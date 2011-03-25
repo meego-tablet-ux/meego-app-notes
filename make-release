@@ -1,0 +1,24 @@
+#/bin/sh
+#
+# Create archive file for a source code release.
+
+set -e
+
+VER=0.1.1
+APP1=meego-tablet-notes
+APP2=meego-app-notes
+FILE=${APP2}-${VER}.tar.bz2
+DIR=/tmp
+
+cd $DIR
+echo -n "Checking source out of git..."
+git clone ssh://git@git.meego.com/${APP1}
+echo ""
+
+echo -n "Making tar archive..."
+mv ${APP1} ${APP2}-${VER}
+tar --exclude=.git --exclude=make-release --exclude=BUGS -cjf $DIR/$FILE ${APP2}-${VER}
+rm -rf ${APP2}-${VER}
+echo ""
+
+echo "Done, Code drop is in $DIR/$FILE"

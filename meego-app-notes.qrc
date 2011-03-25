@@ -1,0 +1,19 @@
+<!DOCTYPE RCC><RCC version="1.0">
+ <qresource>
+     <file>main.qml</file>
+     <file>NotebooksView.qml</file>
+     <file>NotesView.qml</file>
+     <file>OneButtonModalDialog.qml</file>
+     <file>AddButton.qml</file>
+     <file>FontSelector.qml</file>
+     <file>FontSizeSelector.qml</file>
+     <file>ImageButton.qml</file>
+     <file>NoteDetail.qml</file>
+		 <file>ShareNote.qml</file>
+		 <file>NoteButton.qml</file>
+		 <file>NotebookSelector.qml</file>
+     <file>DeleteMoveNotificationDialog.qml</file>
+     <file>ConfirmDeleteDialog.qml</file>
+		 <file>TwoButtonsModalDialog.qml</file>
+ </qresource>
+ </RCC>

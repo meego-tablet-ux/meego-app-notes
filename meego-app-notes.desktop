@@ -1,0 +1,6 @@
+[Desktop Entry]
+Type=Application
+Name=Notes
+Icon=meego-app-notes
+Exec=meego-qml-launcher --opengl --fullscreen --app meego-app-notes
+X-MEEGO-CORE-UX=true

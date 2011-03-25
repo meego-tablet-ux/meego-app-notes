@@ -1,0 +1,7 @@
+*~
+Makefile
+.moc
+.obj
+meego-app-notes.pro.user
+meego-app-notes-*.tar.bz2
+libNotes.so

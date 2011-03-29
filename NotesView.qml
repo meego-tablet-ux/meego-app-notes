@@ -139,6 +139,27 @@ ApplicationPage {
                 }
 
                 MouseArea {
+                    anchors.fill: parent
+
+                    onClicked: {
+                        selectedNote = name;
+                        selectedTitle = title;
+                        listView.drag = false;
+                        noteClicked(name);
+                    }
+
+                    onPressAndHold:{
+                        selectedNote = name;
+                        selectedTitle = title;
+                        itemX = note.x + mouseX;
+                        itemY = note.y + nameLabel.height + 50/*header*/ + mouseY;
+                        menu.menuX = note.x + mouseX;
+                        menu.menuY = note.y + nameLabel.height + 50/*header*/ + mouseY;
+                        menu.visible = true;
+                    }
+                }
+
+                MouseArea {
                     anchors.right: parent.right
                     width: parent.height
                     height: parent.height
@@ -171,23 +192,6 @@ ApplicationPage {
                     onPositionChanged:
                     {
                         parent.z = 100;
-                    }
-
-                    onClicked: {
-                        selectedNote = name;
-                        selectedTitle = title;
-                        listView.drag = false;
-                        noteClicked(name);
-                    }
-
-                    onPressAndHold:{
-                        selectedNote = name;
-                        selectedTitle = title;
-                        itemX = note.x + mouseX;
-                        itemY = note.y + nameLabel.height + 50/*header*/ + mouseY;
-                        menu.menuX = note.x + mouseX;
-                        menu.menuY = note.y + nameLabel.height + 50/*header*/ + mouseY;
-                        menu.visible = true;
                     }
                 }
             }

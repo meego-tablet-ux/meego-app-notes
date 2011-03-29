@@ -95,6 +95,7 @@ ApplicationPage {
             contentHeight: editor.paintedHeight
             smooth:true;
             text: dataHandler.loadNoteData(notebookID, noteName);
+            defaultText: qsTr("Start typing a new note.")
         }
 
 

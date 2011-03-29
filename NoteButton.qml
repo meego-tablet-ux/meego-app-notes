@@ -106,7 +106,7 @@ Rectangle {
                     anchors.left: parent.left;
                     anchors.leftMargin: 3;
                     height: parent.height
-                    font.pixelSize: 24
+                    font.pixelSize: theme_fontPixelSizeNormal
                     text: qsTr("Text Element");
                 }
             }
@@ -121,9 +121,10 @@ Rectangle {
                 anchors.bottomMargin: 3
                 width: parent.width
                 height: parent.height / 2
-                font.pixelSize: 18
+                font.pixelSize: theme_fontPixelSizeSmall
                 text: qsTr("Add some comments here");
                 elide: Text.ElideRight
+                color: theme_fontColorInactive
             }
         }
 

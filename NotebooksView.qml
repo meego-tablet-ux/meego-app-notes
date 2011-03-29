@@ -47,6 +47,8 @@ ApplicationPage {
         Text {
             id: viewByText
             text: qsTr("View by:")
+            x: firstActionMenu.textMargin
+            font.pixelSize: theme_contextMenuFontPixelSize
         }
         ActionMenu {
             id: secondActionMenu

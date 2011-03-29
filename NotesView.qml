@@ -53,6 +53,8 @@ ApplicationPage {
 
             Text {
                 id: viewByText
+                x: actionsAddNote.textMargin
+                font.pixelSize: theme_contextMenuFontPixelSize
                 text: qsTr("View by:")
             }
             ActionMenu {

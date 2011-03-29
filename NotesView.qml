@@ -60,7 +60,7 @@ ApplicationPage {
             ActionMenu {
                 id: actions
                 property string allChoice: qsTr("All");
-                property string atozChoice: qsTr("A-Z");
+                property string atozChoice: qsTr("Alphabetical order");
 
                 model: [allChoice, atozChoice]
                 onTriggered: {

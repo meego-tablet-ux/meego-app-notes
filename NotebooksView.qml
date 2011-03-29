@@ -52,7 +52,7 @@ ApplicationPage {
         }
         ActionMenu {
             id: secondActionMenu
-            model: [qsTr("All"), qsTr("A-Z")]
+            model: [qsTr("All"), qsTr("Alphabetical order")]
             onTriggered: {
                 if(index == 0) {
                     dataHandler.setSort(false);

@@ -119,15 +119,15 @@ ApplicationPage {
 
             NoteButton {
                 id: note
-                property int defaultHeight: 70
                 x: 40;
                 width: listView.width - 80;
-                height: ((listView.height / 10) > defaultHeight) ? listView.height / 10 : defaultHeight;
+                height: theme_listBackgroundPixelHeightTwo
                 z: 0
                 title: name
                 comment: prepareText(dataHandler.loadNoteData(notebook, name));
                 property string notePos: position
                 checkBoxVisible: false;
+                property int startY
 
                 function prepareText(text)
                 {
@@ -140,6 +140,8 @@ ApplicationPage {
 
                 MouseArea {
                     anchors.fill: parent
+
+                    hoverEnabled: true
 
                     onClicked: {
                         selectedNote = name;
@@ -165,33 +167,26 @@ ApplicationPage {
                     height: parent.height
 
                     drag.target: parent
-                    drag.axis: Drag.XandYAxis
+                    drag.axis: Drag.YAxis
                     hoverEnabled: true
 
-                    onEntered:
-                    {
-                        if (listView.drag)
-                        {
-                            listView.drag = false;
-
-                            if (!menu.visible &&
-                                    !notebookSelector.visible &&
-                                    !shareDialog.opacity &&
-                                    !deleteConfirmationDialog.opacity)
-                                listView.changePosition(parent.title, parent.notePos);
-                        }
-                    }
-
-                    onReleased:
-                    {
-                        listView.drag = true;
-                        parent.z = 0;
-                        listView.draggedItem = parent.title;
-                    }
-
-                    onPositionChanged:
-                    {
+                    onPressed: {
                         parent.z = 100;
+                        listView.isDragging = true;
+                        parent.startY = parent.y;
+                    }
+
+
+                    onReleased: {
+                        parent.z = 1;
+                        listView.isDragging = false;
+                        listView.draggingItem = parent.title;
+                        var diff = parent.y - startY;
+                        diff = parseInt( diff /  parent.height);
+                        listView.newIndex = parent.notePos + diff;
+
+                        //console.debug("Going to move: " + listView.draggingItem + " from " + parent.notePos + " to " +  listView.newIndex);
+                        listView.changePosition();
                     }
                 }
             }
@@ -233,43 +228,15 @@ ApplicationPage {
                     selectedItems = tmpList;
                 }
 
+
                 MouseArea {
-                    //anchors.fill: parent
                     anchors.left:parent.left
                     anchors.leftMargin: parent.checkBoxWidth;
                     anchors.right:parent.right
                     anchors.top:parent.top
                     anchors.bottom:parent.bottom
 
-                    drag.target: parent
-                    drag.axis: Drag.XandYAxis
                     hoverEnabled: true
-
-                    onEntered:
-                    {
-                        if (listView.drag)
-                        {
-                            listView.drag = false;
-
-                            if (!menu.visible &&
-                                    !notebookSelector.visible &&
-                                    !shareDialog.opacity &&
-                                    !deleteConfirmationDialog.opacity)
-                                listView.changePosition(parent.title, parent.notePos);
-                        }
-                    }
-
-                    onReleased:
-                    {
-                        listView.drag = true;
-                        parent.z = 0;
-                        listView.draggedItem = parent.title;
-                    }
-
-                    onPositionChanged:
-                    {
-                        parent.z = 100;
-                    }
 
                     onClicked: {
                         selectedNote = name;
@@ -281,11 +248,40 @@ ApplicationPage {
                     onPressAndHold:{
                         selectedNote = name;
                         selectedTitle = title;
-                        itemX = note2.x + mouseX;
-                        itemY = note2.y + nameLabel.height + 50/*header*/ + mouseY;
-                        menu.menuX = note2.x + mouseX;
-                        menu.menuY = note2.y + nameLabel.height + 50/*header*/ + mouseY;
+                        itemX = note.x + mouseX;
+                        itemY = note.y + nameLabel.height + 50/*header*/ + mouseY;
+                        menu.menuX = note.x + mouseX;
+                        menu.menuY = note.y + nameLabel.height + 50/*header*/ + mouseY;
                         menu.visible = true;
+                    }
+                }
+
+                MouseArea {
+                    anchors.right: parent.right
+                    width: parent.height
+                    height: parent.height
+
+                    drag.target: parent
+                    drag.axis: Drag.YAxis
+                    hoverEnabled: true
+
+                    onPressed: {
+                        parent.z = 100;
+                        listView.isDragging = true;
+                        parent.startY = parent.y;
+                    }
+
+
+                    onReleased: {
+                        parent.z = 1;
+                        listView.isDragging = false;
+                        listView.draggingItem = parent.title;
+                        var diff = parent.y - startY;
+                        diff = parseInt( diff /  parent.height);
+                        listView.newIndex = parent.notePos + diff;
+
+                        //console.debug("Going to move: " + listView.draggingItem + " from " + parent.notePos + " to " +  listView.newIndex);
+                        listView.changePosition();
                     }
                 }
             }
@@ -317,14 +313,16 @@ ApplicationPage {
             clip: true
             spacing: 1
             property bool drag: false
-            property string draggedItem: ""
-            cacheBuffer: 600
+            property string draggingItem: ""
+            property string newIndex: ""
+            property bool isDragging: false
 
-            function changePosition(itemName, position)
+            function changePosition()
             {
-                dataHandler.changeNotePosition(noteListPage.caption, draggedItem, position);
-                scene.applicationPage = notebookList;
-                scene.addApplicationPage(noteList);
+                dataHandler.changeNotePosition(noteListPage.caption, draggingItem, newIndex);
+                var prev = model.notebookName;
+                model.notebookName = "something else"; //this is a hack to force the model to update (no need for translation)
+                model.notebookName = prev;
             }
         }
 

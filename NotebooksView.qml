@@ -237,7 +237,16 @@ ApplicationPage {
         property string deleteChoice: qsTr("Delete");
 
         property variant choices: [ openChoice, emailChoice, moveChoice, deleteChoice ]
-        model: choices
+        property variant defaultListChoices: [ openChoice, emailChoice, moveChoice ]
+
+
+        model:  {
+            if(selectedNotebook == defaultNotebook) {
+                return defaultListChoices;
+            } else {
+                return choices;
+            }
+        }
 
         onTriggered: {
             console.log("triggered: " + index);
@@ -255,11 +264,7 @@ ApplicationPage {
             }
             else if (model[index] == deleteChoice)
             {
-                if (selectedNotebook == defaultNotebook)
-                {
-                    //we cannot delete default notebook, so do nothing
-                }
-                else if (selectedItems.length > 1)
+                if (selectedItems.length > 1)
                 {
                     if (selectedItems[0] != defaultNotebook)
                     {

@@ -19,61 +19,61 @@
  * name and title
  *
  *******************************************************************/
- class Notebook
- {
- public:
-	 Notebook(const QString& name, const QString& title);
+class Notebook
+{
+public:
+    Notebook(const QString& name, const QString& title);
 
-	 QString name() const;
-	 QString title() const;
+    QString name() const;
+    QString title() const;
 
- protected:
-	 QString m_strName;
-	 QString m_strTitle;
- };
+protected:
+    QString m_strName;
+    QString m_strTitle;
+};
 
 
- /********************************************************************
-	* NotebooksModel class declaration
-	*
-	* This class implements notebook data model.
-	*
-	*******************************************************************/
- class NotebooksModel : public QAbstractListModel
- {
-		 Q_OBJECT
- public:
-        Q_PROPERTY(CDataHandler *dataHandler READ dataHandler WRITE setDataHandler)
+/********************************************************************
+ * NotebooksModel class declaration
+ *
+ * This class implements notebook data model.
+ *
+ *******************************************************************/
+class NotebooksModel : public QAbstractListModel
+{
+    Q_OBJECT
+public:
+    Q_PROPERTY(CDataHandler *dataHandler READ dataHandler WRITE setDataHandler)
 
-		 enum NotebooksRoles
-		 {
-				 NameRole = Qt::UserRole + 1,
-                                 TitleRole,
-                                 NotesCountRole
-		 };
+    enum NotebooksRoles
+    {
+        NameRole = Qt::UserRole + 1,
+        TitleRole,
+        NotesCountRole
+    };
 
-		 NotebooksModel(QObject *parent = 0);
-		 int rowCount(const QModelIndex& parent = QModelIndex()) const;
-		 QVariant data(const QModelIndex& index, int role = Qt::DisplayRole) const;
-                 void addNotebook(Notebook *notebook);
-		 void clear();
-                 void setDataHandler(CDataHandler *handler) { m_handler = handler; init(); }
-                 CDataHandler * dataHandler() { return m_handler; }
+    NotebooksModel(QObject *parent = 0);
+    int rowCount(const QModelIndex& parent = QModelIndex()) const;
+    QVariant data(const QModelIndex& index, int role = Qt::DisplayRole) const;
+    void addNotebook(Notebook *notebook);
+    void clear();
+    void setDataHandler(CDataHandler *handler) { m_handler = handler; init(); }
+    CDataHandler * dataHandler() { return m_handler; }
 
- public slots:
-       void addNotebook(const QString &name);
-       void removeNotebook(const QString &name);
-       void handleNotesChanging() { this->reset(); }
-       void sort();
+public slots:
+    void addNotebook(const QString &name);
+    void removeNotebook(const QString &name);
+    void handleNotesChanging() { this->reset(); }
+    void sort();
 
- protected:
-     QStringList m_notebooksTitles;
-     QList<Notebook*> m_notebooks;
-     CDataHandler *m_handler;
+protected:
+    QStringList m_notebooksTitles;
+    QList<Notebook*> m_notebooks;
+    CDataHandler *m_handler;
 
- private:
-     void init();
-     void quickSort(QStringList &list, int left, int right);
- };
+private:
+    void init();
+    void quickSort(QStringList &list, int left, int right);
+};
 
 #endif // NOTEBOOKSMODEL_H

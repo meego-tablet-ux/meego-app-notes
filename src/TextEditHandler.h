@@ -21,34 +21,34 @@
  *******************************************************************/
 class CTextEditHandler: public QObject
 {
-  Q_OBJECT
+    Q_OBJECT
 
-  enum FontRoles
-  {
-      BoldRole = Qt::UserRole + 1,
-      ItalicRole,
-      UnderlineRole,
-  };
+    enum FontRoles
+    {
+        BoldRole = Qt::UserRole + 1,
+        ItalicRole,
+        UnderlineRole,
+    };
 
 public:
-  CTextEditHandler(QObject* parent = NULL);
-  virtual ~CTextEditHandler();
-  void Init();
+    CTextEditHandler(QObject* parent = NULL);
+    virtual ~CTextEditHandler();
+    void Init();
 
-  Q_INVOKABLE QString bold(const QString& _text, int _nPos, int _nPosEnd);
-  Q_INVOKABLE QString italic(const QString& _text, int _nPos, int _nPosEnd);
-  Q_INVOKABLE QString underline(const QString& _text, int _nPos, int _nPosEnd);
-  Q_INVOKABLE QString toPlainText(const QString& _text);
-  Q_INVOKABLE QString setFontFamily(const QString& _text, int _nPos, int _nPosEnd, const QString& _fontFamily);
-  Q_INVOKABLE QString setFontSize(const QString& _text, int _nPos, int _nPosEnd, int _nPointSize);
+    Q_INVOKABLE QString bold(const QString& _text, int _nPos, int _nPosEnd);
+    Q_INVOKABLE QString italic(const QString& _text, int _nPos, int _nPosEnd);
+    Q_INVOKABLE QString underline(const QString& _text, int _nPos, int _nPosEnd);
+    Q_INVOKABLE QString toPlainText(const QString& _text);
+    Q_INVOKABLE QString setFontFamily(const QString& _text, int _nPos, int _nPosEnd, const QString& _fontFamily);
+    Q_INVOKABLE QString setFontSize(const QString& _text, int _nPos, int _nPosEnd, int _nPointSize);
 
 protected:
-  void setTextAndCursor(int role, const QString& _text, int _nPos, int _nPosEnd);
+    void setTextAndCursor(int role, const QString& _text, int _nPos, int _nPosEnd);
 
-  QTextEdit* m_pEdit;
-  bool m_bIsBold;
-  bool m_bIsItalic;
-  bool m_bIsUnderline;
+    QTextEdit* m_pEdit;
+    bool m_bIsBold;
+    bool m_bIsItalic;
+    bool m_bIsUnderline;
 };
 
 #endif // TEXTEDITHANDLER_H

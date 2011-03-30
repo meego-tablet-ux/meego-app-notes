@@ -40,7 +40,7 @@ static const char STR_DEFAULT_NOTEBOOK[] = "Everyday Notes (default)";
  *******************************************************************/
 CDataHandler::CDataHandler()
 {
-	Init();
+    Init();
 }
 
 
@@ -51,42 +51,42 @@ CDataHandler::CDataHandler()
  *******************************************************************/
 void CDataHandler::Init()
 {
-	//check if the data folder exists
-	if (!checkAppData()) //doen't exist, let's create it!
-	{
-		QString home(QDir::homePath());
-		if (!home.endsWith("/"))
-		{
-			home.append("/");
-		}
+    //check if the data folder exists
+    if (!checkAppData()) //doen't exist, let's create it!
+    {
+        QString home(QDir::homePath());
+        if (!home.endsWith("/"))
+        {
+            home.append("/");
+        }
 
-                QDir dir;
-                dir.mkdir(home + ".MeeGo");//create top level folder
-                dir.mkdir(home + ".MeeGo/Notes");//create top level folder
-//		mkdir(home.toUtf8() + ".MeeGo", 0777); //create top level folder
-//		mkdir(home.toUtf8() + ".MeeGo/Notes", 0777); //create top level folder
-    //QString dbPath(home + ".MeeGo/Notes/Everyday Notes");
-    QString dbPath(QString("%1.MeeGo/Notes/%2").arg(home).arg(tr("Everyday Notes")));
-//		mkdir(dbPath.toUtf8(), 0777); //create default subfolder
-                dir.mkdir(dbPath);//create default subfolder
+        QDir dir;
+        dir.mkdir(home + ".MeeGo");//create top level folder
+        dir.mkdir(home + ".MeeGo/Notes");//create top level folder
+        //		mkdir(home.toUtf8() + ".MeeGo", 0777); //create top level folder
+        //		mkdir(home.toUtf8() + ".MeeGo/Notes", 0777); //create top level folder
+        //QString dbPath(home + ".MeeGo/Notes/Everyday Notes");
+        QString dbPath(QString("%1.MeeGo/Notes/%2").arg(home).arg(tr("Everyday Notes")));
+        //		mkdir(dbPath.toUtf8(), 0777); //create default subfolder
+        dir.mkdir(dbPath);//create default subfolder
 
-		//create databases file which contains info about all note books
-		QFile dbs(home + ".MeeGo/Notes/data");
-		if (dbs.open(QIODevice::WriteOnly | QIODevice::Append))
-		{
-			dbs.setTextModeEnabled(true);
-                        QTextStream out(&dbs);
-                        out <<QString("name=%1,position=0,path=%2,title=%3,\n").arg(tr(STR_DEFAULT_NOTEBOOK)).arg(dbPath).arg(
-                                   tr(STR_DEFAULT_NOTEBOOK));
-			dbs.close();
-			//create empty data file for the database
-			QFile f(dbPath+"/data");
-			if (f.open(QIODevice::WriteOnly | QIODevice::Append))
-			{
-				f.close();
-			}
-		}
-	}
+        //create databases file which contains info about all note books
+        QFile dbs(home + ".MeeGo/Notes/data");
+        if (dbs.open(QIODevice::WriteOnly | QIODevice::Append))
+        {
+            dbs.setTextModeEnabled(true);
+            QTextStream out(&dbs);
+            out <<QString("name=%1,position=0,path=%2,title=%3,\n").arg(tr(STR_DEFAULT_NOTEBOOK)).arg(dbPath).arg(
+                       tr(STR_DEFAULT_NOTEBOOK));
+            dbs.close();
+            //create empty data file for the database
+            QFile f(dbPath+"/data");
+            if (f.open(QIODevice::WriteOnly | QIODevice::Append))
+            {
+                f.close();
+            }
+        }
+    }
 }
 
 
@@ -97,26 +97,26 @@ void CDataHandler::Init()
  *******************************************************************/
 bool CDataHandler::checkAppData()
 {
-	bool bRet = false;
+    bool bRet = false;
 
-	QString home(QDir::homePath());
+    QString home(QDir::homePath());
 
-	if (!home.endsWith("/"))
-	{
-		home.append("/");
-	}
+    if (!home.endsWith("/"))
+    {
+        home.append("/");
+    }
 
-	//check if the data folder exists
-	if (!QFile::exists(home + ".MeeGo/Notes")) //doen't exist, let's create it!
-	{
-		bRet = false;
-	}
-	else
-	{
-		bRet = true;
-	}
+    //check if the data folder exists
+    if (!QFile::exists(home + ".MeeGo/Notes")) //doen't exist, let's create it!
+    {
+        bRet = false;
+    }
+    else
+    {
+        bRet = true;
+    }
 
-	return bRet;
+    return bRet;
 }
 
 
@@ -127,55 +127,55 @@ bool CDataHandler::checkAppData()
  *******************************************************************/
 void CDataHandler::createNoteBook(const QString& _nodeName)
 {
-	//check if the data folder exists
-	if (checkAppData())
-	{
-		QString home(QDir::homePath());
-		if (!home.endsWith("/"))
-		{
-			home.append("/");
-		}
+    //check if the data folder exists
+    if (checkAppData())
+    {
+        QString home(QDir::homePath());
+        if (!home.endsWith("/"))
+        {
+            home.append("/");
+        }
 
-		QFile dbs(home + ".MeeGo/Notes/data");
-		if (dbs.exists())
-		{
-			if (dbs.open(QIODevice::ReadWrite | QIODevice::Append))
-			{
-				int nPos = getPositionFromFile(dbs);
+        QFile dbs(home + ".MeeGo/Notes/data");
+        if (dbs.exists())
+        {
+            if (dbs.open(QIODevice::ReadWrite | QIODevice::Append))
+            {
+                int nPos = getPositionFromFile(dbs);
 
-				QString dbPath(home + ".MeeGo/Notes/" + _nodeName);
-				if (!QFile::exists(dbPath))
-				{
-                                    QTextStream out(&dbs);
-                                    out << QString("name=%1,position=%2,path=%3,title=%4,\n").arg(
-                                               _nodeName).arg(nPos+1).arg(dbPath).arg(_nodeName);
-				}
-				else //error - note book already exists, let's generate unique name for it
-				{
+                QString dbPath(home + ".MeeGo/Notes/" + _nodeName);
+                if (!QFile::exists(dbPath))
+                {
+                    QTextStream out(&dbs);
+                    out << QString("name=%1,position=%2,path=%3,title=%4,\n").arg(
+                               _nodeName).arg(nPos+1).arg(dbPath).arg(_nodeName);
+                }
+                else //error - note book already exists, let's generate unique name for it
+                {
 #if SAME_TITLES
-					QString strNodeName = generateUniqueName(home + ".MeeGo/Notes/", _nodeName);
-					dbPath = home + ".MeeGo/Notes/" + strNodeName;
-                                        QTextStream out(&dbs);
-                                        out << QString("name=%1,position=%2,path=%3,title=%4,\n").arg(
-                                                   _nodeName).arg(nPos+1).arg(dbPath).arg(_nodeName);
+                    QString strNodeName = generateUniqueName(home + ".MeeGo/Notes/", _nodeName);
+                    dbPath = home + ".MeeGo/Notes/" + strNodeName;
+                    QTextStream out(&dbs);
+                    out << QString("name=%1,position=%2,path=%3,title=%4,\n").arg(
+                               _nodeName).arg(nPos+1).arg(dbPath).arg(_nodeName);
 #endif
-				}
+                }
 
-                                QDir dir;
-                                dir.mkdir(dbPath);
-				dbs.close();
-				//create empty file
-				QFile f(dbPath+"/data");
-				if (f.open(QIODevice::WriteOnly | QIODevice::Append))
-				{
-					f.close();
-				}
+                QDir dir;
+                dir.mkdir(dbPath);
+                dbs.close();
+                //create empty file
+                QFile f(dbPath+"/data");
+                if (f.open(QIODevice::WriteOnly | QIODevice::Append))
+                {
+                    f.close();
+                }
 
-                                emit notebookAdded(_nodeName);
-			}
+                emit notebookAdded(_nodeName);
+            }
 
-		}
-	}
+        }
+    }
 }
 
 
@@ -185,75 +185,75 @@ void CDataHandler::createNoteBook(const QString& _nodeName)
  *
  *******************************************************************/
 void CDataHandler::createNote(const QString& _notebookID,
-															const QString& _noteName,
-															const QString& _noteText)
+                              const QString& _noteName,
+                              const QString& _noteText)
 {
-	//check if the data folder exists
-	if (checkAppData())
-	{
-		QString home(QDir::homePath());
-		if (!home.endsWith("/"))
-		{
-			home.append("/");
-		}
+    //check if the data folder exists
+    if (checkAppData())
+    {
+        QString home(QDir::homePath());
+        if (!home.endsWith("/"))
+        {
+            home.append("/");
+        }
 
-		QFile dbs(home + ".MeeGo/Notes/data");
-		if (dbs.exists())
-		{
-			if (dbs.open(QIODevice::ReadOnly))
-			{
-				QString strLine, strPath, strName;
-				strName = getNameFromFile(dbs, _notebookID, strLine);
+        QFile dbs(home + ".MeeGo/Notes/data");
+        if (dbs.exists())
+        {
+            if (dbs.open(QIODevice::ReadOnly))
+            {
+                QString strLine, strPath, strName;
+                strName = getNameFromFile(dbs, _notebookID, strLine);
 
-				if (strName == _notebookID)
-				{
-					strPath = getStringAttribute(strLine, "path=");
-					if (!strPath.endsWith("/"))
-					{
-						strPath.append("/");
-					}
+                if (strName == _notebookID)
+                {
+                    strPath = getStringAttribute(strLine, "path=");
+                    if (!strPath.endsWith("/"))
+                    {
+                        strPath.append("/");
+                    }
 
-					QFile db(strPath + "data");
-					if (db.open(QIODevice::ReadWrite | QIODevice::Append))
-					{
-						QString strName, strLine;
-						QString strNoteName(_noteName);
-						strName = getNameFromFile(db, _noteName, strLine);
-						int nPos = getPositionFromFile(db);
-                                                QTextStream out(&db);
+                    QFile db(strPath + "data");
+                    if (db.open(QIODevice::ReadWrite | QIODevice::Append))
+                    {
+                        QString strName, strLine;
+                        QString strNoteName(_noteName);
+                        strName = getNameFromFile(db, _noteName, strLine);
+                        int nPos = getPositionFromFile(db);
+                        QTextStream out(&db);
 #if SAME_TITLES
-						if (strName == _noteName) //note already exists
-						{
-							strNoteName = generateUniqueName(strPath+ "/", _noteName);
-						}
-                                                out << QString("name=%1,position=%2,path=%3,title=%4,\n").arg(
-                                                           strNoteName).arg(nPos+1).arg(strPath + strNoteName).arg(_noteName);
+                        if (strName == _noteName) //note already exists
+                        {
+                            strNoteName = generateUniqueName(strPath+ "/", _noteName);
+                        }
+                        out << QString("name=%1,position=%2,path=%3,title=%4,\n").arg(
+                                   strNoteName).arg(nPos+1).arg(strPath + strNoteName).arg(_noteName);
 #else
-						if (strName != _noteName) //note doesn't exists
-						{
-                                                    out << QString("name=%1,position=%2,path=%3,title=%4,\n").arg(
-                                                               strNoteName).arg(nPos+1).arg(strPath + strNoteName).arg(_noteName);
-						}
+                        if (strName != _noteName) //note doesn't exists
+                        {
+                            out << QString("name=%1,position=%2,path=%3,title=%4,\n").arg(
+                                       strNoteName).arg(nPos+1).arg(strPath + strNoteName).arg(_noteName);
+                        }
 #endif
 
 
-						QFile f(strPath+ "/" + strNoteName);
-						if (f.open(QIODevice::WriteOnly))
-						{
-                                                    out.setDevice(&f);
-                                                        out << _noteText;
-							f.close();
-						}
+                        QFile f(strPath+ "/" + strNoteName);
+                        if (f.open(QIODevice::WriteOnly))
+                        {
+                            out.setDevice(&f);
+                            out << _noteText;
+                            f.close();
+                        }
 
-						db.close();
+                        db.close();
 
-                                                emit noteAdded(_noteName);
-					}
-				}
-			}
-		}
-		dbs.close();
-	}
+                        emit noteAdded(_noteName);
+                    }
+                }
+            }
+        }
+        dbs.close();
+    }
 }
 
 
@@ -264,61 +264,61 @@ void CDataHandler::createNote(const QString& _notebookID,
  *******************************************************************/
 void CDataHandler::deleteNote(const QString& _notebookID, const QString& _noteName)
 {
-	bool bFound = false;
+    bool bFound = false;
 
-	//check if the data folder exists
-	if (checkAppData())
-	{
-		QString home(QDir::homePath());
-		if (!home.endsWith("/"))
-		{
-			home.append("/");
-		}
+    //check if the data folder exists
+    if (checkAppData())
+    {
+        QString home(QDir::homePath());
+        if (!home.endsWith("/"))
+        {
+            home.append("/");
+        }
 
-		QFile dbs(home + ".MeeGo/Notes/data");
-		if (dbs.exists())
-		{
-			QString strLine, strPath, strName;
+        QFile dbs(home + ".MeeGo/Notes/data");
+        if (dbs.exists())
+        {
+            QString strLine, strPath, strName;
 
-			if (dbs.open(QIODevice::ReadOnly | QIODevice::Append))
-			{
-				strName = getNameFromFile(dbs, _notebookID, strLine);
-				if (strName == _notebookID)
-				{
-					strPath = getStringAttribute(strLine,"path=");
-					if (!strPath.endsWith("/"))
-					{
-						strPath.append("/");
-					}
+            if (dbs.open(QIODevice::ReadOnly | QIODevice::Append))
+            {
+                strName = getNameFromFile(dbs, _notebookID, strLine);
+                if (strName == _notebookID)
+                {
+                    strPath = getStringAttribute(strLine,"path=");
+                    if (!strPath.endsWith("/"))
+                    {
+                        strPath.append("/");
+                    }
 
-					QFile db(strPath + "data");
-					QFile db2(strPath + "data.bak");
-					if (db.open(QIODevice::ReadOnly))
-					{
-						if (db2.open(QIODevice::WriteOnly | QIODevice::Append))
-						{
-							bFound = createTempFile(db, db2, _noteName);
-							db2.close();
-						}
-						db.close();
-					}
-				}
-				dbs.close();
-			}
+                    QFile db(strPath + "data");
+                    QFile db2(strPath + "data.bak");
+                    if (db.open(QIODevice::ReadOnly))
+                    {
+                        if (db2.open(QIODevice::WriteOnly | QIODevice::Append))
+                        {
+                            bFound = createTempFile(db, db2, _noteName);
+                            db2.close();
+                        }
+                        db.close();
+                    }
+                }
+                dbs.close();
+            }
 
-			if (bFound) //now we should replace old file with new one
-			{
-                                qDebug()<<"Trying to remove old file";
-				if (QFile::remove(strPath + "data")) //remove old file
-				{
-					QFile::rename(strPath + "data.bak", strPath + "data");
-					QFile::remove(strPath + _noteName);
+            if (bFound) //now we should replace old file with new one
+            {
+                qDebug()<<"Trying to remove old file";
+                if (QFile::remove(strPath + "data")) //remove old file
+                {
+                    QFile::rename(strPath + "data.bak", strPath + "data");
+                    QFile::remove(strPath + _noteName);
 
-                                        emit noteRemoved(_noteName);
-				}
-			}
-		}
-	}
+                    emit noteRemoved(_noteName);
+                }
+            }
+        }
+    }
 }
 
 
@@ -329,10 +329,10 @@ void CDataHandler::deleteNote(const QString& _notebookID, const QString& _noteNa
  *******************************************************************/
 void CDataHandler::deleteNotes(const QString& _notebookID, const QStringList& _notes)
 {
-  for (int i = 0; i < _notes.size(); ++i)
-  {
-    deleteNote(_notebookID, _notes[i]);
-  }
+    for (int i = 0; i < _notes.size(); ++i)
+    {
+        deleteNote(_notebookID, _notes[i]);
+    }
 }
 
 
@@ -343,53 +343,53 @@ void CDataHandler::deleteNotes(const QString& _notebookID, const QStringList& _n
  *******************************************************************/
 void CDataHandler::deleteNoteBook(const QString& _notebookID)
 {
-	bool bFound = false;
-	// cannot remove default note book
-  if (_notebookID == tr(STR_DEFAULT_NOTEBOOK))
-	{
-		return;
-	}
+    bool bFound = false;
+    // cannot remove default note book
+    if (_notebookID == tr(STR_DEFAULT_NOTEBOOK))
+    {
+        return;
+    }
 
-	//check if the data folder exists
-	if (checkAppData())
-	{
-		QString home(QDir::homePath());
-		if (!home.endsWith("/"))
-		{
-			home.append("/");
-		}
+    //check if the data folder exists
+    if (checkAppData())
+    {
+        QString home(QDir::homePath());
+        if (!home.endsWith("/"))
+        {
+            home.append("/");
+        }
 
-		QFile dbs(home + ".MeeGo/Notes/data");
-		if (dbs.exists())
-		{
+        QFile dbs(home + ".MeeGo/Notes/data");
+        if (dbs.exists())
+        {
 
-			QFile dbs2(home + ".MeeGo/Notes/data.bak");
-			if (dbs.open(QIODevice::ReadOnly))
-			{
-				if (dbs2.open(QIODevice::WriteOnly | QIODevice::Append))
-				{
-					bFound = createTempFile(dbs, dbs2, _notebookID);
-					dbs2.close();
-				}
-				dbs.close();
-			}
+            QFile dbs2(home + ".MeeGo/Notes/data.bak");
+            if (dbs.open(QIODevice::ReadOnly))
+            {
+                if (dbs2.open(QIODevice::WriteOnly | QIODevice::Append))
+                {
+                    bFound = createTempFile(dbs, dbs2, _notebookID);
+                    dbs2.close();
+                }
+                dbs.close();
+            }
 
-			if (bFound) //now we should replace old file with new one
-			{
-				if (QFile::remove(home + ".MeeGo/Notes/data")) //remove old file
-				{
-					QFile::rename(home + ".MeeGo/Notes/data.bak", home + ".MeeGo/Notes/data");
-					QString strNoteBook(_notebookID);
-					strNoteBook.replace(" ", "\\ ");
-//					QString strCommand = QString("rm -rf %1").arg(home + ".MeeGo/Notes/"+ strNoteBook);
-//                                        system((const char*)strCommand.toUtf8());
-                                        removeDir(home + ".MeeGo/Notes/"+ strNoteBook);
+            if (bFound) //now we should replace old file with new one
+            {
+                if (QFile::remove(home + ".MeeGo/Notes/data")) //remove old file
+                {
+                    QFile::rename(home + ".MeeGo/Notes/data.bak", home + ".MeeGo/Notes/data");
+                    QString strNoteBook(_notebookID);
+                    strNoteBook.replace(" ", "\\ ");
+                    //					QString strCommand = QString("rm -rf %1").arg(home + ".MeeGo/Notes/"+ strNoteBook);
+                    //                                        system((const char*)strCommand.toUtf8());
+                    removeDir(home + ".MeeGo/Notes/"+ strNoteBook);
 
-                                        emit notebookRemoved(_notebookID);
-				}
-			}
-		}
-	}
+                    emit notebookRemoved(_notebookID);
+                }
+            }
+        }
+    }
 }
 
 
@@ -400,10 +400,10 @@ void CDataHandler::deleteNoteBook(const QString& _notebookID)
  *******************************************************************/
 void CDataHandler::deleteNoteBooks(const QStringList& _notebooks)
 {
-  for (int i = 0; i < _notebooks.size(); ++i)
-  {
-    deleteNoteBook(_notebooks[i]);
-  }
+    for (int i = 0; i < _notebooks.size(); ++i)
+    {
+        deleteNoteBook(_notebooks[i]);
+    }
 }
 
 
@@ -414,7 +414,7 @@ void CDataHandler::deleteNoteBooks(const QStringList& _notebooks)
  *******************************************************************/
 void CDataHandler::modifyNote(const QString& _notebookID, const QString& _noteName, const QString& _text)
 {
-	save(_notebookID, _noteName, _text);
+    save(_notebookID, _noteName, _text);
 }
 
 
@@ -425,95 +425,95 @@ void CDataHandler::modifyNote(const QString& _notebookID, const QString& _noteNa
  *******************************************************************/
 void CDataHandler::moveNote(const QString& _notebookID, const QString& _noteName, const QString& _newNoteBookName)
 {
-	//check if the data folder exists
-	if (checkAppData())
-	{
-		QString strFilePath,strNotebookPath;
+    //check if the data folder exists
+    if (checkAppData())
+    {
+        QString strFilePath,strNotebookPath;
 
-		QString home(QDir::homePath());
-		if (!home.endsWith("/"))
-		{
-			home.append("/");
-		}
+        QString home(QDir::homePath());
+        if (!home.endsWith("/"))
+        {
+            home.append("/");
+        }
 
-		QFile dbs(home + ".MeeGo/Notes/data");
-		if (dbs.exists())
-		{
-			QString strLine, strPath, strName;
-			if (dbs.open(QIODevice::ReadOnly | QIODevice::Append))
-			{
-				strName = getNameFromFile(dbs, _notebookID, strLine);
-				if (strName == _notebookID)
-				{
-					strPath = getStringAttribute(strLine, "path=");
-					if (!strPath.endsWith("/"))
-					{
-						strPath.append("/");
-					}
+        QFile dbs(home + ".MeeGo/Notes/data");
+        if (dbs.exists())
+        {
+            QString strLine, strPath, strName;
+            if (dbs.open(QIODevice::ReadOnly | QIODevice::Append))
+            {
+                strName = getNameFromFile(dbs, _notebookID, strLine);
+                if (strName == _notebookID)
+                {
+                    strPath = getStringAttribute(strLine, "path=");
+                    if (!strPath.endsWith("/"))
+                    {
+                        strPath.append("/");
+                    }
 
-					QFile db(strPath + "data");
-					if (db.open(QIODevice::ReadOnly))
-					{
-						strName = getNameFromFile(db, _noteName, strLine);
-						db.close();
-					}
+                    QFile db(strPath + "data");
+                    if (db.open(QIODevice::ReadOnly))
+                    {
+                        strName = getNameFromFile(db, _noteName, strLine);
+                        db.close();
+                    }
 
-					strFilePath = getStringAttribute(strLine, "path=");
-					//get the path of the new notebook
-					if (dbs.reset())
-					{
-						strName = getNameFromFile(dbs, _newNoteBookName, strLine);
-						if (strName == _newNoteBookName)
-						{
-							strNotebookPath = getStringAttribute(strLine,"path=");
-							if (!strNotebookPath.endsWith("/"))
-							{
-								strNotebookPath.append("/");
-							}
+                    strFilePath = getStringAttribute(strLine, "path=");
+                    //get the path of the new notebook
+                    if (dbs.reset())
+                    {
+                        strName = getNameFromFile(dbs, _newNoteBookName, strLine);
+                        if (strName == _newNoteBookName)
+                        {
+                            strNotebookPath = getStringAttribute(strLine,"path=");
+                            if (!strNotebookPath.endsWith("/"))
+                            {
+                                strNotebookPath.append("/");
+                            }
 
-							QFile db2(strNotebookPath + "data");
-							if (db2.open(QIODevice::ReadWrite | QIODevice::Append))
-							{
-								int nPos = -1;
-								if (db2.size() == 0) //empty file
-								{
-									nPos = 0;
-								}
-								else
-								{
-									QString strName, strLine;
-									strName = getNameFromFile(db2, _noteName, strLine);
+                            QFile db2(strNotebookPath + "data");
+                            if (db2.open(QIODevice::ReadWrite | QIODevice::Append))
+                            {
+                                int nPos = -1;
+                                if (db2.size() == 0) //empty file
+                                {
+                                    nPos = 0;
+                                }
+                                else
+                                {
+                                    QString strName, strLine;
+                                    strName = getNameFromFile(db2, _noteName, strLine);
 
-									if (strName != _noteName) //such note does not exist
-									{
-										nPos = getPositionFromFile(db2);
-									}
-									else //note already exists
-									{
-									}
-								}
+                                    if (strName != _noteName) //such note does not exist
+                                    {
+                                        nPos = getPositionFromFile(db2);
+                                    }
+                                    else //note already exists
+                                    {
+                                    }
+                                }
 
-								if (-1 != nPos)
-								{
-                                                                    QTextStream out(&db2);
-                                                                    out << QString("name=%1,position=%2,path=%3,title=%4,\n").arg(
-                                                                               _noteName).arg(nPos+1).arg(strNotebookPath + _noteName).arg(_noteName);
+                                if (-1 != nPos)
+                                {
+                                    QTextStream out(&db2);
+                                    out << QString("name=%1,position=%2,path=%3,title=%4,\n").arg(
+                                               _noteName).arg(nPos+1).arg(strNotebookPath + _noteName).arg(_noteName);
 
-									if (QFile::copy(strFilePath, strNotebookPath+_noteName))
-									{
-										deleteNote(_notebookID, _noteName);
-									}
-								}
-								db2.close();
-							}
-						}
+                                    if (QFile::copy(strFilePath, strNotebookPath+_noteName))
+                                    {
+                                        deleteNote(_notebookID, _noteName);
+                                    }
+                                }
+                                db2.close();
+                            }
+                        }
 
-					}
-				}
-				dbs.close();
-			}
-		}
-	}
+                    }
+                }
+                dbs.close();
+            }
+        }
+    }
 }
 
 
@@ -524,10 +524,10 @@ void CDataHandler::moveNote(const QString& _notebookID, const QString& _noteName
  *******************************************************************/
 void CDataHandler::moveNotes(const QString& _notebookID, const QStringList& _notes, const QString& _newNoteBookName)
 {
-  for (int i = 0; i < _notes.size(); ++i)
-  {
-    moveNote(_notebookID, _notes[i], _newNoteBookName);
-  }
+    for (int i = 0; i < _notes.size(); ++i)
+    {
+        moveNote(_notebookID, _notes[i], _newNoteBookName);
+    }
 }
 
 
@@ -538,162 +538,162 @@ void CDataHandler::moveNotes(const QString& _notebookID, const QStringList& _not
  *******************************************************************/
 void CDataHandler::changeNotePosition(const QString& _notebookID, const QString& _noteName, int nNewPos)
 {
-	//check if the data folder exists
-	if (checkAppData())
-	{
-		QString home(QDir::homePath());
-		if (!home.endsWith("/"))
-		{
-			home.append("/");
-		}
+    //check if the data folder exists
+    if (checkAppData())
+    {
+        QString home(QDir::homePath());
+        if (!home.endsWith("/"))
+        {
+            home.append("/");
+        }
 
-		QFile dbs(home + ".MeeGo/Notes/data");
-		if (dbs.exists())
-		{
-			if (dbs.open(QIODevice::ReadOnly))
-			{
-				QString strLine, strPath, strName;
-				strName = getNameFromFile(dbs, _notebookID, strLine);
+        QFile dbs(home + ".MeeGo/Notes/data");
+        if (dbs.exists())
+        {
+            if (dbs.open(QIODevice::ReadOnly))
+            {
+                QString strLine, strPath, strName;
+                strName = getNameFromFile(dbs, _notebookID, strLine);
 
-				if (strName == _notebookID)
-				{
-					strPath = getStringAttribute(strLine, "path=");
+                if (strName == _notebookID)
+                {
+                    strPath = getStringAttribute(strLine, "path=");
 
-					if (!strPath.endsWith("/"))
-					{
-						strPath.append("/");
-					}
+                    if (!strPath.endsWith("/"))
+                    {
+                        strPath.append("/");
+                    }
 
-					QFile db(strPath + "data");
-					if (db.open(QIODevice::ReadOnly | QIODevice::Append))
-					{
-						QFile db2(strPath + "data.bak");
-                                                QTextStream out(&db2);
-						if (db2.open(QIODevice::WriteOnly | QIODevice::Append))
-						{
-							int nPos = -1;
-							QString strName, strNoteLine;
-							char buf[1024];
+                    QFile db(strPath + "data");
+                    if (db.open(QIODevice::ReadOnly | QIODevice::Append))
+                    {
+                        QFile db2(strPath + "data.bak");
+                        QTextStream out(&db2);
+                        if (db2.open(QIODevice::WriteOnly | QIODevice::Append))
+                        {
+                            int nPos = -1;
+                            QString strName, strNoteLine;
+                            char buf[1024];
 
-							strName = getNameFromFile(db, _noteName, strNoteLine);
+                            strName = getNameFromFile(db, _noteName, strNoteLine);
 
-							if (_noteName == strName)
-							{
-								QString strSaved;
-								QStringList lst;
+                            if (_noteName == strName)
+                            {
+                                QString strSaved;
+                                QStringList lst;
 
-								nPos = getIntAttribute(strNoteLine, "position=");
+                                nPos = getIntAttribute(strNoteLine, "position=");
 
-								if (nPos == nNewPos)
-								{
-									db2.close();
-									db.close();
-									dbs.close();
-									return;
-								}
+                                if (nPos == nNewPos)
+                                {
+                                    db2.close();
+                                    db.close();
+                                    dbs.close();
+                                    return;
+                                }
 
-								db.reset();
-								while (!db.atEnd())
-								{
-									qint64 lineLength = db.readLine(buf, sizeof(buf));
-									if (lineLength != -1) // the line is available in buf
-									{
-										QString strLine(buf);
-										if (nPos < nNewPos)
-										{
-											int nPos2 = getIntAttribute(strLine, "position=");
-											int nStrPos2 = strLine.indexOf("position=");
-											int nStr2Pos2 = strLine.indexOf(",", nStrPos2+1);
+                                db.reset();
+                                while (!db.atEnd())
+                                {
+                                    qint64 lineLength = db.readLine(buf, sizeof(buf));
+                                    if (lineLength != -1) // the line is available in buf
+                                    {
+                                        QString strLine(buf);
+                                        if (nPos < nNewPos)
+                                        {
+                                            int nPos2 = getIntAttribute(strLine, "position=");
+                                            int nStrPos2 = strLine.indexOf("position=");
+                                            int nStr2Pos2 = strLine.indexOf(",", nStrPos2+1);
 
-											if ((nPos2 < nPos) || (nPos2 > nNewPos))
-											{
-                                                                                            out << strLine;
-											}
-											else if (nPos2 == nPos)
-											{
-												strSaved= strLine.replace(nStrPos2 + strlen("position="),
-																				nStr2Pos2 - (nStrPos2 + strlen("position=")),
-																				QString::number(nNewPos));
-											}
-											else
-											{
-												strLine.replace(nStrPos2 + strlen("position="),
-																				nStr2Pos2 - (nStrPos2 + strlen("position=")),
-																				QString::number(nPos2-1));
-                                                                                                out << strLine;
+                                            if ((nPos2 < nPos) || (nPos2 > nNewPos))
+                                            {
+                                                out << strLine;
+                                            }
+                                            else if (nPos2 == nPos)
+                                            {
+                                                strSaved= strLine.replace(nStrPos2 + strlen("position="),
+                                                                          nStr2Pos2 - (nStrPos2 + strlen("position=")),
+                                                                          QString::number(nNewPos));
+                                            }
+                                            else
+                                            {
+                                                strLine.replace(nStrPos2 + strlen("position="),
+                                                                nStr2Pos2 - (nStrPos2 + strlen("position=")),
+                                                                QString::number(nPos2-1));
+                                                out << strLine;
 
-												if (nPos2 == nNewPos)
-												{
-                                                                                                    out << strSaved;
-												}
-											}
-										}
-										else
-										{
-											int nPos2 = getIntAttribute(strLine, "position=");
+                                                if (nPos2 == nNewPos)
+                                                {
+                                                    out << strSaved;
+                                                }
+                                            }
+                                        }
+                                        else
+                                        {
+                                            int nPos2 = getIntAttribute(strLine, "position=");
 
-											int nStrPos2 = strLine.indexOf("position=");
-											int nStr2Pos2 = strLine.indexOf(",", nStrPos2+1);
-											if (nPos2 < nNewPos)
-											{
-                                                                                            out << strLine;
-											}
-											else if (nPos2 > nPos)
-											{
-												if (!lst.isEmpty())
-												{
-													for (int i=0; i<lst.count(); i++)
-													{
-                                                                                                            out << lst.at(i);
-													}
+                                            int nStrPos2 = strLine.indexOf("position=");
+                                            int nStr2Pos2 = strLine.indexOf(",", nStrPos2+1);
+                                            if (nPos2 < nNewPos)
+                                            {
+                                                out << strLine;
+                                            }
+                                            else if (nPos2 > nPos)
+                                            {
+                                                if (!lst.isEmpty())
+                                                {
+                                                    for (int i=0; i<lst.count(); i++)
+                                                    {
+                                                        out << lst.at(i);
+                                                    }
 
-													lst.clear();
-												}
+                                                    lst.clear();
+                                                }
 
-                                                                                                out << strLine;
-											}
-											else if (nPos2 == nPos)
-											{
-												strLine.replace(nStrPos2 + strlen("position="),
-																				nStr2Pos2 - (nStrPos2 + strlen("position=")),
-																				QString::number(nNewPos));
-                                                                                                out << strLine;
-											}
-											else
-											{
-												strLine.replace(nStrPos2 + strlen("position="),
-																				nStr2Pos2 - (nStrPos2 + strlen("position=")),
-																				QString::number(nPos2+1));
-												lst.append(strLine);
-											}
-										}
-									}
-								}
+                                                out << strLine;
+                                            }
+                                            else if (nPos2 == nPos)
+                                            {
+                                                strLine.replace(nStrPos2 + strlen("position="),
+                                                                nStr2Pos2 - (nStrPos2 + strlen("position=")),
+                                                                QString::number(nNewPos));
+                                                out << strLine;
+                                            }
+                                            else
+                                            {
+                                                strLine.replace(nStrPos2 + strlen("position="),
+                                                                nStr2Pos2 - (nStrPos2 + strlen("position=")),
+                                                                QString::number(nPos2+1));
+                                                lst.append(strLine);
+                                            }
+                                        }
+                                    }
+                                }
 
-								if (!lst.isEmpty())
-								{
-                                                                    QTextStream out(&db2);
-									for (int i=0; i<lst.count(); i++)
-									{
-                                                                            out << lst.at(i);
-									}
-									lst.clear();
-								}
-							}
-							db2.close();
-						}
-						db.close();
+                                if (!lst.isEmpty())
+                                {
+                                    QTextStream out(&db2);
+                                    for (int i=0; i<lst.count(); i++)
+                                    {
+                                        out << lst.at(i);
+                                    }
+                                    lst.clear();
+                                }
+                            }
+                            db2.close();
+                        }
+                        db.close();
 
-						if (QFile::remove(strPath + "data")) //remove old file
-						{
-							QFile::rename(strPath + "data.bak", strPath + "data");
-						}
-					}
-				}
-				dbs.close();
-			}
-		}
-	}
+                        if (QFile::remove(strPath + "data")) //remove old file
+                        {
+                            QFile::rename(strPath + "data.bak", strPath + "data");
+                        }
+                    }
+                }
+                dbs.close();
+            }
+        }
+    }
 }
 
 
@@ -704,19 +704,19 @@ void CDataHandler::changeNotePosition(const QString& _notebookID, const QString&
  *******************************************************************/
 QString CDataHandler::getStringAttribute(const QString& _str, const QString& _attrName)
 {
-	QString strRet;
+    QString strRet;
 
-	int nStrPos = _str.indexOf(_attrName);
-	if (-1 != nStrPos)
-	{
-		int nStrPos2 = _str.indexOf(",", nStrPos+1);
-		if (-1 != nStrPos2)
-		{
-                        strRet = _str.mid(nStrPos + _attrName.length(), nStrPos2 -(nStrPos + _attrName.length()));
-		}
-	}
+    int nStrPos = _str.indexOf(_attrName);
+    if (-1 != nStrPos)
+    {
+        int nStrPos2 = _str.indexOf(",", nStrPos+1);
+        if (-1 != nStrPos2)
+        {
+            strRet = _str.mid(nStrPos + _attrName.length(), nStrPos2 -(nStrPos + _attrName.length()));
+        }
+    }
 
-	return strRet;
+    return strRet;
 }
 
 
@@ -727,19 +727,19 @@ QString CDataHandler::getStringAttribute(const QString& _str, const QString& _at
  *******************************************************************/
 int CDataHandler::getIntAttribute(const QString& _str, const QString& _attrName)
 {
-	int nRet = -1;
+    int nRet = -1;
 
-	int nStrPos = _str.indexOf(_attrName);
-	if (-1 != nStrPos)
-	{
-		int nStrPos2 = _str.indexOf(",", nStrPos+1);
-		if (-1 != nStrPos2)
-		{
-                        nRet = _str.mid(nStrPos + _attrName.length(), nStrPos2 -(nStrPos + _attrName.length())).toInt();
-		}
-	}
+    int nStrPos = _str.indexOf(_attrName);
+    if (-1 != nStrPos)
+    {
+        int nStrPos2 = _str.indexOf(",", nStrPos+1);
+        if (-1 != nStrPos2)
+        {
+            nRet = _str.mid(nStrPos + _attrName.length(), nStrPos2 -(nStrPos + _attrName.length())).toInt();
+        }
+    }
 
-	return nRet;
+    return nRet;
 }
 
 
@@ -776,18 +776,18 @@ QString CDataHandler::getNameFromFile(QFile& _file, const QString& _value, QStri
  *******************************************************************/
 int CDataHandler::getPositionFromFile(QFile& _file)
 {
-	int nRet = 0;
+    int nRet = 0;
 
-	_file.reset();
-        QTextStream in(&_file);
-        QString strLine;
-        while (!in.atEnd())
-	{
-            strLine = in.readLine();
-            nRet = getIntAttribute(strLine, "position=");
-	}
+    _file.reset();
+    QTextStream in(&_file);
+    QString strLine;
+    while (!in.atEnd())
+    {
+        strLine = in.readLine();
+        nRet = getIntAttribute(strLine, "position=");
+    }
 
-	return nRet;
+    return nRet;
 }
 
 
@@ -798,57 +798,57 @@ int CDataHandler::getPositionFromFile(QFile& _file)
  *******************************************************************/
 void CDataHandler::save(const QString& _notebookID, const QString& _nodeName, const QString& _data)
 {
-	//check if the data folder exists
-	if (checkAppData())
-	{
-		QString home(QDir::homePath());
-		if (!home.endsWith("/"))
-		{
-			home.append("/");
-		}
+    //check if the data folder exists
+    if (checkAppData())
+    {
+        QString home(QDir::homePath());
+        if (!home.endsWith("/"))
+        {
+            home.append("/");
+        }
 
-		QFile dbs(home + ".MeeGo/Notes/data");
-		if (dbs.exists())
-		{
-			if (dbs.open(QIODevice::ReadOnly))
-			{
-				QString strLine, strPath, strName;
-				strName = getNameFromFile(dbs, _notebookID, strLine);
+        QFile dbs(home + ".MeeGo/Notes/data");
+        if (dbs.exists())
+        {
+            if (dbs.open(QIODevice::ReadOnly))
+            {
+                QString strLine, strPath, strName;
+                strName = getNameFromFile(dbs, _notebookID, strLine);
 
-				if (strName == _notebookID)
-				{
-					strPath = getStringAttribute(strLine, "path=");
+                if (strName == _notebookID)
+                {
+                    strPath = getStringAttribute(strLine, "path=");
 
-					if (!strPath.endsWith("/"))
-					{
-						strPath.append("/");
-					}
+                    if (!strPath.endsWith("/"))
+                    {
+                        strPath.append("/");
+                    }
 
-					QFile db(strPath + "data");
-					if (db.open(QIODevice::ReadWrite | QIODevice::Append))
-					{
-						strName = getNameFromFile(db, _nodeName, strLine);
+                    QFile db(strPath + "data");
+                    if (db.open(QIODevice::ReadWrite | QIODevice::Append))
+                    {
+                        strName = getNameFromFile(db, _nodeName, strLine);
 
-						if (strName == _nodeName)
-						{
-							QString strNotePath = getStringAttribute(strLine,"path=");
+                        if (strName == _nodeName)
+                        {
+                            QString strNotePath = getStringAttribute(strLine,"path=");
 
-							QFile db2(strNotePath);
-							if (db2.open(QIODevice::WriteOnly))
-							{
-                                                            QTextStream out(&db2);
-                                                            out << _data;
-								db2.close();
-							}
-						}
+                            QFile db2(strNotePath);
+                            if (db2.open(QIODevice::WriteOnly))
+                            {
+                                QTextStream out(&db2);
+                                out << _data;
+                                db2.close();
+                            }
+                        }
 
-						db.close();
-					}
-				}
-				dbs.close();
-			}
-		}
-	}
+                        db.close();
+                    }
+                }
+                dbs.close();
+            }
+        }
+    }
 }
 
 
@@ -859,56 +859,56 @@ void CDataHandler::save(const QString& _notebookID, const QString& _nodeName, co
  *******************************************************************/
 void CDataHandler::load(const QString& _notebookID, const QString& _nodeName, QString& _data)
 {
-	//check if the data folder exists
-	if (checkAppData())
-	{
-		QString home(QDir::homePath());
-		if (!home.endsWith("/"))
-		{
-			home.append("/");
-		}
+    //check if the data folder exists
+    if (checkAppData())
+    {
+        QString home(QDir::homePath());
+        if (!home.endsWith("/"))
+        {
+            home.append("/");
+        }
 
-		QFile dbs(home + ".MeeGo/Notes/data");
-		if (dbs.exists())
-		{
-			if (dbs.open(QIODevice::ReadOnly))
-			{
-				QString strLine, strPath, strName;
-				strName = getNameFromFile(dbs, _notebookID, strLine);
+        QFile dbs(home + ".MeeGo/Notes/data");
+        if (dbs.exists())
+        {
+            if (dbs.open(QIODevice::ReadOnly))
+            {
+                QString strLine, strPath, strName;
+                strName = getNameFromFile(dbs, _notebookID, strLine);
 
-				if (strName == _notebookID)
-				{
-					strPath = getStringAttribute(strLine, "path=");
+                if (strName == _notebookID)
+                {
+                    strPath = getStringAttribute(strLine, "path=");
 
-					if (!strPath.endsWith("/"))
-					{
-						strPath.append("/");
-					}
+                    if (!strPath.endsWith("/"))
+                    {
+                        strPath.append("/");
+                    }
 
-					QFile db(strPath + "data");
-					if (db.open(QIODevice::ReadWrite | QIODevice::Append))
-					{
-						strName = getNameFromFile(db, _nodeName, strLine);
+                    QFile db(strPath + "data");
+                    if (db.open(QIODevice::ReadWrite | QIODevice::Append))
+                    {
+                        strName = getNameFromFile(db, _nodeName, strLine);
 
-						if (strName == _nodeName)
-						{
-							QString strNotePath = getStringAttribute(strLine,"path=");
+                        if (strName == _nodeName)
+                        {
+                            QString strNotePath = getStringAttribute(strLine,"path=");
 
-							QFile db2(strNotePath);
-							if (db2.open(QIODevice::ReadOnly))
-              {
-                _data = QString::fromUtf8(db2.readAll());
-								db2.close();
-							}
-						}
+                            QFile db2(strNotePath);
+                            if (db2.open(QIODevice::ReadOnly))
+                            {
+                                _data = QString::fromUtf8(db2.readAll());
+                                db2.close();
+                            }
+                        }
 
-						db.close();
-					}
-				}
-				dbs.close();
-			}
-		}
-	}
+                        db.close();
+                    }
+                }
+                dbs.close();
+            }
+        }
+    }
 }
 
 
@@ -919,33 +919,33 @@ void CDataHandler::load(const QString& _notebookID, const QString& _nodeName, QS
  *******************************************************************/
 void CDataHandler::getNoteBooks(int role, QStringList& _noteBooks, bool _sort)
 {
-	//check if the data folder exists
-	if (checkAppData())
-	{
-		QString home(QDir::homePath());
-		if (!home.endsWith("/"))
-		{
-			home.append("/");
-		}
+    //check if the data folder exists
+    if (checkAppData())
+    {
+        QString home(QDir::homePath());
+        if (!home.endsWith("/"))
+        {
+            home.append("/");
+        }
 
-		QFile dbs(home + ".MeeGo/Notes/data");
-		if (dbs.exists())
-		{
-			if (dbs.open(QIODevice::ReadOnly))
-			{
-				getStringsFromFile(dbs, role, _noteBooks);
+        QFile dbs(home + ".MeeGo/Notes/data");
+        if (dbs.exists())
+        {
+            if (dbs.open(QIODevice::ReadOnly))
+            {
+                getStringsFromFile(dbs, role, _noteBooks);
 
-				if (_sort)
-				{
-                                        _noteBooks.removeAll(STR_DEFAULT_NOTEBOOK);
-					_noteBooks.sort();
-                                        _noteBooks.prepend(STR_DEFAULT_NOTEBOOK);
-				}
+                if (_sort)
+                {
+                    _noteBooks.removeAll(STR_DEFAULT_NOTEBOOK);
+                    _noteBooks.sort();
+                    _noteBooks.prepend(STR_DEFAULT_NOTEBOOK);
+                }
 
-				dbs.close();
-			}
-		}
-	}
+                dbs.close();
+            }
+        }
+    }
 }
 
 
@@ -956,49 +956,49 @@ void CDataHandler::getNoteBooks(int role, QStringList& _noteBooks, bool _sort)
  *******************************************************************/
 void CDataHandler::getNotes(const QString& _noteBook, int role, QStringList& _notes, bool _sort)
 {
-	//check if the data folder exists
-	if (checkAppData())
-	{
-		QString home(QDir::homePath());
-		if (!home.endsWith("/"))
-		{
-			home.append("/");
-		}
+    //check if the data folder exists
+    if (checkAppData())
+    {
+        QString home(QDir::homePath());
+        if (!home.endsWith("/"))
+        {
+            home.append("/");
+        }
 
-		QFile dbs(home + ".MeeGo/Notes/data");
-		if (dbs.exists())
-		{
-			if (dbs.open(QIODevice::ReadOnly))
-			{
-				QString strLine, strPath, strName;
-				strName = getNameFromFile(dbs, _noteBook, strLine);
+        QFile dbs(home + ".MeeGo/Notes/data");
+        if (dbs.exists())
+        {
+            if (dbs.open(QIODevice::ReadOnly))
+            {
+                QString strLine, strPath, strName;
+                strName = getNameFromFile(dbs, _noteBook, strLine);
 
-				if (strName == _noteBook)
-				{
-					strPath = getStringAttribute(strLine, "path=");
-					if (!strPath.endsWith("/"))
-					{
-						strPath.append("/");
-					}
+                if (strName == _noteBook)
+                {
+                    strPath = getStringAttribute(strLine, "path=");
+                    if (!strPath.endsWith("/"))
+                    {
+                        strPath.append("/");
+                    }
 
-					QFile db(strPath + "data");
-					if (db.open(QIODevice::ReadOnly))
-					{
-						getStringsFromFile(db, role, _notes);
+                    QFile db(strPath + "data");
+                    if (db.open(QIODevice::ReadOnly))
+                    {
+                        getStringsFromFile(db, role, _notes);
 
-						if (_sort)
-						{
-							_notes.sort();
-						}
+                        if (_sort)
+                        {
+                            _notes.sort();
+                        }
 
-						db.close();
-					}
-				}
+                        db.close();
+                    }
+                }
 
-				dbs.close();
-			}
-		}
-	}
+                dbs.close();
+            }
+        }
+    }
 }
 
 
@@ -1031,17 +1031,17 @@ void CDataHandler::getStringsFromFile(QFile& _file, int role, QStringList& _list
  *******************************************************************/
 QString CDataHandler::generateUniqueName(const QString& _path, const QString& _originalName)
 {
-	QString str(_originalName);
+    QString str(_originalName);
 
-	int i=1;
-	while (QFile::exists(_path + str))
-	{
-		str = _originalName;
-		str.append("_("+ QString::number(i) +")");
-		i++;
-	}
+    int i=1;
+    while (QFile::exists(_path + str))
+    {
+        str = _originalName;
+        str.append("_("+ QString::number(i) +")");
+        i++;
+    }
 
-	return str;
+    return str;
 }
 
 
@@ -1099,11 +1099,11 @@ bool CDataHandler::createTempFile(QFile& dbs, QFile& dbs2, const QString& _noteb
  *******************************************************************/
 QString CDataHandler::loadNoteData(const QString& _notebookID, const QString& _fileName)
 {
-	QString strRet;
+    QString strRet;
 
-	load(_notebookID, _fileName, strRet);
+    load(_notebookID, _fileName, strRet);
 
-	return strRet;
+    return strRet;
 }
 
 
@@ -1114,28 +1114,28 @@ QString CDataHandler::loadNoteData(const QString& _notebookID, const QString& _f
  *******************************************************************/
 void CDataHandler::setSort(bool _bSort)
 {
-	//check if the data folder exists
-	if (checkAppData())
-	{
-		QString home(QDir::homePath());
-		if (!home.endsWith("/"))
-		{
-			home.append("/");
-		}
+    //check if the data folder exists
+    if (checkAppData())
+    {
+        QString home(QDir::homePath());
+        if (!home.endsWith("/"))
+        {
+            home.append("/");
+        }
 
-		QFile dbs(home + ".MeeGo/Notes/config");
-		//if (dbs.exists())
-		{
-			if (dbs.open(QIODevice::WriteOnly))
-			{
-				dbs.reset();
-				QString strSort = _bSort ? "true" : "false";
-                                QTextStream out(&dbs);
-                                out << QString("SortNoteBooks=%1").arg(strSort);
-				dbs.close();
-			}
-		}
-	}
+        QFile dbs(home + ".MeeGo/Notes/config");
+        //if (dbs.exists())
+        {
+            if (dbs.open(QIODevice::WriteOnly))
+            {
+                dbs.reset();
+                QString strSort = _bSort ? "true" : "false";
+                QTextStream out(&dbs);
+                out << QString("SortNoteBooks=%1").arg(strSort);
+                dbs.close();
+            }
+        }
+    }
 }
 
 
@@ -1187,48 +1187,48 @@ bool CDataHandler::isSorted()
  *******************************************************************/
 void CDataHandler::getNotePosition(const QString& _notebookID, const QString& _nodeName, QString& _position)
 {
-	if (checkAppData())
-	{
-		QString home(QDir::homePath());
-		if (!home.endsWith("/"))
-		{
-			home.append("/");
-		}
+    if (checkAppData())
+    {
+        QString home(QDir::homePath());
+        if (!home.endsWith("/"))
+        {
+            home.append("/");
+        }
 
-		QFile dbs(home + ".MeeGo/Notes/data");
-		if (dbs.exists())
-		{
-			if (dbs.open(QIODevice::ReadOnly))
-			{
-				QString strLine, strPath, strName;
-				strName = getNameFromFile(dbs, _notebookID, strLine);
+        QFile dbs(home + ".MeeGo/Notes/data");
+        if (dbs.exists())
+        {
+            if (dbs.open(QIODevice::ReadOnly))
+            {
+                QString strLine, strPath, strName;
+                strName = getNameFromFile(dbs, _notebookID, strLine);
 
-				if (strName == _notebookID)
-				{
-					strPath = getStringAttribute(strLine, "path=");
-					if (!strPath.endsWith("/"))
-					{
-						strPath.append("/");
-					}
+                if (strName == _notebookID)
+                {
+                    strPath = getStringAttribute(strLine, "path=");
+                    if (!strPath.endsWith("/"))
+                    {
+                        strPath.append("/");
+                    }
 
-					QFile db(strPath + "data");
-					if (db.open(QIODevice::ReadWrite | QIODevice::Append))
-					{
-						strName = getNameFromFile(db, _nodeName, strLine);
+                    QFile db(strPath + "data");
+                    if (db.open(QIODevice::ReadWrite | QIODevice::Append))
+                    {
+                        strName = getNameFromFile(db, _nodeName, strLine);
 
-						if (strName == _nodeName)
-						{
-							int nPos = getIntAttribute(strLine, "position=");
-							_position = QString::number(nPos);
-						}
+                        if (strName == _nodeName)
+                        {
+                            int nPos = getIntAttribute(strLine, "position=");
+                            _position = QString::number(nPos);
+                        }
 
-						db.close();
-					}
-				}
-				dbs.close();
-			}
-		}
-	}
+                        db.close();
+                    }
+                }
+                dbs.close();
+            }
+        }
+    }
 }
 
 
@@ -1239,27 +1239,27 @@ void CDataHandler::getNotePosition(const QString& _notebookID, const QString& _n
  *******************************************************************/
 int CDataHandler::getChildNotes(const QString& _notebookID)
 {
-  QString home(QDir::homePath());
-  if (!home.endsWith("/"))
-  {
-          home.append("/");
-  }
+    QString home(QDir::homePath());
+    if (!home.endsWith("/"))
+    {
+        home.append("/");
+    }
 
-  if(tr(STR_DEFAULT_NOTEBOOK) == _notebookID) {
-      QDir dir(home + ".MeeGo/Notes/" + tr("Everyday Notes"));
-      QStringList list = dir.entryList(QDir::Files);
-      list.removeAll("data");
-      list.removeAll("data.bak");
-      return list.count();
-  }
-  else {
-      QDir dir(home + ".MeeGo/Notes/" + _notebookID + "/");
-      QStringList list = dir.entryList(QDir::Files);
-      list.removeAll("data");
-      list.removeAll("data.bak");
-      return list.count();
-  }
-  return 0;
+    if(tr(STR_DEFAULT_NOTEBOOK) == _notebookID) {
+        QDir dir(home + ".MeeGo/Notes/" + tr("Everyday Notes"));
+        QStringList list = dir.entryList(QDir::Files);
+        list.removeAll("data");
+        list.removeAll("data.bak");
+        return list.count();
+    }
+    else {
+        QDir dir(home + ".MeeGo/Notes/" + _notebookID + "/");
+        QStringList list = dir.entryList(QDir::Files);
+        list.removeAll("data");
+        list.removeAll("data.bak");
+        return list.count();
+    }
+    return 0;
 }
 
 
@@ -1299,9 +1299,9 @@ QString CDataHandler::getDate(const QString& _notebookID)
  *******************************************************************/
 QStringList CDataHandler::getNoteBooks()
 {
-  QStringList lst;
-  getNoteBooks(NoteModel::NameRole, lst, false);
-  return lst;
+    QStringList lst;
+    getNoteBooks(NoteModel::NameRole, lst, false);
+    return lst;
 }
 
 
@@ -1312,19 +1312,19 @@ QStringList CDataHandler::getNoteBooks()
  *******************************************************************/
 void CDataHandler::saveToFile(const QString& st)
 {
-  QString home(QDir::homePath());
+    QString home(QDir::homePath());
 
-  if (!home.endsWith("/"))
-  {
-    home.append("/");
-  }
+    if (!home.endsWith("/"))
+    {
+        home.append("/");
+    }
 
-  QFile data(home + "output.txt");
-  if (data.open(QFile::WriteOnly | QFile::Append))
-  {
-       QTextStream out(&data);
-       out << st << endl;
-   }
+    QFile data(home + "output.txt");
+    if (data.open(QFile::WriteOnly | QFile::Append))
+    {
+        QTextStream out(&data);
+        out << st << endl;
+    }
 }
 
 
@@ -1335,28 +1335,28 @@ void CDataHandler::saveToFile(const QString& st)
  *******************************************************************/
 void CDataHandler::setCheckBox(bool _bShow)
 {
-  //check if the data folder exists
-  if (checkAppData())
-  {
-    QString home(QDir::homePath());
-    if (!home.endsWith("/"))
+    //check if the data folder exists
+    if (checkAppData())
     {
-      home.append("/");
-    }
+        QString home(QDir::homePath());
+        if (!home.endsWith("/"))
+        {
+            home.append("/");
+        }
 
-    QFile dbs(home + ".MeeGo/Notes/config");
-    //if (dbs.exists())
-    {
-      if (dbs.open(QIODevice::WriteOnly))
-      {
-        dbs.reset();
-        QString strShow = _bShow ? "true" : "false";
-        QTextStream out(&dbs);
-        out << QString("ShowCheckBox=%1").arg(strShow);
-        dbs.close();
-      }
+        QFile dbs(home + ".MeeGo/Notes/config");
+        //if (dbs.exists())
+        {
+            if (dbs.open(QIODevice::WriteOnly))
+            {
+                dbs.reset();
+                QString strShow = _bShow ? "true" : "false";
+                QTextStream out(&dbs);
+                out << QString("ShowCheckBox=%1").arg(strShow);
+                dbs.close();
+            }
+        }
     }
-  }
 }
 
 
@@ -1408,9 +1408,9 @@ bool CDataHandler::getCheckBox()
  *******************************************************************/
 QStringList CDataHandler::removeFromString(const QStringList& _array, const QString& _value)
 {
-  QStringList lst = _array;
-  lst.removeOne(_value);
-  return lst;
+    QStringList lst = _array;
+    lst.removeOne(_value);
+    return lst;
 }
 
 bool CDataHandler::removeDir(const QString &path)

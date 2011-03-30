@@ -29,7 +29,7 @@ CTextEditHandler::CTextEditHandler(QObject* parent):
     QObject(parent), m_pEdit(NULL),
     m_bIsBold(false), m_bIsItalic(false), m_bIsUnderline(false)
 {
-  Init();
+    Init();
 }
 
 
@@ -40,11 +40,11 @@ CTextEditHandler::CTextEditHandler(QObject* parent):
  *******************************************************************/
 CTextEditHandler::~CTextEditHandler()
 {
-  if (NULL != m_pEdit)
-  {
-    delete m_pEdit;
-    m_pEdit = NULL;
-  }
+    if (NULL != m_pEdit)
+    {
+        delete m_pEdit;
+        m_pEdit = NULL;
+    }
 }
 
 
@@ -55,8 +55,8 @@ CTextEditHandler::~CTextEditHandler()
  *******************************************************************/
 void CTextEditHandler::Init()
 {
-  m_pEdit = new QTextEdit(NULL);
-  m_pEdit->setText("");
+    m_pEdit = new QTextEdit(NULL);
+    m_pEdit->setText("");
 }
 
 
@@ -67,8 +67,8 @@ void CTextEditHandler::Init()
  *******************************************************************/
 QString CTextEditHandler::bold(const QString& _text, int _nPos, int _nPosEnd)
 {
-  setTextAndCursor(CTextEditHandler::BoldRole, _text, _nPos, _nPosEnd);
-  return m_pEdit->toHtml();
+    setTextAndCursor(CTextEditHandler::BoldRole, _text, _nPos, _nPosEnd);
+    return m_pEdit->toHtml();
 }
 
 
@@ -79,8 +79,8 @@ QString CTextEditHandler::bold(const QString& _text, int _nPos, int _nPosEnd)
  *******************************************************************/
 QString CTextEditHandler::italic(const QString& _text, int _nPos, int _nPosEnd)
 {
-  setTextAndCursor(CTextEditHandler::ItalicRole, _text, _nPos, _nPosEnd);
-  return m_pEdit->toHtml();
+    setTextAndCursor(CTextEditHandler::ItalicRole, _text, _nPos, _nPosEnd);
+    return m_pEdit->toHtml();
 }
 
 
@@ -91,8 +91,8 @@ QString CTextEditHandler::italic(const QString& _text, int _nPos, int _nPosEnd)
  *******************************************************************/
 QString CTextEditHandler::underline(const QString& _text, int _nPos, int _nPosEnd)
 {
-  setTextAndCursor(CTextEditHandler::UnderlineRole, _text, _nPos, _nPosEnd);
-  return m_pEdit->toHtml();
+    setTextAndCursor(CTextEditHandler::UnderlineRole, _text, _nPos, _nPosEnd);
+    return m_pEdit->toHtml();
 }
 
 
@@ -103,45 +103,45 @@ QString CTextEditHandler::underline(const QString& _text, int _nPos, int _nPosEn
  *******************************************************************/
 void CTextEditHandler::setTextAndCursor(int role, const QString& _text, int _nPos, int _nPosEnd)
 {
-  m_pEdit->setText(_text);
+    m_pEdit->setText(_text);
 
-  QTextCursor cursor = m_pEdit->textCursor();
+    QTextCursor cursor = m_pEdit->textCursor();
 
-  if (_nPos == _nPosEnd) //no selection
-  {
-    cursor.setPosition(_nPos);
-    if (!cursor.hasSelection())
+    if (_nPos == _nPosEnd) //no selection
     {
-      cursor.select(QTextCursor::WordUnderCursor);
+        cursor.setPosition(_nPos);
+        if (!cursor.hasSelection())
+        {
+            cursor.select(QTextCursor::WordUnderCursor);
+        }
     }
-  }
-  else
-  {
-    cursor.setPosition(_nPos);
-    cursor.setPosition(_nPosEnd, QTextCursor::KeepAnchor);
-  }
+    else
+    {
+        cursor.setPosition(_nPos);
+        cursor.setPosition(_nPosEnd, QTextCursor::KeepAnchor);
+    }
 
-  QString strSelection = cursor.selection().toHtml();
-  QTextCharFormat fmt;
+    QString strSelection = cursor.selection().toHtml();
+    QTextCharFormat fmt;
 
-  if (CTextEditHandler::BoldRole == role)
-  {
-    m_bIsBold = (-1 != strSelection.indexOf("font-weight:")) ? false : true;
-    fmt.setFontWeight(m_bIsBold ? QFont::Bold : QFont::Normal);
-  }
-  else if (CTextEditHandler::ItalicRole == role)
-  {
-    m_bIsItalic = (-1 != strSelection.indexOf("font-style:italic")) ? false : true;
-    fmt.setFontItalic(m_bIsItalic);
-  }
-  else if (CTextEditHandler::UnderlineRole == role)
-  {
-    m_bIsUnderline = (-1 != strSelection.indexOf("text-decoration: underline;")) ? false : true;
-    fmt.setFontUnderline(m_bIsUnderline);
-  }
+    if (CTextEditHandler::BoldRole == role)
+    {
+        m_bIsBold = (-1 != strSelection.indexOf("font-weight:")) ? false : true;
+        fmt.setFontWeight(m_bIsBold ? QFont::Bold : QFont::Normal);
+    }
+    else if (CTextEditHandler::ItalicRole == role)
+    {
+        m_bIsItalic = (-1 != strSelection.indexOf("font-style:italic")) ? false : true;
+        fmt.setFontItalic(m_bIsItalic);
+    }
+    else if (CTextEditHandler::UnderlineRole == role)
+    {
+        m_bIsUnderline = (-1 != strSelection.indexOf("text-decoration: underline;")) ? false : true;
+        fmt.setFontUnderline(m_bIsUnderline);
+    }
 
-  cursor.mergeCharFormat(fmt);
-  m_pEdit->mergeCurrentCharFormat(fmt);
+    cursor.mergeCharFormat(fmt);
+    m_pEdit->mergeCurrentCharFormat(fmt);
 }
 
 
@@ -150,11 +150,11 @@ void CTextEditHandler::setTextAndCursor(int role, const QString& _text, int _nPo
  *
  *
  *******************************************************************/
- QString CTextEditHandler::toPlainText(const QString& _text)
- {
-   m_pEdit->setText(_text);
-   return m_pEdit->toPlainText();
- }
+QString CTextEditHandler::toPlainText(const QString& _text)
+{
+    m_pEdit->setText(_text);
+    return m_pEdit->toPlainText();
+}
 
 
 /********************************************************************
@@ -164,30 +164,30 @@ void CTextEditHandler::setTextAndCursor(int role, const QString& _text, int _nPo
  *******************************************************************/
 QString CTextEditHandler::setFontFamily(const QString& _text, int _nPos, int _nPosEnd, const QString& _fontFamily)
 {
-  m_pEdit->setText(_text);
+    m_pEdit->setText(_text);
 
-  QTextCursor cursor = m_pEdit->textCursor();
+    QTextCursor cursor = m_pEdit->textCursor();
 
-  if (_nPos == _nPosEnd) //no selection
-  {
-    cursor.setPosition(_nPos);
-    if (!cursor.hasSelection())
+    if (_nPos == _nPosEnd) //no selection
     {
-      cursor.select(QTextCursor::WordUnderCursor);
+        cursor.setPosition(_nPos);
+        if (!cursor.hasSelection())
+        {
+            cursor.select(QTextCursor::WordUnderCursor);
+        }
     }
-  }
-  else
-  {
-    cursor.setPosition(_nPos);
-    cursor.setPosition(_nPosEnd, QTextCursor::KeepAnchor);
-  }
+    else
+    {
+        cursor.setPosition(_nPos);
+        cursor.setPosition(_nPosEnd, QTextCursor::KeepAnchor);
+    }
 
-  QTextCharFormat fmt;
-  fmt.setFontFamily(_fontFamily);
-  cursor.mergeCharFormat(fmt);
-  m_pEdit->mergeCurrentCharFormat(fmt);
+    QTextCharFormat fmt;
+    fmt.setFontFamily(_fontFamily);
+    cursor.mergeCharFormat(fmt);
+    m_pEdit->mergeCurrentCharFormat(fmt);
 
-  return m_pEdit->toHtml();
+    return m_pEdit->toHtml();
 }
 
 
@@ -198,30 +198,30 @@ QString CTextEditHandler::setFontFamily(const QString& _text, int _nPos, int _nP
  *******************************************************************/
 QString CTextEditHandler::setFontSize(const QString& _text, int _nPos, int _nPosEnd, int _nPointSize)
 {
-  m_pEdit->setText(_text);
+    m_pEdit->setText(_text);
 
-  QTextCursor cursor = m_pEdit->textCursor();
+    QTextCursor cursor = m_pEdit->textCursor();
 
-  if (_nPos == _nPosEnd) //no selection
-  {
-    cursor.setPosition(_nPos);
-    if (!cursor.hasSelection())
+    if (_nPos == _nPosEnd) //no selection
     {
-      cursor.select(QTextCursor::WordUnderCursor);
+        cursor.setPosition(_nPos);
+        if (!cursor.hasSelection())
+        {
+            cursor.select(QTextCursor::WordUnderCursor);
+        }
     }
-  }
-  else
-  {
-    cursor.setPosition(_nPos);
-    cursor.setPosition(_nPosEnd, QTextCursor::KeepAnchor);
-  }
+    else
+    {
+        cursor.setPosition(_nPos);
+        cursor.setPosition(_nPosEnd, QTextCursor::KeepAnchor);
+    }
 
-  QTextCharFormat fmt;
-  fmt.setFontPointSize(_nPointSize);
-  cursor.mergeCharFormat(fmt);
-  m_pEdit->mergeCurrentCharFormat(fmt);
+    QTextCharFormat fmt;
+    fmt.setFontPointSize(_nPointSize);
+    cursor.mergeCharFormat(fmt);
+    m_pEdit->mergeCurrentCharFormat(fmt);
 
-  return m_pEdit->toPlainText();
+    return m_pEdit->toPlainText();
 }
 
 

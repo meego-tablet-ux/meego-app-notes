@@ -11,11 +11,11 @@
 
 #include <QDeclarativeExtensionPlugin>
 
- class NotesPlugin : public QDeclarativeExtensionPlugin
- {
-     Q_OBJECT
- public:
-     void registerTypes(const char *uri);
- };
+class NotesPlugin : public QDeclarativeExtensionPlugin
+{
+    Q_OBJECT
+public:
+    void registerTypes(const char *uri);
+};
 
 #endif // NOTESPLUGIN_H

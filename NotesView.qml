@@ -334,6 +334,9 @@ ApplicationPage {
                 title: qsTr("Delete")
                 width: 200
                 height: 100
+                active: selectedItems.length > 0
+                bgSourceUp: "image://theme/btn_red_up"
+                bgSourceDn: "image://theme/btn_red_dn"
                 onClicked: {
                     deleteConfirmationDialog.opacity = 1;
                     showCheckBox = false;

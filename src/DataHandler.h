@@ -66,6 +66,7 @@ protected:
 	void getStringsFromFile(QFile& _file, int role, QStringList& _list);
 	QString generateUniqueName(const QString& _path, const QString& _originalName);
 	bool createTempFile(QFile& _source, QFile& _dest, const QString& _noteBookID);
+        bool removeDir(const QString &path);
 
 signals:
     void notebookAdded(const QString &name);

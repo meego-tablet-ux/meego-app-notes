@@ -325,7 +325,6 @@ ApplicationPage {
             defaultText: qsTr("Notebook name");
             onButton1Clicked: {
                 dataHandler.createNoteBook(text);
-                //            modelManager.update();
                 updateView();
                 //            opacity = 0;
                 addDialogLoader.sourceComponent = undefined;

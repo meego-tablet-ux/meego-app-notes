@@ -8,7 +8,6 @@
 
 #include "notesplugin.h"
 #include "DataHandler.h"
-#include "ModelManager.h"
 #include "NotebooksModel.h"
 #include "NoteModel.h"
 #include "TextEditHandler.h"
@@ -20,7 +19,6 @@ void NotesPlugin::registerTypes(const char *uri)
     qmlRegisterType<CDataHandler>(uri, 0, 1, "DataHandler");
     qmlRegisterType<NotebooksModel>(uri, 0, 1, "NotebooksModel");
     qmlRegisterType<NoteModel>(uri, 0, 1, "NoteModel");
-    qmlRegisterType<ModelManager>(uri, 0, 1, "ModelManager");
     qmlRegisterType<CTextEditHandler>(uri, 0, 1, "TextEditHandler");
 }
 

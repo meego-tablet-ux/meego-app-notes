@@ -41,10 +41,6 @@ ApplicationPage {
         }//ontriggered
     }//action menu
 
-    ModelManager {
-        id: modelManager
-    }
-
     TextEditHandler {
         id: textEditHandler
     }
@@ -125,7 +121,6 @@ ApplicationPage {
                 if (button == 1) {
                     // Yes
                     dataHandler.deleteNote(notebookID, noteName);
-                    modelManager.update();
                     opacity = 0;
                     topRect.closeWindow();
                 }

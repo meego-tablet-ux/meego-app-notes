@@ -12,7 +12,6 @@ SOURCES += \
     DataHandler.cpp \
     NotebooksModel.cpp \
     NoteModel.cpp \
-    ModelManager.cpp \
     TextEditHandler.cpp \
     notesplugin.cpp
 
@@ -20,7 +19,6 @@ HEADERS += \
     DataHandler.h \
     NotebooksModel.h \
     NoteModel.h \
-    ModelManager.h \
     TextEditHandler.h \
     notesplugin.h
 

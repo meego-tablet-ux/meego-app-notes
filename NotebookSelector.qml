@@ -43,10 +43,6 @@ Item {
         //height: 280
 	focus: true
 
-        ModelManager {
-            id: modelManager
-        }
-
 	ListView {
 
             id:listView
@@ -57,7 +53,7 @@ Item {
             property int index: 0;
             property string selectedNotebook:  qsTr("Everyday Notes (default)");
 
-            model: modelManager.notebooksModel()
+            model: notebooksModel
             delegate:
                 Item {
                 height: 25

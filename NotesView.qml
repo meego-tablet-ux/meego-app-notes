@@ -79,10 +79,6 @@ ApplicationPage {
     }
 
 
-    ModelManager {
-        id: modelManager
-    }
-
     TextEditHandler {
         id: textEditHandler
     }
@@ -297,7 +293,7 @@ ApplicationPage {
 
             height: parent.height - nameLabel.height - 50;
             delegate: showCheckBox ? noteDelegate2 : noteDelegate;
-            model: modelManager.modelFromName(notebook);
+            model: noteModel
             interactive: contentHeight > listView.height
             header:
                 Item {
@@ -444,7 +440,6 @@ ApplicationPage {
                 dataHandler.moveNote(noteListPage.caption, selectedNote, newNotebook);
             }
 
-            modelManager.update();
             visible = false;
             moveReportWindow.opacity = 1;
         }

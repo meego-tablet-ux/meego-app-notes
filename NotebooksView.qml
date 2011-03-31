@@ -271,8 +271,7 @@ ApplicationPage {
                 {
                     if (selectedItems[0] != defaultNotebook)
                     {
-                        deleteConfirmationDialog.contentLoader.sourceComponent = textComp2;
-                        deleteReportWindow.reportText = qsTr("%1 notebooks have been deleted").arg(selectedItems.length);
+
                         deleteConfirmationDialog.opacity = 1;
                     }
                 }
@@ -280,15 +279,11 @@ ApplicationPage {
                 {
                     if (selectedItems[0] != defaultNotebook)
                     {
-                        deleteConfirmationDialog.contentLoader.sourceComponent = textComp;
-                        deleteReportWindow.reportText = qsTr("\"%1\" has been deleted").arg(selectedItems[0]);
                         deleteConfirmationDialog.opacity = 1;
                     }
                 }
                 else
                 {
-                    deleteConfirmationDialog.contentLoader.sourceComponent = textComp;
-                    deleteReportWindow.reportText = qsTr("\"%1\" has been deleted").arg(selectedNotebook);
                     deleteConfirmationDialog.opacity = 1;
                 }
             }                
@@ -377,7 +372,7 @@ ApplicationPage {
             }
         }
 
-        contentLoader.sourceComponent: (selectedItems.length > 0) ? textComp2: textComp
+        contentLoader.sourceComponent: (selectedItems.length > 1) ? textComp2: textComp
 
         onDialogClicked:
         {
@@ -399,23 +394,32 @@ ApplicationPage {
             else if (button == 2) // No
             {
                 opacity = 0;
+                selectedItems = [];
             }
         }
     }
 
 
-    ModalDialog {
+    DeleteMoveNotificationDialog {
         id: deleteReportWindow
+        menuHeight: 125
+        menuWidth: 250
         opacity: 0;
-        property string componentText: (selectedItems.length > 0) ? selectedItems[0] : selectedNotebook;
-        property string reportText;
-
-        middleButtonText: qsTr("OK");
-        //dialogTitle: qsTr("Notebook deleted");
-        dialogTitle: reportText;
+        buttonText: qsTr("OK");
+        dialogTitle: (selectedItems.length > 1) ? qsTr("Notebooks deleted") : qsTr("Notebook deleted")
+        text:  {
+            if(selectedItems.length > 1) {
+                return qsTr("%1 notebooks have been deleted").arg(selectedItems.length);
+            } else if(selectedItems.length == 1) {
+                return qsTr("%1 has been deleted").arg(selectedItems[0]);
+            } else  {
+                return qsTr("%1 has been deleted").arg(selectedNote);
+            }
+        }
 
         onDialogClicked:
         {
+            selectedItems = [];
             opacity = 0;
             updateView();
         }

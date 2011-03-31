@@ -113,7 +113,7 @@ Item {
                     height: 40
                     bgSourceUp: "image://theme/btn_blue_up"
                     bgSourceDn: "image://theme/btn_blue_dn"
-                    active: container.text.length > 1
+                    active: container.text.length > 0
 
                     onClicked: container.button1Clicked();
                 }

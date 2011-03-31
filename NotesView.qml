@@ -193,10 +193,9 @@ ApplicationPage {
 
             NoteButton {
                 id: note2
-                property int defaultHeight: 70
                 x: 40;
                 width: listView.width - 80;
-                height: ((listView.height / 10) > defaultHeight) ? listView.height / 10 : defaultHeight;
+                height: theme_listBackgroundPixelHeightTwo
                 z: 0
                 title: name
                 comment: prepareText(dataHandler.loadNoteData(notebook, name));
@@ -291,7 +290,7 @@ ApplicationPage {
                 top: nameLabel.bottom;
             }
 
-            height: parent.height - nameLabel.height - 50;
+            height: parent.height - nameLabel.height;
             delegate: showCheckBox ? noteDelegate2 : noteDelegate;
             model: noteModel
             interactive: contentHeight > listView.height
@@ -353,6 +352,7 @@ ApplicationPage {
                 onClicked: {
                     multiSelectRow.opacity = 0;
                     showCheckBox = false;
+                    selectedItems = [];
                 }
             }
         }
@@ -394,17 +394,17 @@ ApplicationPage {
             {
                 if (selectedItems.length > 1)
                 {
-                    deleteConfirmationDialog.contentLoader.sourceComponent = textComp2;
+                    //deleteConfirmationDialog.contentLoader.sourceComponent = textComp2;
                     deleteReportWindow.text = qsTr("%1 notes have been deleted").arg(selectedItems.length);
                 }
                 else if (selectedItems.length == 1)
                 {
-                    deleteConfirmationDialog.contentLoader.sourceComponent = textComp;
+                    //deleteConfirmationDialog.contentLoader.sourceComponent = textComp;
                     deleteReportWindow.text = qsTr("\"%1\" has been deleted").arg(selectedItems[0]);
                 }
                 else
                 {
-                    deleteConfirmationDialog.contentLoader.sourceComponent = textComp;
+                    //deleteConfirmationDialog.contentLoader.sourceComponent = textComp;
                     deleteReportWindow.text = qsTr("\"%1\" has been deleted").arg(selectedNote);
                 }
 
@@ -525,14 +525,14 @@ ApplicationPage {
             }
         }
 
-        contentLoader.sourceComponent: textComp
+        //contentLoader.sourceComponent: textComp
+        contentLoader.sourceComponent: (selectedItems.length > 1) ? textComp2 : textComp
 
         onDialogClicked: {
             if (button == 1) {
                 if (selectedItems.length > 0)
                 {
                     dataHandler.deleteNotes(noteListPage.caption, selectedItems);
-                    selectedItems = [];
                 }
                 else
                 {
@@ -544,6 +544,7 @@ ApplicationPage {
             else if (button == 2) {
                 // No
                 opacity = 0;
+                selectedItems = [];
             }
         }
     }
@@ -553,14 +554,21 @@ ApplicationPage {
         menuHeight: 125
         menuWidth: 250
         opacity: 0;
-        property string componentText: (selectedItems.length > 0) ? selectedItems[0] : selectedNote;
-
         buttonText: qsTr("OK");
-        dialogTitle: qsTr("Note deleted");
-        text:qsTr("\"%1\" has been deleted").arg(componentText);
+        dialogTitle: (selectedItems.length > 1) ? qsTr("Notes deleted") : qsTr("Note deleted")
+        text:  {
+            if(selectedItems.length > 1) {
+                return qsTr("%1 notes have been deleted").arg(selectedItems.length);
+            } else if(selectedItems.length == 1) {
+                return qsTr("%1 has been deleted").arg(selectedItems[0]);
+            } else  {
+                return qsTr("%1 has been deleted").arg(selectedNote);
+            }
+        }
 
         onDialogClicked:
         {
+            selectedItems = [];
             opacity = 0;
             updateView();
         }

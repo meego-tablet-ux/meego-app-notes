@@ -236,11 +236,10 @@ ApplicationPage {
 
         property string openChoice: qsTr("Open");
         property string emailChoice: qsTr("Email");
-        property string moveChoice: qsTr("Move");
         property string deleteChoice: qsTr("Delete");
 
-        property variant choices: [ openChoice, emailChoice, moveChoice, deleteChoice ]
-        property variant defaultListChoices: [ openChoice, emailChoice, moveChoice ]
+        property variant choices: [ openChoice, emailChoice, deleteChoice ]
+        property variant defaultListChoices: [ openChoice, emailChoice ]
 
 
         model:  {
@@ -260,10 +259,6 @@ ApplicationPage {
             else if (model[index] == emailChoice)
             {
                 shareDialog.opacity = 1;
-            }
-            else if (model[index] == moveChoice)
-            {
-
             }
             else if (model[index] == deleteChoice)
             {

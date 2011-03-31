@@ -77,7 +77,6 @@ ApplicationPage {
 
         EditPane {
             id: editor
-            focus: true
             property int topMargins: 20
             anchors.top: textRect.bottom;
             anchors.topMargin: topMargins

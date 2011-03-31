@@ -71,6 +71,7 @@ public:
         m_handler = handler;
         connect(m_handler, SIGNAL(noteAdded(QString)), this, SLOT(addNote(QString)));
         connect(m_handler, SIGNAL(noteRemoved(QString)), this, SLOT(removeNote(QString)));
+        connect(m_handler, SIGNAL(noteChanged()),this,SLOT(refresh()));
     }
     CDataHandler * dataHandler() { return m_handler; }
     void setNotebookName(const QString &name) { m_notebookName = name; init(); }
@@ -79,6 +80,7 @@ public slots:
     void addNote(const QString &name);
     void removeNote(const QString &name);
     void sort();
+    void refresh();
 
 protected:
     QStringList m_notesNames;

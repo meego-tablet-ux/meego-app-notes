@@ -73,6 +73,7 @@ signals:
     void notebookRemoved(const QString &name);
     void noteAdded(const QString &name);
     void noteRemoved(const QString &name);
+    void noteChanged();
 };
 
 #endif // DATAHANDLER_H

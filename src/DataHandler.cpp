@@ -415,6 +415,7 @@ void CDataHandler::deleteNoteBooks(const QStringList& _notebooks)
 void CDataHandler::modifyNote(const QString& _notebookID, const QString& _noteName, const QString& _text)
 {
     save(_notebookID, _noteName, _text);
+    emit noteChanged();
 }
 
 

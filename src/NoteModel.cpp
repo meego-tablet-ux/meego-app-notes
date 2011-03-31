@@ -240,6 +240,11 @@ void NoteModel::sort()
     endResetModel();
 }
 
+void NoteModel::refresh() {
+    beginResetModel();
+    endResetModel();
+}
+
 void NoteModel::quickSort(QStringList &list, int left, int right)
 {
     int i = left, j = right;

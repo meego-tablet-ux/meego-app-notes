@@ -370,8 +370,9 @@ ApplicationPage {
         property string emailChoice: qsTr("Email");
         property string moveChoice: qsTr("Move");
         property string deleteChoice: qsTr("Delete");
+        property string renameChoice: qsTr("Rename");
 
-        property variant choices: [ openChoice, emailChoice, moveChoice, deleteChoice ]
+        property variant choices: [ openChoice, emailChoice, moveChoice, deleteChoice, renameChoice ]
         model: choices
 
         onTriggered: {
@@ -394,21 +395,22 @@ ApplicationPage {
             {
                 if (selectedItems.length > 1)
                 {
-                    //deleteConfirmationDialog.contentLoader.sourceComponent = textComp2;
                     deleteReportWindow.text = qsTr("%1 notes have been deleted").arg(selectedItems.length);
                 }
                 else if (selectedItems.length == 1)
                 {
-                    //deleteConfirmationDialog.contentLoader.sourceComponent = textComp;
                     deleteReportWindow.text = qsTr("\"%1\" has been deleted").arg(selectedItems[0]);
                 }
                 else
                 {
-                    //deleteConfirmationDialog.contentLoader.sourceComponent = textComp;
                     deleteReportWindow.text = qsTr("\"%1\" has been deleted").arg(selectedNote);
                 }
 
                 deleteConfirmationDialog.opacity = 1;
+            }
+            else if(model[index] == renameChoice) {
+                renameWindow.oldName =  selectedNote;
+                renameWindow.opacity = 1;
             }
         }
     }
@@ -571,6 +573,35 @@ ApplicationPage {
             selectedItems = [];
             opacity = 0;
             updateView();
+        }
+    }
+
+    TwoButtonsModalDialog {
+        id: renameWindow
+        opacity: 0;
+        buttonText:qsTr("OK");
+        button2Text:  qsTr("Cancel");
+        dialogTitle: qsTr("Rename Note")
+        property string oldName
+        text: oldName
+        menuHeight: 150
+        menuWidth: 360
+        onButton1Clicked: {
+            var newName = renameWindow.text;
+            var noteNames = dataHandler.getNoteNames(model.notebookName);
+            for(var i=0;i<noteNames.length;i++) {
+                if(noteNames[i] == newName) {
+                    newName = qsTr("%1 (Renamed Note)").arg(newName);
+                }
+            }
+            var noteData = dataHandler.loadNoteData(model.notebookName,oldName);
+            dataHandler.deleteNote(model.notebookName,oldName);
+            dataHandler.createNote(model.notebookName,newName,noteData);
+            opacity = 0;
+            updateView();
+        }
+        onButton2Clicked: {
+            opacity = 0;
         }
     }
 

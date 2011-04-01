@@ -116,6 +116,7 @@ Item {
                     active: container.text.length > 0
 
                     onClicked: container.button1Clicked();
+                    anchors.left: parent.left
                 }
 
                 Button {
@@ -124,6 +125,7 @@ Item {
                     height: button.height
 
                     onClicked: container.button2Clicked();
+                    anchors.right: parent.right
                 }
             }
         }

@@ -49,6 +49,7 @@ public:
     Q_INVOKABLE void setCheckBox(bool _bShow);
     Q_INVOKABLE bool getCheckBox();
     Q_INVOKABLE QStringList removeFromString(const QStringList& _array, const QString& _value);
+    Q_INVOKABLE QStringList getNoteNames(QString _noteBook);
 
     bool isSorted();
     void save(const QString& _notebookID, const QString& _fileName, const QString& _data);

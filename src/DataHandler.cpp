@@ -1003,6 +1003,13 @@ void CDataHandler::getNotes(const QString& _noteBook, int role, QStringList& _no
 }
 
 
+QStringList CDataHandler::getNoteNames(QString _noteBook) {
+    QStringList returnMe;
+    getNotes(_noteBook,NoteModel::TitleRole,returnMe,false);
+    return returnMe;
+}
+
+
 /********************************************************************
  * getStringsFromFile function read names of the existing
  * items(notes/notebooks) from the file and add them to the list

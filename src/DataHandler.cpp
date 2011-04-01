@@ -429,8 +429,8 @@ void CDataHandler::moveNote(const QString& _notebookID, const QString& _noteName
     //check if the data folder exists
     if (checkAppData())
     {
-        QString strFilePath,strNotebookPath;
-
+        QString strFilePath,strNotebookPath,newNoteName;
+        newNoteName = _noteName;
         QString home(QDir::homePath());
         if (!home.endsWith("/"))
         {
@@ -484,13 +484,21 @@ void CDataHandler::moveNote(const QString& _notebookID, const QString& _noteName
                                 {
                                     QString strName, strLine;
                                     strName = getNameFromFile(db2, _noteName, strLine);
-
                                     if (strName != _noteName) //such note does not exist
                                     {
                                         nPos = getPositionFromFile(db2);
                                     }
                                     else //note already exists
                                     {
+                                        int counter =2;
+                                        newNoteName = tr("%1 (%2)").arg(newNoteName).arg(QString::number(counter));
+
+                                        while(getNameFromFile(db2, newNoteName, strLine) == newNoteName) {
+                                            counter++;
+                                            newNoteName = tr("%1 (%2)").arg(newNoteName).arg(QString::number(counter));
+                                        }
+
+                                        nPos = getPositionFromFile(db2);
                                     }
                                 }
 
@@ -498,9 +506,9 @@ void CDataHandler::moveNote(const QString& _notebookID, const QString& _noteName
                                 {
                                     QTextStream out(&db2);
                                     out << QString("name=%1,position=%2,path=%3,title=%4,\n").arg(
-                                               _noteName).arg(nPos+1).arg(strNotebookPath + _noteName).arg(_noteName);
+                                               newNoteName).arg(nPos+1).arg(strNotebookPath + newNoteName).arg(newNoteName);
 
-                                    if (QFile::copy(strFilePath, strNotebookPath+_noteName))
+                                    if (QFile::copy(strFilePath, strNotebookPath+newNoteName))
                                     {
                                         deleteNote(_notebookID, _noteName);
                                     }

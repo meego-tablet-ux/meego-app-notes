@@ -22,7 +22,7 @@
 #include <QDebug>
 #define SAME_TITLES 0
 
-static const char STR_DEFAULT_NOTEBOOK[] = "Everyday Notes (default)";
+static const QString STR_DEFAULT_NOTEBOOK = QObject::tr("Everyday Notes (default)");
 
 /********************************************************************
  * CDataHandler class implementation
@@ -76,8 +76,7 @@ void CDataHandler::Init()
         {
             dbs.setTextModeEnabled(true);
             QTextStream out(&dbs);
-            out <<QString("name=%1,position=0,path=%2,title=%3,\n").arg(tr(STR_DEFAULT_NOTEBOOK)).arg(dbPath).arg(
-                       tr(STR_DEFAULT_NOTEBOOK));
+            out <<QString("name=%1,position=0,path=%2,title=%3,\n").arg(STR_DEFAULT_NOTEBOOK).arg(dbPath).arg(STR_DEFAULT_NOTEBOOK);
             dbs.close();
             //create empty data file for the database
             QFile f(dbPath+"/data");
@@ -345,7 +344,7 @@ void CDataHandler::deleteNoteBook(const QString& _notebookID)
 {
     bool bFound = false;
     // cannot remove default note book
-    if (_notebookID == tr(STR_DEFAULT_NOTEBOOK))
+    if (_notebookID == STR_DEFAULT_NOTEBOOK)
     {
         return;
     }
@@ -1261,7 +1260,7 @@ int CDataHandler::getChildNotes(const QString& _notebookID)
         home.append("/");
     }
 
-    if(tr(STR_DEFAULT_NOTEBOOK) == _notebookID) {
+    if(STR_DEFAULT_NOTEBOOK == _notebookID) {
         QDir dir(home + ".MeeGo/Notes/" + tr("Everyday Notes"));
         QStringList list = dir.entryList(QDir::Files);
         list.removeAll("data");
@@ -1296,7 +1295,7 @@ QString CDataHandler::getDate(const QString& _notebookID)
             home.append("/");
         }
 
-        QString noteBook = (_notebookID == tr(STR_DEFAULT_NOTEBOOK)) ?
+        QString noteBook = (_notebookID == STR_DEFAULT_NOTEBOOK) ?
                     tr("Everyday Notes") : _notebookID;
 
         QString strPath = home + ".MeeGo/Notes/" + noteBook + "/data";

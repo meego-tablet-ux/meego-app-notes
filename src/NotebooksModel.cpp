@@ -154,7 +154,6 @@ void NotebooksModel::clear()
 
 void NotebooksModel::init()
 {
-    qDebug()<<"initFunction";
     connect(m_handler, SIGNAL(notebookAdded(QString)), this, SLOT(addNotebook(QString)));
     connect(m_handler, SIGNAL(notebookRemoved(QString)), this, SLOT(removeNotebook(QString)));
     connect(m_handler, SIGNAL(noteAdded(QString)), this, SLOT(handleNotesChanging()));
@@ -165,8 +164,6 @@ void NotebooksModel::init()
 
     m_handler->getNoteBooks(NotebooksModel::NameRole, noteBooksNames, bSorted);
     m_handler->getNoteBooks(NotebooksModel::TitleRole, noteBooksTitles, bSorted);
-
-    qDebug()<<"NotebooksCount: "<<noteBooksNames.count();
 
     for (int i=0; i< noteBooksNames.count(); i++)
     {

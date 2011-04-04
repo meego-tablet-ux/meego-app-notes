@@ -179,10 +179,18 @@ ApplicationPage {
                         listView.draggingItem = parent.title;
                         var diff = parent.y - startY;
                         diff = parseInt( diff /  parent.height);
-                        listView.newIndex = parent.notePos + diff;
+                        listView.newIndex = parseInt(parent.notePos) + diff;
 
-                        //console.debug("Going to move: " + listView.draggingItem + " from " + parent.notePos + " to " +  listView.newIndex);
-                        listView.changePosition();
+                        //console.debug("Going to move: " + listView.count + " from " + parent.notePos + " to " +  listView.newIndex);
+                        if ((parent.notePos != listView.newIndex) && (parseInt(listView.newIndex) > 0)
+                                && (parseInt(listView.newIndex) <= listView.count)) {
+                            listView.changePosition();
+                        } else {
+                            //just stupid workaround
+                            var prev = listView.model.notebookName;
+                            listView.model.notebookName = "something else"; //this is a hack to force the model to update (no need for translation)
+                            listView.model.notebookName = prev;
+                        }
                     }
                 }
             }

@@ -308,7 +308,6 @@ void CDataHandler::deleteNote(const QString& _notebookID, const QString& _noteNa
 
             if (bFound) //now we should replace old file with new one
             {
-                qDebug()<<"Trying to remove old file";
                 if (QFile::remove(strPath + "data")) //remove old file
                 {
                     QFile::rename(strPath + "data.bak", strPath + "data");
@@ -569,12 +568,12 @@ void CDataHandler::changeNotePosition(const QString& _notebookID, const QString&
                     if (db.open(QIODevice::ReadOnly | QIODevice::Append))
                     {
                         QFile db2(strPath + "data.bak");
-                        QTextStream out(&db2);
+                        QTextStream outDb(&db);
+                        QTextStream outDb2(&db2);
                         if (db2.open(QIODevice::WriteOnly | QIODevice::Append))
                         {
                             int nPos = -1;
                             QString strName, strNoteLine;
-                            char buf[1024];
 
                             strName = getNameFromFile(db, _noteName, strNoteLine);
 
@@ -594,89 +593,84 @@ void CDataHandler::changeNotePosition(const QString& _notebookID, const QString&
                                 }
 
                                 db.reset();
-                                while (!db.atEnd())
+                                while (!outDb.atEnd())
                                 {
-                                    qint64 lineLength = db.readLine(buf, sizeof(buf));
-                                    if (lineLength != -1) // the line is available in buf
+                                    QString strLine = outDb.readLine();
+                                    if (nPos < nNewPos)
                                     {
-                                        QString strLine(buf);
-                                        if (nPos < nNewPos)
+                                        int nPos2 = getIntAttribute(strLine, "position=");
+                                        int nStrPos2 = strLine.indexOf("position=");
+                                        int nStr2Pos2 = strLine.indexOf(",", nStrPos2+1);
+
+                                        if ((nPos2 < nPos) || (nPos2 > nNewPos))
                                         {
-                                            int nPos2 = getIntAttribute(strLine, "position=");
-                                            int nStrPos2 = strLine.indexOf("position=");
-                                            int nStr2Pos2 = strLine.indexOf(",", nStrPos2+1);
-
-                                            if ((nPos2 < nPos) || (nPos2 > nNewPos))
-                                            {
-                                                out << strLine;
-                                            }
-                                            else if (nPos2 == nPos)
-                                            {
-                                                strSaved= strLine.replace(nStrPos2 + strlen("position="),
-                                                                          nStr2Pos2 - (nStrPos2 + strlen("position=")),
-                                                                          QString::number(nNewPos));
-                                            }
-                                            else
-                                            {
-                                                strLine.replace(nStrPos2 + strlen("position="),
-                                                                nStr2Pos2 - (nStrPos2 + strlen("position=")),
-                                                                QString::number(nPos2-1));
-                                                out << strLine;
-
-                                                if (nPos2 == nNewPos)
-                                                {
-                                                    out << strSaved;
-                                                }
-                                            }
+                                            outDb2 << strLine << "\n";
+                                        }
+                                        else if (nPos2 == nPos)
+                                        {
+                                            strSaved= strLine.replace(nStrPos2 + strlen("position="),
+                                                                      nStr2Pos2 - (nStrPos2 + strlen("position=")),
+                                                                      QString::number(nNewPos));
                                         }
                                         else
                                         {
-                                            int nPos2 = getIntAttribute(strLine, "position=");
+                                            strLine.replace(nStrPos2 + strlen("position="),
+                                                            nStr2Pos2 - (nStrPos2 + strlen("position=")),
+                                                            QString::number(nPos2-1));
+                                            outDb2 << strLine << "\n";
 
-                                            int nStrPos2 = strLine.indexOf("position=");
-                                            int nStr2Pos2 = strLine.indexOf(",", nStrPos2+1);
-                                            if (nPos2 < nNewPos)
+                                            if (nPos2 == nNewPos)
                                             {
-                                                out << strLine;
+                                                outDb2 << strSaved << "\n";
                                             }
-                                            else if (nPos2 > nPos)
-                                            {
-                                                if (!lst.isEmpty())
-                                                {
-                                                    for (int i=0; i<lst.count(); i++)
-                                                    {
-                                                        out << lst.at(i);
-                                                    }
+                                        }
+                                    }
+                                    else
+                                    {
+                                        int nPos2 = getIntAttribute(strLine, "position=");
 
-                                                    lst.clear();
+                                        int nStrPos2 = strLine.indexOf("position=");
+                                        int nStr2Pos2 = strLine.indexOf(",", nStrPos2+1);
+                                        if (nPos2 < nNewPos)
+                                        {
+                                            outDb2 << strLine << "\n";
+                                        }
+                                        else if (nPos2 > nPos)
+                                        {
+                                            if (!lst.isEmpty())
+                                            {
+                                                for (int i=0; i<lst.count(); i++)
+                                                {
+                                                    outDb2 << lst.at(i) << "\n";
                                                 }
 
-                                                out << strLine;
+                                                lst.clear();
                                             }
-                                            else if (nPos2 == nPos)
-                                            {
-                                                strLine.replace(nStrPos2 + strlen("position="),
-                                                                nStr2Pos2 - (nStrPos2 + strlen("position=")),
-                                                                QString::number(nNewPos));
-                                                out << strLine;
-                                            }
-                                            else
-                                            {
-                                                strLine.replace(nStrPos2 + strlen("position="),
-                                                                nStr2Pos2 - (nStrPos2 + strlen("position=")),
-                                                                QString::number(nPos2+1));
-                                                lst.append(strLine);
-                                            }
+
+                                            outDb2 << strLine << "\n";
+                                        }
+                                        else if (nPos2 == nPos)
+                                        {
+                                            strLine.replace(nStrPos2 + strlen("position="),
+                                                            nStr2Pos2 - (nStrPos2 + strlen("position=")),
+                                                            QString::number(nNewPos));
+                                            outDb2 << strLine << "\n";
+                                        }
+                                        else
+                                        {
+                                            strLine.replace(nStrPos2 + strlen("position="),
+                                                            nStr2Pos2 - (nStrPos2 + strlen("position=")),
+                                                            QString::number(nPos2+1));
+                                            lst.append(strLine);
                                         }
                                     }
                                 }
 
                                 if (!lst.isEmpty())
                                 {
-                                    QTextStream out(&db2);
                                     for (int i=0; i<lst.count(); i++)
                                     {
-                                        out << lst.at(i);
+                                        outDb2 << lst.at(i) << "\n";
                                     }
                                     lst.clear();
                                 }

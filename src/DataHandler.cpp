@@ -22,7 +22,7 @@
 #include <QDebug>
 #define SAME_TITLES 0
 
-static const char STR_DEFAULT_NOTEBOOK[] = "Everyday Notes (default)";
+static const QString STR_DEFAULT_NOTEBOOK = QObject::tr("Everyday Notes (default)");
 
 /********************************************************************
  * CDataHandler class implementation
@@ -76,8 +76,7 @@ void CDataHandler::Init()
         {
             dbs.setTextModeEnabled(true);
             QTextStream out(&dbs);
-            out <<QString("name=%1,position=0,path=%2,title=%3,\n").arg(tr(STR_DEFAULT_NOTEBOOK)).arg(dbPath).arg(
-                       tr(STR_DEFAULT_NOTEBOOK));
+            out <<QString("name=%1,position=0,path=%2,title=%3,\n").arg(STR_DEFAULT_NOTEBOOK).arg(dbPath).arg(STR_DEFAULT_NOTEBOOK);
             dbs.close();
             //create empty data file for the database
             QFile f(dbPath+"/data");
@@ -344,7 +343,7 @@ void CDataHandler::deleteNoteBook(const QString& _notebookID)
 {
     bool bFound = false;
     // cannot remove default note book
-    if (_notebookID == tr(STR_DEFAULT_NOTEBOOK))
+    if (_notebookID == STR_DEFAULT_NOTEBOOK)
     {
         return;
     }
@@ -428,8 +427,8 @@ void CDataHandler::moveNote(const QString& _notebookID, const QString& _noteName
     //check if the data folder exists
     if (checkAppData())
     {
-        QString strFilePath,strNotebookPath;
-
+        QString strFilePath,strNotebookPath,newNoteName;
+        newNoteName = _noteName;
         QString home(QDir::homePath());
         if (!home.endsWith("/"))
         {
@@ -483,13 +482,21 @@ void CDataHandler::moveNote(const QString& _notebookID, const QString& _noteName
                                 {
                                     QString strName, strLine;
                                     strName = getNameFromFile(db2, _noteName, strLine);
-
                                     if (strName != _noteName) //such note does not exist
                                     {
                                         nPos = getPositionFromFile(db2);
                                     }
                                     else //note already exists
                                     {
+                                        int counter =2;
+                                        newNoteName = tr("%1 (%2)").arg(newNoteName).arg(QString::number(counter));
+
+                                        while(getNameFromFile(db2, newNoteName, strLine) == newNoteName) {
+                                            counter++;
+                                            newNoteName = tr("%1 (%2)").arg(newNoteName).arg(QString::number(counter));
+                                        }
+
+                                        nPos = getPositionFromFile(db2);
                                     }
                                 }
 
@@ -497,9 +504,9 @@ void CDataHandler::moveNote(const QString& _notebookID, const QString& _noteName
                                 {
                                     QTextStream out(&db2);
                                     out << QString("name=%1,position=%2,path=%3,title=%4,\n").arg(
-                                               _noteName).arg(nPos+1).arg(strNotebookPath + _noteName).arg(_noteName);
+                                               newNoteName).arg(nPos+1).arg(strNotebookPath + newNoteName).arg(newNoteName);
 
-                                    if (QFile::copy(strFilePath, strNotebookPath+_noteName))
+                                    if (QFile::copy(strFilePath, strNotebookPath+newNoteName))
                                     {
                                         deleteNote(_notebookID, _noteName);
                                     }
@@ -997,6 +1004,13 @@ void CDataHandler::getNotes(const QString& _noteBook, int role, QStringList& _no
 }
 
 
+QStringList CDataHandler::getNoteNames(QString _noteBook) {
+    QStringList returnMe;
+    getNotes(_noteBook,NoteModel::TitleRole,returnMe,false);
+    return returnMe;
+}
+
+
 /********************************************************************
  * getStringsFromFile function read names of the existing
  * items(notes/notebooks) from the file and add them to the list
@@ -1240,7 +1254,7 @@ int CDataHandler::getChildNotes(const QString& _notebookID)
         home.append("/");
     }
 
-    if(tr(STR_DEFAULT_NOTEBOOK) == _notebookID) {
+    if(STR_DEFAULT_NOTEBOOK == _notebookID) {
         QDir dir(home + ".MeeGo/Notes/" + tr("Everyday Notes"));
         QStringList list = dir.entryList(QDir::Files);
         list.removeAll("data");
@@ -1275,7 +1289,7 @@ QString CDataHandler::getDate(const QString& _notebookID)
             home.append("/");
         }
 
-        QString noteBook = (_notebookID == tr(STR_DEFAULT_NOTEBOOK)) ?
+        QString noteBook = (_notebookID == STR_DEFAULT_NOTEBOOK) ?
                     tr("Everyday Notes") : _notebookID;
 
         QString strPath = home + ".MeeGo/Notes/" + noteBook + "/data";

@@ -12,6 +12,7 @@
 #include <QtCore/QObject>
 #include <QtCore/QFile>
 #include <QtCore/QStringList>
+#include <QtCore/QMutex>
 
 /********************************************************************
  * CDataHandler class declaration
@@ -68,6 +69,9 @@ protected:
     QString generateUniqueName(const QString& _path, const QString& _originalName);
     bool createTempFile(QFile& _source, QFile& _dest, const QString& _noteBookID);
     bool removeDir(const QString &path);
+
+private:
+    QMutex m_mutex;
 
 signals:
     void notebookAdded(const QString &name);

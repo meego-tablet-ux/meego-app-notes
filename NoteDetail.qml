@@ -30,6 +30,12 @@ ApplicationPage {
         model: [qsTr("Save"), qsTr("Delete"),/* qsTr("Share")*/ ]
         onTriggered: {
             if(index == 0) {
+                //reset timer
+                manualSaveTimer.running = false;
+
+                //start timer
+                saveTimer.running = false;
+                manualSaveTimer.running = true;
                 dataHandler.modifyNote(notebookID, nameLabel.text, editor.text);
             } else if(index == 1) {
                 deleteConfirmationDialog.opacity = 1;
@@ -93,7 +99,25 @@ ApplicationPage {
             defaultText: qsTr("Start typing a new note.")
         }
 
+        Timer {
+            id: saveTimer
+            interval: 1000
+            running: true
+            repeat: true
 
+            onTriggered: {
+                dataHandler.modifyNote(notebookID, nameLabel.text, editor.text);
+            }
+        }
+
+        Timer {
+            id: manualSaveTimer
+            interval: 5000
+
+            onTriggered:  {
+                saveTimer.running = true;
+            }
+        }
 
         ModalDialog {
             id: deleteConfirmationDialog

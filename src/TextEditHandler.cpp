@@ -223,5 +223,3 @@ QString CTextEditHandler::setFontSize(const QString& _text, int _nPos, int _nPos
 
     return m_pEdit->toPlainText();
 }
-
-

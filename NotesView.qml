@@ -18,6 +18,7 @@ ApplicationPage {
     property alias caption: nameLabel.text
     property string selectedNote
     property string selectedTitle
+    property string selectedIndex
     property alias model: listView.model
     property int itemX;
     property int itemY;
@@ -142,6 +143,7 @@ ApplicationPage {
                     onClicked: {
                         selectedNote = name;
                         selectedTitle = title;
+                        selectedIndex = index;
                         listView.drag = false;
                         noteClicked(name);
                     }
@@ -149,6 +151,7 @@ ApplicationPage {
                     onPressAndHold:{
                         selectedNote = name;
                         selectedTitle = title;
+                        selectedIndex = index;
                         itemX = note.x + mouseX;
                         itemY = note.y + nameLabel.height + 50/*header*/ + mouseY;
                         menu.menuX = note.x + mouseX;
@@ -244,6 +247,7 @@ ApplicationPage {
                     onClicked: {
                         selectedNote = name;
                         selectedTitle = title;
+                        selectedIndex = index;
                         listView.drag = false;
                         noteClicked(name);
                     }
@@ -251,6 +255,7 @@ ApplicationPage {
                     onPressAndHold:{
                         selectedNote = name;
                         selectedTitle = title;
+                        selectedIndex = index;
                         itemX = note.x + mouseX;
                         itemY = note.y + nameLabel.height + 50/*header*/ + mouseY;
                         menu.menuX = note.x + mouseX;
@@ -605,6 +610,13 @@ ApplicationPage {
             var noteData = dataHandler.loadNoteData(model.notebookName,oldName);
             dataHandler.deleteNote(model.notebookName,oldName);
             dataHandler.createNote(model.notebookName,newName,noteData);
+            dataHandler.changeNotePosition(model.notebookName, newName, selectedIndex);
+
+            //stupid workaround for updating the model
+            var prev = model.notebookName;
+            model.notebookName = "something else"; //this is a hack to force the model to update (no need for translation)
+            model.notebookName = prev;
+
             opacity = 0;
             updateView();
         }

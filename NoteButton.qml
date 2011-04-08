@@ -92,23 +92,17 @@ Rectangle {
             anchors.rightMargin: 10;
             height: parent.height
 
-            Row {
-                id: topRow;
+
+            Text {
+                id: textElement
+//                clip: true
                 anchors.top: parent.top
                 anchors.left: parent.left;
                 anchors.right: parent.right;
                 height: parent.height /2
-
-                Text {
-                    id: textElement
-                    anchors.top: parent.top
-                    anchors.topMargin: 3
-                    anchors.left: parent.left;
-                    anchors.leftMargin: 3;
-                    height: parent.height
-                    font.pixelSize: theme_fontPixelSizeNormal
-                    text: qsTr("Text Element");
-                }
+                font.pixelSize: theme_fontPixelSizeNormal
+                text: qsTr("Text Element");
+                wrapMode: Text.Wrap
             }
 
             Text {

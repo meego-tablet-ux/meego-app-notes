@@ -499,6 +499,10 @@ ApplicationPage {
             button2Text: qsTr("Cancel");
             defaultText: qsTr("Note name");
             onButton1Clicked: {
+                //workaround (max length of the file name - 256)
+                if (text.length > 256)
+                    text = text.slice(0, 255);
+
                 dataHandler.createNote(noteListPage.caption, text, "");
                 noteClicked(text);
                 addDialogLoader.sourceComponent = undefined;
@@ -510,7 +514,7 @@ ApplicationPage {
         }
     }
 
-    ConfirmDeleteDialog {
+    ModalDialog {
         id: deleteConfirmationDialog
 
         opacity: 0
@@ -519,6 +523,8 @@ ApplicationPage {
         rightButtonText: qsTr("Cancel");
         dialogTitle: qsTr("Delete?");
         property string componentText: (selectedItems.length > 0) ? selectedItems[0] : selectedNote;
+        bgSourceUpLeft: "image://theme/btn_red_up"
+        bgSourceDnLeft: "image://theme/btn_red_dn"
 
         Component {
             id: textComp
@@ -527,6 +533,7 @@ ApplicationPage {
                 text: qsTr("Are you sure you want to\ndelete \"%1\"?").arg(componentText);
                 horizontalAlignment: Text.AlignHCenter
                 width: parent.width
+                wrapMode: Text.Wrap
             }
         }
 
@@ -566,8 +573,6 @@ ApplicationPage {
 
     DeleteMoveNotificationDialog {
         id: deleteReportWindow
-        menuHeight: 125
-        menuWidth: 250
         opacity: 0;
         buttonText: qsTr("OK");
         dialogTitle: (selectedItems.length > 1) ? qsTr("Notes deleted") : qsTr("Note deleted")

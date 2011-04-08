@@ -322,6 +322,10 @@ ApplicationPage {
             button2Text: qsTr("Cancel");
             defaultText: qsTr("Notebook name");
             onButton1Clicked: {
+                //workaround (max length of the folder name - 256)
+                if (text.length > 256)
+                    text = text.slice(0, 255);
+
                 dataHandler.createNoteBook(text);
                 updateView();
                 //            opacity = 0;
@@ -354,6 +358,7 @@ ApplicationPage {
                 text: qsTr("Are you sure you want to\ndelete \"%1\"?").arg(componentText);
                 horizontalAlignment: Text.AlignHCenter
                 width: parent.width
+                wrapMode: Text.Wrap
             }
         }
 
@@ -397,8 +402,6 @@ ApplicationPage {
 
     DeleteMoveNotificationDialog {
         id: deleteReportWindow
-        menuHeight: 125
-        menuWidth: 250
         opacity: 0;
         buttonText: qsTr("OK");
         dialogTitle: (selectedItems.length > 1) ? qsTr("Notebooks deleted") : qsTr("Notebook deleted")

@@ -59,6 +59,9 @@ Item {
             x: 20
             y: 20
 
+            width: 438
+            height: textReport.paintedHeight + title.height + button.height + 45
+
             Text {
                 id: title
                 text: qsTr("Title text");
@@ -89,6 +92,7 @@ Item {
                     anchors.fill: parent;
                     text: qsTr("Notebook name");
                     font.pixelSize: 14
+                    wrapMode: Text.Wrap
                 }
             }
 

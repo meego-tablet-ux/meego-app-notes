@@ -2,7 +2,7 @@
  * Copyright 2011 Intel Corporation.
  *
  * This program is licensed under the terms and conditions of the
- * Apache License, version 2.0.  The full text of the Apache License is at 	
+ * Apache License, version 2.0.  The full text of the Apache License is at
  * http://www.apache.org/licenses/LICENSE-2.0
  */
 
@@ -1447,5 +1447,17 @@ bool CDataHandler::removeDir(const QString &path)
     }
 
     return result;
+}
+
+bool CDataHandler::noteBookExists(const QString &noteBookName)
+{
+    const QStringList noteBooks = getNoteBooks();
+    return noteBooks.contains(noteBookName);
+}
+
+bool CDataHandler::noteExists(const QString &noteBookName, const QString &noteName)
+{
+    const QStringList notes = getNoteNames(noteBookName);
+    return notes.contains(noteName);
 }
 

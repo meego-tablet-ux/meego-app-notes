@@ -8,14 +8,15 @@
 
 import Qt 4.7
 import MeeGo.Labs.Components 0.1
+import MeeGo.Components 0.1 as UX
 
 Item {
     id: container
     width: 260
     height:125
 
-    property alias buttonText: button.title
-    property alias button2Text: button2.title
+    property alias buttonText: button.text
+    property alias button2Text: button2.text
     property alias dialogTitle: title.text
     property alias menuHeight: contents.height
     property alias defaultText: textInput.defaultText
@@ -66,6 +67,14 @@ Item {
 
             //autoresize
             width: {
+                var buttonsWidth = button.width + button2.width + buttonBar.spacing;
+                if (title.paintedWidth < buttonsWidth) {
+                    if (buttonsWidth < minWidth)
+                        return minWidth;
+                    else
+                        return buttonsWidth;
+                }
+
                 if (title.paintedWidth < minWidth)
                     return minWidth;
                 else
@@ -97,7 +106,7 @@ Item {
                 //border.width: 1
                 //focus: true
 
-                TextEntry {
+                UX.TextField {
                     id: textInput
                     anchors.fill: parent;
                 }
@@ -113,12 +122,11 @@ Item {
                     bottom: parent.bottom;
                     right: parent.right;
                     left: parent.left;
+                    leftMargin: parent.width - (button.width + spacing + button2.width)
                 }
 
-                Button {
+                UX.Button {
                     id: button
-                    width: 120
-                    height: 40
                     bgSourceUp: "image://theme/btn_blue_up"
                     bgSourceDn: "image://theme/btn_blue_dn"
                     active: container.text.length > 0
@@ -127,11 +135,8 @@ Item {
                     anchors.left: parent.left
                 }
 
-                Button {
+                UX.Button {
                     id: button2
-                    width: button.width
-                    height: button.height
-
                     onClicked: container.button2Clicked();
                     anchors.right: parent.right
                 }

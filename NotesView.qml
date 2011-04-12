@@ -441,11 +441,11 @@ ApplicationPage {
 
             if (selectedItems.length > 1)
             {
-                moveReportWindow.text = qsTr("%1 notes have successfully\nbeen moved to \"%2\"").arg(selectedItems.length).arg(newNotebook);
+                moveReportWindow.text = qsTr("%1 notes have successfully been moved to \"%2\"").arg(selectedItems.length).arg(newNotebook);
             }
             else
             {
-                moveReportWindow.text = qsTr("\"%1\" has successfully\nbeen moved to \"%2\"").arg(selectedNote).arg(newNotebook);
+                moveReportWindow.text = qsTr("\"%1\" has successfully been moved to \"%2\"").arg(selectedNote).arg(newNotebook);
             }
 
             if (selectedItems.length > 0)
@@ -574,6 +574,7 @@ ApplicationPage {
     DeleteMoveNotificationDialog {
         id: deleteReportWindow
         opacity: 0;
+        minWidth: 270
         buttonText: qsTr("OK");
         dialogTitle: (selectedItems.length > 1) ? qsTr("Notes deleted") : qsTr("Note deleted")
         text:  {
@@ -632,13 +633,11 @@ ApplicationPage {
 
     DeleteMoveNotificationDialog {
         id: moveReportWindow
-        menuHeight: 145
-        menuWidth: 270
+        minWidth: 270
         opacity: 0;
 
         buttonText: qsTr("OK");
         dialogTitle: qsTr("Note moved");
-        text:qsTr("\"%1\" has successfully\nbeen moved to \"%2\"").arg(selectedNote).arg(newNotebook);
 
         onDialogClicked:
         {

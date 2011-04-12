@@ -15,8 +15,9 @@ Item {
     property alias buttonText: button.title
     property alias dialogTitle: title.text
     property alias menuHeight: contents.height
-    property alias menuWidth: contents.width
     property alias text: textReport.text
+
+    property int minWidth: title.paintedWidth
 
     anchors.fill: parent
     signal dialogClicked
@@ -59,7 +60,13 @@ Item {
             x: 20
             y: 20
 
-            width: 438
+            width: {
+                if (title.paintedWidth < minWidth)
+                    return minWidth;
+                else
+                    return title.paintedWidth;
+            }
+
             height: textReport.paintedHeight + title.height + button.height + 45
 
             Text {
@@ -74,26 +81,20 @@ Item {
                 }
             }
 
-
-            Item {
-                id: rectText;
-                anchors { right: parent.right;
-                    left: parent.left;
+            Text {
+                id: textReport
+                anchors {
+                    left: parent.left
                     leftMargin:15
-                    top: title.bottom;
+                    right: parent.right
+                    top: title.bottom
                     topMargin: 25;
-                    bottom: button.top;
+                    bottom: button.top
                     bottomMargin: 15;
-                    horizontalCenter: parent.horizontalCenter;
                 }
 
-                Text {
-                    id: textReport
-                    anchors.fill: parent;
-                    text: qsTr("Notebook name");
-                    font.pixelSize: 14
-                    wrapMode: Text.Wrap
-                }
+                font.pixelSize: 14
+                wrapMode: Text.Wrap
             }
 
             Button {

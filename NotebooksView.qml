@@ -413,15 +413,16 @@ ApplicationPage {
     DeleteMoveNotificationDialog {
         id: deleteReportWindow
         opacity: 0;
+        minWidth: 270
         buttonText: qsTr("OK");
         dialogTitle: (selectedItems.length > 1) ? qsTr("Notebooks deleted") : qsTr("Notebook deleted")
         text:  {
             if(selectedItems.length > 1) {
-                return qsTr("%1 notebooks have been deleted").arg(selectedItems.length);
+                return qsTr("\"%1\" notebooks have been deleted").arg(selectedItems.length);
             } else if(selectedItems.length == 1) {
-                return qsTr("%1 has been deleted").arg(selectedItems[0]);
+                return qsTr("\"%1\" has been deleted").arg(selectedItems[0]);
             } else  {
-                return qsTr("%1 has been deleted").arg(selectedNote);
+                return qsTr("\"%1\" has been deleted").arg(selectedNotebook);
             }
         }
 

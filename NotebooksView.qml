@@ -316,7 +316,7 @@ ApplicationPage {
         TwoButtonsModalDialog {
             id: addDialog
             menuHeight: 125
-            menuWidth: 260
+            minWidth: 260
             dialogTitle: qsTr("Create a new Notebook");
             buttonText: qsTr("Create");
             button2Text: qsTr("Cancel");

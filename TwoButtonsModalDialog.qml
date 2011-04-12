@@ -18,9 +18,10 @@ Item {
     property alias button2Text: button2.title
     property alias dialogTitle: title.text
     property alias menuHeight: contents.height
-    property alias menuWidth: contents.width
     property alias defaultText: textInput.defaultText
     property alias text: textInput.text
+
+    property int minWidth: width
 
     anchors.fill: parent
     signal button1Clicked
@@ -63,9 +64,16 @@ Item {
             x: 20
             y: 20
 
+            //autoresize
+            width: {
+                if (title.paintedWidth < minWidth)
+                    return minWidth;
+                else
+                    return title.paintedWidth;
+            }
+
             Text {
                 id: title
-                text: qsTr("Title text");
                 font.weight: Font.Bold
                 font.pixelSize: 14
 

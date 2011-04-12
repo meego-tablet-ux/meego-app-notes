@@ -493,7 +493,7 @@ ApplicationPage {
         TwoButtonsModalDialog {
             id: addDialog
             menuHeight: 125
-            menuWidth: 260
+            minWidth: 260
             dialogTitle: qsTr("Create a new Note");
             buttonText: qsTr("Create");
             button2Text: qsTr("Cancel");
@@ -603,7 +603,7 @@ ApplicationPage {
         property string oldName
         text: oldName
         menuHeight: 150
-        menuWidth: 360
+        minWidth: 260
         onButton1Clicked: {
             var newName = renameWindow.text;
             var noteNames = dataHandler.getNoteNames(model.notebookName);

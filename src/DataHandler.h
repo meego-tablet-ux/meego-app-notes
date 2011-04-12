@@ -2,7 +2,7 @@
  * Copyright 2011 Intel Corporation.
  *
  * This program is licensed under the terms and conditions of the
- * Apache License, version 2.0.  The full text of the Apache License is at 	
+ * Apache License, version 2.0.  The full text of the Apache License is at
  * http://www.apache.org/licenses/LICENSE-2.0
  */
 
@@ -58,6 +58,10 @@ public:
     void getNotePosition(const QString& _notebookID, const QString& _fileName, QString& _position);
     void getNoteBooks(int role, QStringList& _noteBooks, bool _sort);
     void getNotes(const QString& _noteBook, int role, QStringList& _notes, bool _sort);
+
+public slots:
+    bool noteBookExists(const QString &noteBookName);
+    bool noteExists(const QString &noteBookName, const QString &noteName);
 
 protected:
     bool checkAppData();

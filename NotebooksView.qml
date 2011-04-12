@@ -2,7 +2,7 @@
  * Copyright 2011 Intel Corporation.
  *
  * This program is licensed under the terms and conditions of the
- * Apache License, version 2.0.  The full text of the Apache License is at 	
+ * Apache License, version 2.0.  The full text of the Apache License is at
  * http://www.apache.org/licenses/LICENSE-2.0
  */
 
@@ -281,7 +281,7 @@ ApplicationPage {
                 {
                     deleteConfirmationDialog.opacity = 1;
                 }
-            }                
+            }
         }
     }
 
@@ -326,10 +326,20 @@ ApplicationPage {
                 if (text.length > 256)
                     text = text.slice(0, 255);
 
-                dataHandler.createNoteBook(text);
                 updateView();
                 //            opacity = 0;
                 addDialogLoader.sourceComponent = undefined;
+
+                if (dataHandler.noteBookExists(text)) {
+                    informationDialog.info = qsTr("A NoteBook <b>'" + text + "'</b> already exists.");
+                    informationDialog.visible = true;
+                    return;
+                }
+
+                dataHandler.createNoteBook(text);
+//                updateView();
+//                //            opacity = 0;
+//                addDialogLoader.sourceComponent = undefined;
             }
 
             onButton2Clicked: {
@@ -421,6 +431,13 @@ ApplicationPage {
             opacity = 0;
             updateView();
         }
+    }
+
+    InformationDialog {
+        id: informationDialog
+        visible: false
+
+        onOkClicked: informationDialog.visible = false;
     }
 }
 

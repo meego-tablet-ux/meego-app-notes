@@ -26,6 +26,7 @@ ApplicationPage {
     menuContent: Column {
         ActionMenu {
             id: firstActionMenu
+            maxWidth: scene.width
             model: {
                 if((listView.count == 1) || (showCheckBox) ) {
                     return [qsTr("New Notebook")];

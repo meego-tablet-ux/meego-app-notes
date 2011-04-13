@@ -44,28 +44,6 @@ ApplicationPage {
                 notebookListPage.closeMenu();
             }//ontriggered
         }//action menu
-        Text {
-            id: viewByText
-            text: qsTr("View by:")
-            x: firstActionMenu.textMargin
-            font.pixelSize: theme_contextMenuFontPixelSize
-        }
-        ActionMenu {
-            id: secondActionMenu
-            model: [qsTr("All"), qsTr("Alphabetical order")]
-            onTriggered: {
-                if(index == 0) {
-                    dataHandler.setSort(false);
-                    updateView();
-                } else if(index == 1) {
-                    dataHandler.setSort(true);
-                    notebooksModel.sort();
-                    updateView();
-                }
-                notebookListPage.closeMenu();
-            }//ontriggered
-        }
-
     }
 
     Component {
@@ -337,9 +315,9 @@ ApplicationPage {
                 }
 
                 dataHandler.createNoteBook(text);
-//                updateView();
-//                //            opacity = 0;
-//                addDialogLoader.sourceComponent = undefined;
+                //                updateView();
+                //                //            opacity = 0;
+                //                addDialogLoader.sourceComponent = undefined;
             }
 
             onButton2Clicked: {

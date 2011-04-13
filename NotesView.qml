@@ -32,51 +32,25 @@ ApplicationPage {
 
     menuContent: Column {
         ActionMenu {
-                id: actionsAddNote
-                model:{
-                    if((listView.count == 1) || (showCheckBox) ) {
-                        return [qsTr("New Note")];
-                    } else {
-                        return [qsTr("New Note"), qsTr("Select Multiple")];
-                    }
+            id: actionsAddNote
+            model:{
+                if((listView.count == 1) || (showCheckBox) ) {
+                    return [qsTr("New Note")];
+                } else {
+                    return [qsTr("New Note"), qsTr("Select Multiple")];
                 }
-                onTriggered: {
-                    if(index == 0) {
-                        addDialogLoader.sourceComponent = addDialogComponent;
-                        addDialogLoader.item.parent = noteListPage;
-                    } else if(index ==1) {
-                        showCheckBox = true;
-                        multiSelectRow.opacity = 1;
-                    }
-                    noteListPage.closeMenu();
-                }//ontriggered
-            }//action menu
-
-            Text {
-                id: viewByText
-                x: actionsAddNote.textMargin
-                font.pixelSize: theme_contextMenuFontPixelSize
-                text: qsTr("View by:")
             }
-            ActionMenu {
-                id: actions
-                property string allChoice: qsTr("All");
-                property string atozChoice: qsTr("Alphabetical order");
-
-                model: [allChoice, atozChoice]
-                onTriggered: {
-                    if(index == 0) {
-                        console.log(allChoice); //XXX
-                        dataHandler.setSort(false);
-                        updateView();
-                    } else if(index == 1) {
-                        console.log(atozChoice); //XXX
-                        dataHandler.setSort(true);
-                        noteModel.sort();
-                    }
-                    noteListPage.closeMenu();
-                }//ontriggered
-            }//action menu
+            onTriggered: {
+                if(index == 0) {
+                    addDialogLoader.sourceComponent = addDialogComponent;
+                    addDialogLoader.item.parent = noteListPage;
+                } else if(index ==1) {
+                    showCheckBox = true;
+                    multiSelectRow.opacity = 1;
+                }
+                noteListPage.closeMenu();
+            }//ontriggered
+        }//action menu
     }
 
 

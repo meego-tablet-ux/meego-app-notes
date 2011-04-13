@@ -13,6 +13,7 @@ import MeeGo.App.Notes 0.1
 Window {
     id: scene
     title: qsTr("Notes")
+    filterModel: [qsTr("All"), qsTr("Alphabetical order")]
 
     property string notebookName
     property string noteName
@@ -22,6 +23,23 @@ Window {
 
     onNotebookNameChanged: {
         noteModel.notebookName = notebookName;
+    }
+
+    onFilterTriggered: {
+        if(index == 0) {
+            dataHandler.setSort(false);
+            console.log("DisableSort");
+        } else if(index == 1) {
+            dataHandler.setSort(true);
+            console.log("EnableSort");
+            if (applicationPage == notebookList) {
+                notebooksModel.sort();
+                console.log("notebooksModel");
+            } else if(applicationPage == noteList) {
+                noteModel.sort();
+                console.log("noteModel");
+            }
+        }
     }
 
     DataHandler {

@@ -41,15 +41,16 @@ Item {
 
         function idealWidth()
         {
-            var maxWidth = dialog.width / 3;
             var marging = 40;
+            var maxWidth = dialog.width - marging;
             var widjetsWidth = Math.max(label.width, okButton.width) + marging;
             return Math.min(widjetsWidth, maxWidth);
         }
 
         function idealHeight()
         {
-            var maxHeight = dialog.height / 3;
+            var marging = 40;
+            var maxHeight = dialog.height - marging;
             //multiplication for 2 is neccessary for extra space between label and button
             var widjetsHeight = label.height + label.anchors.topMargin + okButton.height + 2 * okButton.anchors.bottomMargin;
             return Math.min(widjetsHeight, maxHeight);

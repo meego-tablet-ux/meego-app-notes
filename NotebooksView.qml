@@ -65,6 +65,7 @@ ApplicationPage {
             }
             isNote : false
             checkBoxVisible: false;
+            showGrip: false
 
             MouseArea {
                 anchors.fill: parent

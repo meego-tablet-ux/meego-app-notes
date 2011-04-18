@@ -18,6 +18,7 @@ Rectangle {
     property bool checkBoxVisible: false
     property bool isNote : true
     property int checkBoxWidth: width/ 15
+    property alias showGrip: gridView.visible
 
     signal noteSelected(string noteName)
     signal noteDeselected(string noteName)

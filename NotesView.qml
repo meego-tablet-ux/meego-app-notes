@@ -8,6 +8,7 @@
 
 import Qt 4.7
 import MeeGo.Labs.Components 0.1
+import MeeGo.Components 0.1 as UX
 import MeeGo.App.Notes 0.1
 
 ApplicationPage {
@@ -478,15 +479,28 @@ ApplicationPage {
                 if (text.length > 256)
                     text = text.slice(0, 255);
 
-                dataHandler.createNote(noteListPage.caption, text, "");
-                noteClicked(text);
-                addDialogLoader.sourceComponent = undefined;
+                if (!dataHandler.noteExists(model.notebookName, text)) {
+                    dataHandler.createNote(noteListPage.caption, text, "");
+                    noteClicked(text);
+                    addDialogLoader.sourceComponent = undefined;
+                } else {
+                    informationDialog.info = qsTr("A Note <b>'" + text + "'</b> already exists.");
+                    informationDialog.visible = true;
+                }
             }
 
             onButton2Clicked: {
                 addDialogLoader.sourceComponent = undefined;
             }
         }
+    }
+
+    InformationDialog {
+        id: informationDialog
+        z: 10
+        visible: false
+
+        onOkClicked: informationDialog.visible = false;
     }
 
     ModalDialog {

@@ -166,38 +166,47 @@ ApplicationPage {
             }
         }
 
-        Row {
+        BorderImage {
             id: multiSelectRow
+            source: "image://meegotheme/widgets/common/action-bar/action-bar-background"
             anchors.bottom: listView.bottom
-            height: 100
-            spacing: 10
+            width: listView.width
+            height: 80
             opacity: 0
-            anchors.horizontalCenter: listView.horizontalCenter
-            Button {
-                id: deleteButton
-                title: qsTr("Delete")
-                width: 200
-                height: 100
-                active: selectedItems.length > 0
-                bgSourceUp: "image://theme/btn_red_up"
-                bgSourceDn: "image://theme/btn_red_dn"
-                onClicked: {
-                    deleteConfirmationDialog.opacity = 1;
-                    showCheckBox = false;
-                    multiSelectRow.opacity = 0;
+
+            Row {
+                spacing: 10
+                anchors.horizontalCenter: parent.horizontalCenter
+                Button {
+                    id: deleteButton
+                    title: qsTr("Delete")
+                    height: 80
+                    active: selectedItems.length > 0
+                    bgSourceUp: "image://theme/btn_red_up"
+                    bgSourceDn: "image://theme/btn_red_dn"
+                    onClicked: {
+                        deleteConfirmationDialog.opacity = 1;
+                        showCheckBox = false;
+                        multiSelectRow.opacity = 0;
+                    }
+                }
+
+                Button {
+                    id: cancelButton
+                    title: qsTr("Cancel")
+                    anchors.bottom: listView.bottom
+                    height: 80
+                    onClicked: {
+                        multiSelectRow.opacity = 0;
+                        showCheckBox = false;
+                    }
                 }
             }
 
-            Button {
-                id: cancelButton
-                title: qsTr("Cancel")
-                anchors.bottom: listView.bottom
-                width: 200
-                height: 100
-                onClicked: {
-                    multiSelectRow.opacity = 0;
-                    showCheckBox = false;
-                }
+            Image {
+                source: "image://meegotheme/widgets/common/action-bar/action-bar-shadow"
+                anchors.bottom: multiSelectRow.top
+                width: parent.width
             }
         }
     }
@@ -217,8 +226,8 @@ ApplicationPage {
         property string emailChoice: qsTr("Email");
         property string deleteChoice: qsTr("Delete");
 
-        property variant choices: [ openChoice, emailChoice, deleteChoice ]
-        property variant defaultListChoices: [ openChoice, emailChoice ]
+        property variant choices: [ openChoice, /*emailChoice,*/ deleteChoice ]
+        property variant defaultListChoices: [ openChoice, /*emailChoice*/ ]
 
 
         model:  {
@@ -335,34 +344,12 @@ ApplicationPage {
         opacity: 0
         leftButtonText: qsTr("Delete");
         rightButtonText: qsTr("Cancel");
-        dialogTitle: qsTr("Delete?");
+        dialogTitle: (selectedItems.length > 1) ?
+                         qsTr("Are you sure you want to delete these %1 notebooks?").arg(selectedItems.length)
+                       :  qsTr("Are you sure you want to delete \"%1\"?").arg(componentText);
         property string componentText: (selectedItems.length > 0) ? selectedItems[0] : selectedNotebook;
         bgSourceUpLeft: "image://theme/btn_red_up"
         bgSourceDnLeft: "image://theme/btn_red_dn"
-
-        Component {
-            id: textComp
-
-            Text {
-                text: qsTr("Are you sure you want to\ndelete \"%1\"?").arg(componentText);
-                horizontalAlignment: Text.AlignHCenter
-                width: parent.width
-                wrapMode: Text.Wrap
-            }
-        }
-
-        Component {
-            id: textComp2
-
-            Text {
-                text: qsTr("Are you sure you want to\ndelete these %1 notebooks?").arg(selectedItems.length);
-                horizontalAlignment: Text.AlignHCenter
-                width: parent.width
-            }
-        }
-
-        contentLoader.sourceComponent: (selectedItems.length > 1) ? textComp2: textComp
-
         onDialogClicked:
         {
             if (button == 1) // Yes

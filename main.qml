@@ -13,11 +13,12 @@ import MeeGo.App.Notes 0.1
 Window {
     id: scene
     title: qsTr("Notes")
-    filterModel: [qsTr("All"), qsTr("Alphabetical order")]
+    filterModel: filterModelList
 
     property string notebookName
     property string noteName
     property string noteData
+    property variant filterModelList: [qsTr("All"), qsTr("Alphabetical order")]
 
     applicationPage: notebookList
 
@@ -88,6 +89,7 @@ Window {
                 scene.addApplicationPage(noteDetailPage);
                 console.log(scene.applicationPage);
                 noteName = name;
+                filterModel = [];
             }
 
             onCloseWindow:
@@ -112,6 +114,7 @@ Window {
             {
                 scene.applicationPage = notebookList;
                 scene.addApplicationPage(noteList);
+                filterModel = filterModelList;
             }
         }
     }

@@ -107,8 +107,6 @@ Rectangle {
 
             Text {
                 id: textComment
-                anchors.top: topRow.bottom
-                anchors.topMargin: 3
                 anchors.left: parent.left;
                 anchors.leftMargin: 3;
                 anchors.bottom:parent.bottom

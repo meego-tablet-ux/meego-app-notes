@@ -24,17 +24,14 @@ ApplicationPage {
     signal deleteNote(string notebook, string note)
     signal closeWindow();
 
+
+
     //page specific context menu
     menuContent: ActionMenu {
         id: actions
         model: [qsTr("Save"), qsTr("Delete"),/* qsTr("Share")*/ ]
         onTriggered: {
             if(index == 0) {
-                //reset timer
-                manualSaveTimer.running = false;
-
-                //start timer
-                saveTimer.running = false;
                 manualSaveTimer.running = true;
                 dataHandler.modifyNote(notebookID, nameLabel.text, editor.text);
             } else if(index == 1) {
@@ -42,7 +39,6 @@ ApplicationPage {
             } else {
                 shareDialog.opacity = 1;
             }
-
             topRect.closeMenu();
         }//ontriggered
     }//action menu
@@ -104,35 +100,32 @@ ApplicationPage {
             interval: 1000
             running: true
             repeat: true
-
             onTriggered: {
-                dataHandler.modifyNote(notebookID, nameLabel.text, editor.text);
+                if((!manualSaveTimer.running) && (deleteConfirmationDialog.opacity == 0)) {
+                    dataHandler.modifyNote(notebookID, nameLabel.text, editor.text);
+                }
             }
         }
 
         Timer {
             id: manualSaveTimer
             interval: 5000
-
-            onTriggered:  {
-                saveTimer.running = true;
-            }
         }
 
         ModalDialog {
             id: deleteConfirmationDialog
-
             opacity: 0
-
             leftButtonText: qsTr("Yes");
             rightButtonText: qsTr("No");
             dialogTitle: qsTr("Delete?");
+            bgSourceUpLeft: "image://theme/btn_red_up"
+            bgSourceDnLeft: "image://theme/btn_red_dn"
 
             Component {
                 id: textComp
 
                 Text {
-                    text: qsTr("Do you want to Delete\nthis notebook?");
+                    text: qsTr("Do you want to Delete\nthis note?");
                     horizontalAlignment: Text.AlignHCenter
                     width: parent.width
                 }

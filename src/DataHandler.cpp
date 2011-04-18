@@ -1296,7 +1296,7 @@ QString CDataHandler::getDate(const QString& _notebookID)
 
         QString strPath = home + ".MeeGo/Notes/" + noteBook + "/data";
         QFileInfo fileInfo(strPath);
-        result = fileInfo.lastModified().date().toString(tr("dd-MMM-yyyy"));
+        result = fileInfo.lastModified().date().toString(Qt::SystemLocaleShortDate);
     }
 
     return result;

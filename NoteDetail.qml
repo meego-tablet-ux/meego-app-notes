@@ -125,7 +125,7 @@ ApplicationPage {
                 id: textComp
 
                 Text {
-                    text: qsTr("Do you want to Delete\nthis note?");
+                    text: qsTr("Do you want to Delete this note?");
                     horizontalAlignment: Text.AlignHCenter
                     width: parent.width
                 }

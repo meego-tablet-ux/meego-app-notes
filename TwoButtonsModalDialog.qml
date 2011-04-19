@@ -173,13 +173,12 @@ Item {
                 id: buttonBar
                 width: parent.width
                 height: 40
-                spacing: 20
 
                 anchors {
                     bottom: parent.bottom;
                     right: parent.right;
                     left: parent.left;
-                    leftMargin: parent.width - (button.width + spacing + button2.width)
+                    //leftMargin: parent.width - (button.width + spacing + button2.width)
                 }
 
                 UX.Button {
@@ -187,13 +186,15 @@ Item {
                     bgSourceUp: "image://theme/btn_blue_up"
                     bgSourceDn: "image://theme/btn_blue_dn"
                     active: container.text.length > 0
-
+                    //anchors.left: parent.left
                     onClicked: container.button1Clicked();
+
                 }
 
                 UX.Button {
                     id: button2
                     onClicked: container.button2Clicked();
+                    anchors.right: parent.right
                 }
             }
         }

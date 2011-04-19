@@ -368,7 +368,7 @@ ApplicationPage {
         height: 300
 
         property string openChoice: qsTr("Open");
-        property string emailChoice: qsTr("Email");
+        property string emailChoice: qsTr("Share");
         property string moveChoice: qsTr("Move");
         property string deleteChoice: qsTr("Delete");
         property string renameChoice: qsTr("Rename");
@@ -384,7 +384,11 @@ ApplicationPage {
             }
             else if (model[index] == emailChoice)
             {
-                shareDialog.opacity = 1;
+                //shareDialog.opacity = 1;
+                /*shareObj.clearItems();
+                shareObj.addItem() // URI
+                shareObj.shareType = MeeGoUXSharingClientQmlObj.ShareTypeImage
+                shareObj.showContextTypes(mouseX, mouseY)*/
             }
             else if (model[index] == moveChoice)
             {
@@ -415,6 +419,12 @@ ApplicationPage {
             }
         }
     }
+
+
+    ShareObj {
+        id: shareObj
+    }
+
 
     ContextMenu {
         id: notebookSelector

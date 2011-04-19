@@ -23,6 +23,7 @@ Item {
     property alias text: textInput.text
 
     property int minWidth: width
+    property int maxCharactersCount: 50
 
     anchors.fill: parent
     signal button1Clicked
@@ -81,6 +82,8 @@ Item {
                     return title.paintedWidth;
             }
 
+            height: title.height + rectText.height + charsIndicator.height + buttonBar.height
+
             Text {
                 id: title
                 font.weight: Font.Bold
@@ -106,10 +109,64 @@ Item {
                 //border.width: 1
                 //focus: true
 
-                UX.TextField {
+                //TEMPORARY WORKAROUND!
+                //TextField's textChanged signal is not emitted.
+                //UNCOMMENT THIS CODE WHEN TextField WILL BE FIXED
+//                UX.TextField {
+//                    id: textInput
+//                    anchors.fill: parent;
+
+//                    onTextChanged: {
+//                        var string = textInput.text;
+//                        charsIndicator.text = qsTr("%1/%2").arg(container.maxCharactersCount - string.length).arg(container.maxCharactersCount);
+//                        if (string.length <= container.maxCharactersCount)
+//                            return;
+//                        var cursorPosition = textInput.cursorPosition;
+//                        textInput.text = string.slice(0, container.maxCharactersCount);
+//                        textInput.cursorPosition = cursorPosition > container.maxCharactersCount ? cursorPosition - 1 : cursorPosition;
+//                    }
+//                }
+
+                //TEMPORARY WORKAROUND!
+                //TextField's textChanged signal is not emitted.
+                //REMOVE THIS CODE WHEN TextField WILL BE FIXED
+                Loader {
                     id: textInput
-                    anchors.fill: parent;
+                    anchors.fill: parent
+
+                    sourceComponent: textInputComponent
+
+                    property string text: item.text
+                    property string defaultText: item.defaultText
+
+                    onTextChanged: item.text = textInput.text
+                    onDefaultTextChanged: item.defaultText = textInput.defaultText
+
+                    Connections {
+                        target: textInput.item
+                        onTextChanged: {
+                            var string = textInput.item.text;
+                            charsIndicator.text = qsTr("%1/%2").arg(container.maxCharactersCount - string.length).arg(container.maxCharactersCount);
+                            if (string.length <= container.maxCharactersCount)
+                                return;
+                            var cursorPosition = textInput.item.cursorPosition;
+                            textInput.item.text = string.slice(0, container.maxCharactersCount);
+                            textInput.item.cursorPosition = cursorPosition > container.maxCharactersCount ? cursorPosition - 1 : cursorPosition;
+                        }
+                    }
                 }
+            }
+
+            Text {
+                id: charsIndicator
+                font.italic: true
+
+                anchors.right: parent.right
+                anchors.top: rectText.bottom
+
+                font.pixelSize: 10
+
+                text: qsTr("%1/%2").arg(container.maxCharactersCount).arg(container.maxCharactersCount)
             }
 
             Row {
@@ -132,15 +189,120 @@ Item {
                     active: container.text.length > 0
 
                     onClicked: container.button1Clicked();
-                    anchors.left: parent.left
                 }
 
                 UX.Button {
                     id: button2
                     onClicked: container.button2Clicked();
-                    anchors.right: parent.right
                 }
             }
         }
     }
+
+    //TEMPORARY WORKAROUND!
+    //TextField's textChanged signal is not emitted.
+    //UNCOMMENT THIS CODE WHEN TextField WILL BE FIXED
+    Component {
+        id: textInputComponent
+        BorderImage {
+            id: borderImage
+            property alias text: edit.text
+            property alias font: edit.font
+            property alias readOnly: edit.readOnly
+            property alias defaultText: fakeText.text
+            property alias cursorPosition: edit.cursorPosition//new property
+
+            signal textChanged
+
+            border.top: 6
+            border.bottom: 6
+            border.left: 6
+            border.right: 6
+
+            height: 50
+            source: (edit.focus && !readOnly) ? "image://themedimage/widgets/common/text-area/text-area-background-active" : "image://themedimage/widgets/common/text-area/text-area-background"
+            clip: true
+
+            opacity: readOnly ? 0.5 : 1.0
+
+            onHeightChanged: {
+                if( flick.contentHeight <= flick.height ){
+                    flick.contentY = 0
+                }
+                else if( flick.contentY + flick.height > flick.contentHeight ){
+                    flick.contentY = flick.contentHeight - flick.height
+                }
+            }
+
+            UX.Theme { id: theme }
+
+            Flickable {
+                id: flick
+
+                function ensureVisible(r) {
+                    if (contentX >= r.x){
+                        contentX = r.x
+                    } else if (contentX+width <= r.x+r.width) {
+                        contentX = r.x+r.width-width
+                    }
+
+                    if (contentY >= r.y){
+                        contentY = r.y
+                    } else if (contentY+height <= r.y+r.height) {
+                        contentY = r.y+r.height-height
+                    }
+                }
+
+                anchors {
+                    fill: parent
+                    topMargin: 3      // this value is the hardcoded margin to keep the text within the backgrounds text field
+                    bottomMargin: 3
+                    leftMargin: 4
+                    rightMargin: 4
+                }
+                contentWidth: edit.paintedWidth
+                contentHeight: edit.paintedHeight
+
+                flickableDirection: Flickable.VerticalFlick
+                interactive: ( contentHeight > flick.height ) ? true : false
+
+                clip: true
+
+                TextEdit {
+                    id: edit
+
+                    width: flick.width
+                    height: flick.height
+
+                    wrapMode: TextEdit.Wrap
+                    onCursorRectangleChanged: flick.ensureVisible(cursorRectangle)
+                    font.pixelSize: theme.fontPixelSizeNormal
+
+                    onTextChanged: borderImage.textChanged()//Fix for TextField
+                }
+
+                Text {
+                  id: fakeText
+
+                  property bool firstUsage: true
+
+                  anchors.fill: edit
+
+                  font: edit.font
+                  color: "slategrey"
+
+                  visible: ( edit.text == ""  && !edit.focus && firstUsage )
+
+                  Connections {
+                      target: edit
+                      onTextChanged: {
+                          fakeText.visible = (edit.text == "" && fakeText.firstUsage);//Fix for TextField
+                          fakeText.firstUsage = false;//Fix for TextField
+                      }
+                  }
+              }
+            }
+        }
+    }
+
 }

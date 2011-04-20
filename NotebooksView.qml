@@ -101,6 +101,7 @@ ApplicationPage {
             }
             isNote : false
             checkBoxVisible: index != 0
+            showGrip: false
 
             onNoteSelected: {
                 var tmpList = selectedItems;

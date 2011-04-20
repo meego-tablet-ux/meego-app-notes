@@ -161,8 +161,10 @@ ApplicationPage {
                         listView.newIndex = parseInt(parent.notePos) + diff;
 
                         //console.debug("Going to move: " + listView.count + " from " + parent.notePos + " to " +  listView.newIndex);
-                        if ((parent.notePos != listView.newIndex) && (parseInt(listView.newIndex) > 0)
-                                && (parseInt(listView.newIndex) <= listView.count)) {
+                        if ((parent.notePos != listView.newIndex) && (parseInt(listView.newIndex) > 0)) {
+                            if (parseInt(listView.newIndex) > listView.count)
+                                listView.newIndex = listView.count;
+
                             listView.changePosition();
                         } else {
                             //just stupid workaround

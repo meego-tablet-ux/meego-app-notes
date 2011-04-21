@@ -8,6 +8,7 @@
 
 import Qt 4.7
 import MeeGo.Labs.Components 0.1
+import MeeGo.Components 0.1 as UX
 import MeeGo.App.Notes 0.1
 
 ApplicationPage {
@@ -24,9 +25,9 @@ ApplicationPage {
 
 
     menuContent: Column {
-        ActionMenu {
+        UX.ActionMenu {
             id: firstActionMenu
-            maxWidth: scene.width
+            maxWidth: window.width
             model: {
                 if((listView.count == 1) || (showCheckBox) ) {
                     return [qsTr("New Notebook")];
@@ -75,9 +76,9 @@ ApplicationPage {
                 onPressAndHold:{
                     selectedNotebook = name;
                     selectedTitle = title;
-                    contextMenu.menuX = notebook.x + mouseX;
-                    contextMenu.menuY = notebook.y + 50/*header*/ + mouseY;
-                    contextMenu.visible = true;
+                    var map = mapToItem(listView, mouseX, mouseY);
+                    contextMenu.setPosition(map.x, map.y+50);
+                    contextMenu.show();
                 }
             }
         }
@@ -179,23 +180,23 @@ ApplicationPage {
             Row {
                 spacing: 10
                 anchors.horizontalCenter: parent.horizontalCenter
-                Button {
+                UX.Button {
                     id: deleteButton
-                    title: qsTr("Delete")
+                    text: qsTr("Delete")
                     height: 80
                     active: selectedItems.length > 0
                     bgSourceUp: "image://theme/btn_red_up"
                     bgSourceDn: "image://theme/btn_red_dn"
                     onClicked: {
-                        deleteConfirmationDialog.opacity = 1;
+                        deleteConfirmationDialog.show();
                         showCheckBox = false;
                         multiSelectRow.opacity = 0;
                     }
                 }
 
-                Button {
+                UX.Button {
                     id: cancelButton
-                    title: qsTr("Cancel")
+                    text: qsTr("Cancel")
                     anchors.bottom: listView.bottom
                     height: 80
                     onClicked: {
@@ -214,13 +215,9 @@ ApplicationPage {
     }
 
     // context menu system
-    ContextMenu {
+    UX.ModalContextMenu {
         id: contextMenu
 
-        visible: false
-
-        menuX: 0
-        menuY: 0
         width: 150
         height: 300
 
@@ -232,45 +229,41 @@ ApplicationPage {
         property variant defaultListChoices: [ openChoice, /*emailChoice*/ ]
 
 
-        model:  {
-            if(selectedNotebook == defaultNotebook) {
-                return defaultListChoices;
-            } else {
-                return choices;
+        content: UX.ActionMenu {
+            model:  {
+                if(selectedNotebook == defaultNotebook) {
+                    return contextMenu.defaultListChoices;
+                } else {
+                    return contextMenu.choices;
+                }
             }
-        }
 
-        onTriggered: {
-            console.log("triggered: " + index);
-            if (model[index] == openChoice)
-            {
-                notebookClicked(selectedNotebook, selectedTitle)
-            }
-            else if (model[index] == emailChoice)
-            {
-                shareDialog.opacity = 1;
-            }
-            else if (model[index] == deleteChoice)
-            {
-                if (selectedItems.length > 1)
-                {
-                    if (selectedItems[0] != defaultNotebook)
+            onTriggered: {
+                if (model[index] == contextMenu.openChoice) {
+                    notebookClicked(selectedNotebook, selectedTitle)
+                }
+                else if (model[index] == contextMenu.emailChoice) {
+                    shareDialog.opacity = 1;
+                }
+                else if (model[index] == contextMenu.deleteChoice) {
+                    if (selectedItems.length > 1) {
+                        if (selectedItems[0] != defaultNotebook){
+                            deleteConfirmationDialog.show();
+                        }
+                    }
+                    else if (selectedItems.length == 1)
                     {
-
-                        deleteConfirmationDialog.opacity = 1;
+                        if (selectedItems[0] != defaultNotebook)
+                        {
+                            deleteConfirmationDialog.show();
+                        }
+                    }
+                    else
+                    {
+                        deleteConfirmationDialog.show();
                     }
                 }
-                else if (selectedItems.length == 1)
-                {
-                    if (selectedItems[0] != defaultNotebook)
-                    {
-                        deleteConfirmationDialog.opacity = 1;
-                    }
-                }
-                else
-                {
-                    deleteConfirmationDialog.opacity = 1;
-                }
+                 contextMenu.hide();
             }
         }
     }
@@ -341,39 +334,34 @@ ApplicationPage {
         }
     }
 
-    ModalDialog {
+    UX.ModalDialog {
         id: deleteConfirmationDialog
-        opacity: 0
-        leftButtonText: qsTr("Delete");
-        rightButtonText: qsTr("Cancel");
-        dialogTitle: (selectedItems.length > 1) ?
+        acceptButtonText: qsTr("Delete");
+        title: (selectedItems.length > 1) ?
                          qsTr("Are you sure you want to delete these %1 notebooks?").arg(selectedItems.length)
                        :  qsTr("Are you sure you want to delete \"%1\"?").arg(componentText);
         property string componentText: (selectedItems.length > 0) ? selectedItems[0] : selectedNotebook;
-        bgSourceUpLeft: "image://theme/btn_red_up"
-        bgSourceDnLeft: "image://theme/btn_red_dn"
-        onDialogClicked:
-        {
-            if (button == 1) // Yes
-            {
-                if (selectedItems.length > 0)
-                {
-                    dataHandler.deleteNoteBooks(selectedItems);
-                    selectedItems = [];
-                }
-                else
-                {
-                    dataHandler.deleteNoteBook(selectedNotebook);
-                }
+//        bgSourceUpLeft: "image://theme/btn_red_up"
+//        bgSourceDnLeft: "image://theme/btn_red_dn"
 
-                opacity = 0;
-                deleteReportWindow.opacity = 1;
-            }
-            else if (button == 2) // No
+        onAccepted: {
+            if (selectedItems.length > 0)
             {
-                opacity = 0;
+                dataHandler.deleteNoteBooks(selectedItems);
                 selectedItems = [];
             }
+            else
+            {
+                dataHandler.deleteNoteBook(selectedNotebook);
+            }
+
+            opacity = 0;
+            deleteReportWindow.opacity = 1;
+        }
+
+        onRejected: {
+            opacity = 0;
+            selectedItems = [];
         }
     }
 

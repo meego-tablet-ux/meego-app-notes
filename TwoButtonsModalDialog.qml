@@ -7,8 +7,7 @@
  */
 
 import Qt 4.7
-import MeeGo.Labs.Components 0.1
-import MeeGo.Components 0.1 as UX
+import MeeGo.Components 0.1
 
 Item {
     id: container
@@ -181,7 +180,7 @@ Item {
                     //leftMargin: parent.width - (button.width + spacing + button2.width)
                 }
 
-                UX.Button {
+                Button {
                     id: button
                     bgSourceUp: "image://theme/btn_blue_up"
                     bgSourceDn: "image://theme/btn_blue_dn"
@@ -191,7 +190,7 @@ Item {
 
                 }
 
-                UX.Button {
+                Button {
                     id: button2
                     onClicked: container.button2Clicked();
                     anchors.right: parent.right
@@ -235,7 +234,7 @@ Item {
                 }
             }
 
-            UX.Theme { id: theme }
+            Theme { id: theme }
 
             Flickable {
                 id: flick

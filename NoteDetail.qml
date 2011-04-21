@@ -8,6 +8,7 @@
 
 import Qt 4.7
 import MeeGo.Labs.Components 0.1
+import MeeGo.Components 0.1 as UX
 import MeeGo.App.Notes 0.1
 
 ApplicationPage {
@@ -27,7 +28,7 @@ ApplicationPage {
 
 
     //page specific context menu
-    menuContent: ActionMenu {
+    menuContent: UX.ActionMenu {
         id: actions
         model: [qsTr("Save"), qsTr("Delete"),/* qsTr("Share")*/ ]
         onTriggered: {
@@ -35,7 +36,7 @@ ApplicationPage {
                 manualSaveTimer.running = true;
                 dataHandler.modifyNote(notebookID, nameLabel.text, editor.text);
             } else if(index == 1) {
-                deleteConfirmationDialog.opacity = 1;
+                deleteConfirmationDialog.show();
             } else {
                 shareDialog.opacity = 1;
             }
@@ -77,7 +78,7 @@ ApplicationPage {
             }
         }
 
-        EditPane {
+        UX.TextField {
             id: editor
             property int topMargins: 20
             anchors.top: textRect.bottom;
@@ -88,8 +89,8 @@ ApplicationPage {
             anchors.rightMargin: 30
             width: parent.width;
             height: parent.height -  textRect.height - topMargins;
-            contentWidth: editor.paintedWidth
-            contentHeight: editor.paintedHeight
+//            contentWidth: editor.paintedWidth
+//            contentHeight: editor.paintedHeight
             smooth:true;
             text: dataHandler.loadNoteData(notebookID, noteName);
             defaultText: qsTr("Start typing a new note.")
@@ -112,38 +113,27 @@ ApplicationPage {
             interval: 5000
         }
 
-        ModalDialog {
+        UX.ModalDialog {
             id: deleteConfirmationDialog
             opacity: 0
-            leftButtonText: qsTr("Yes");
-            rightButtonText: qsTr("No");
-            dialogTitle: qsTr("Delete?");
-            bgSourceUpLeft: "image://theme/btn_red_up"
-            bgSourceDnLeft: "image://theme/btn_red_dn"
+            acceptButtonText: qsTr("Yes");
+            cancelButtonText: qsTr("No");
+            title: qsTr("Delete?");
 
-            Component {
-                id: textComp
-
-                Text {
-                    text: qsTr("Do you want to Delete this note?");
-                    horizontalAlignment: Text.AlignHCenter
-                    width: parent.width
-                }
+            content: Text {
+                text: qsTr("Do you want to Delete this note?");
+                horizontalAlignment: Text.AlignHCenter
+                width: parent.width
             }
 
-            contentLoader.sourceComponent: textComp
+            onAccepted: {
+                dataHandler.deleteNote(notebookID, noteName);
+                hide();
+                topRect.closeWindow();
+            }
 
-            onDialogClicked: {
-                if (button == 1) {
-                    // Yes
-                    dataHandler.deleteNote(notebookID, noteName);
-                    opacity = 0;
-                    topRect.closeWindow();
-                }
-                else if (button == 2) {
-                    // No
-                    opacity = 0;
-                }
+            onRejected: {
+                hide();
             }
         }
 

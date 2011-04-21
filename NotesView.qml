@@ -138,7 +138,7 @@ ApplicationPage {
 
                 MouseArea {
                     anchors.right: parent.right
-                    width: parent.height
+                    width: parent.height * 2 //big thumbs + little screen = sad panda; so we be a little lenient
                     height: parent.height
 
                     drag.target: parent
@@ -244,7 +244,7 @@ ApplicationPage {
 
                 MouseArea {
                     anchors.right: parent.right
-                    width: parent.height
+                    width: (parent.height * 2) //Because we want to be lenient with peopel who have big thumbs
                     height: parent.height
 
                     drag.target: parent

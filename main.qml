@@ -8,25 +8,26 @@
 
 import Qt 4.7
 import MeeGo.Labs.Components 0.1
+import MeeGo.Components 0.1 as UX
 import MeeGo.App.Notes 0.1
 
 Window {
     id: scene
-    title: qsTr("Notes")
-    filterModel: filterModelList
+    title: qsTr("Notes")          //labs
+    filterModel: filterModelList  //labs
 
     property string notebookName
     property string noteName
     property string noteData
     property variant filterModelList: [qsTr("All"), qsTr("Alphabetical order")]
 
-    applicationPage: notebookList
+    applicationPage: notebookList //labs
 
     onNotebookNameChanged: {
         noteModel.notebookName = notebookName;
     }
 
-    onFilterTriggered: {
+    onFilterTriggered: {  //labs
         if(index == 0) {
             dataHandler.setSort(false);
             console.log("DisableSort");
@@ -62,12 +63,11 @@ Window {
 
         NotebooksView {
             id: notebooksView
-	    anchors.fill: parent
-            title: qsTr("Notes");
+            anchors.fill: parent
+            title: qsTr("Notes")
 
             onNotebookClicked: {
                 scene.addApplicationPage(noteList);
-                console.log(scene.applicationPage);
                 notebookName = name;
             }
 
@@ -78,22 +78,19 @@ Window {
         id: noteList
 
         NotesView {
-	    id: notesView
-	    anchors.fill: parent
-            title: qsTr("Notes");
+            id: notesView
+            anchors.fill: parent
+            title: qsTr("Notes")
             caption: notebookName
             model: noteModel
 
-            onNoteClicked:
-            {
+            onNoteClicked: {
                 scene.addApplicationPage(noteDetailPage);
-                console.log(scene.applicationPage);
                 noteName = name;
                 filterModel = [];
             }
 
-            onCloseWindow:
-            {
+            onCloseWindow: {
                 scene.applicationPage = notebookList;
             }
 

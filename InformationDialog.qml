@@ -7,7 +7,7 @@
  */
 
 import Qt 4.7
-import MeeGo.Labs.Components 0.1
+import MeeGo.Components 0.1
 
 Item {
     id: dialog
@@ -64,7 +64,6 @@ Item {
             anchors.horizontalCenter: parent.horizontalCenter
 
             font.pixelSize: 20
-//            wrapMode: Text.Wrap
             verticalAlignment: Text.AlignHCenter
             horizontalAlignment: Text.AlignVCenter
         }
@@ -80,9 +79,9 @@ Item {
             height: 40
             bgSourceUp: "image://theme/btn_blue_up"
             bgSourceDn: "image://theme/btn_blue_dn"
-            title: qsTr("OK")
+            text: qsTr("OK")
 
-            onClicked: dialog.okClicked();
+            onClicked: dialog.okClicked()
         }
     }
 }

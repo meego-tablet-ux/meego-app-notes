@@ -7,11 +7,12 @@
  */
 
 import Qt 4.7
-import MeeGo.Labs.Components 0.1
+import MeeGo.Components 0.1
 
 Item {
     id: container
     anchors.fill: parent
+
     signal fontSelected(string fontName)
     signal buttonOKClicked(string fontName)
     signal buttonCancelClicked()
@@ -33,14 +34,24 @@ Item {
     }
 
     Rectangle {
-	id: mainRect
-	color: "lightblue"
-        width: 260; height: 280
-	focus: true
+        id: mainRect
+        color: "lightblue"
+        width: 260
+        height: 280
+        focus: true
         anchors.centerIn: parent
 
-	ListView {
+        ListView {
+            id:listView
+            height: 200
+            width: mainRect.width
+            anchors.horizontalCenter: parent.horizontalCenter
+            spacing: 10
 
+            property int index: 0;
+            property string selectedFont: fontNames[0];
+            property variant fontNames: ["Times New Romans", "Helvetica",
+                "Courier", "Arial", "Lucida"]
 
             ListModel {
                 id: fontModel
@@ -71,25 +82,14 @@ Item {
                 }
             }
 
-            id:listView
-            height: 200
-            width: mainRect.width
-            anchors.horizontalCenter: parent.horizontalCenter
-            spacing: 10
-            property int index: 0;
-            property string selectedFont: fontNames[0];
-            property variant fontNames: ["Times New Romans", "Helvetica",
-                "Courier", "Arial", "Lucida"]
             model: fontModel
-            delegate:
-                Item {
+            delegate: Item {
                 height: 25
                 width: mainRect.width
+                anchors.horizontalCenter: parent.horizontalCenter
+
                 property int index: model.index;
 
-                //color: "lightblue";
-                anchors.horizontalCenter: parent.horizontalCenter
-                //border.color: "black";
                 Text {
                     anchors.centerIn: parent
                     text: model.name;
@@ -98,79 +98,67 @@ Item {
 
                 MouseArea {
                     anchors.fill: parent
-                    onClicked:
-                    {
+                    onClicked: {
                         listView.currentIndex = index;
                         listView.highlight = listView.highlighter;
                     }
 
-                    onDoubleClicked:
-                    {
-                        container.fontSelected(listView.selectedFont);
-                    }
+                    onDoubleClicked: container.fontSelected(listView.selectedFont)
                 }
             }
-            highlight:
-                Rectangle {
+
+            highlight: Rectangle {
                 id: highlighter;
                 color: "lightsteelblue";
                 width: listView.width
             }
+
             focus: true
             highlightFollowsCurrentItem: true
-            header:
-                Item {
+
+            header:Item {
                 anchors.horizontalCenter: parent.horizontalCenter
                 height: 25
 
                 Text {
                     anchors.horizontalCenter: parent.horizontalCenter
-                    text: qsTr("<b>Pick a font</b>");
+                    text: qsTr("<b>Pick a font</b>")
                     color: "white"
                 }
             }
 
-            onCurrentIndexChanged:
-            {
-                selectedFont = fontNames[currentIndex];
-            }
-
-            Keys.onReturnPressed:
-            {
+            onCurrentIndexChanged: selectedFont = fontNames[currentIndex]
+            Keys.onReturnPressed: {
                 container.fontSelected(selectedFont);
                 console.log("onReturnPressed");
             }
-	}
+        }
 
         Row {
-            //spacing: 30
-            anchors.left: parent.left;
-            anchors.right: parent.right;
+            anchors.left: parent.left
+            anchors.right: parent.right
             anchors.top: listView.bottom
             anchors.topMargin: 20
 
             Button {
                 id: okButton
-                anchors.right: cancelButton.left;
+                anchors.right: cancelButton.left
                 anchors.rightMargin: 20
-                title: qsTr("OK");
+                text: qsTr("OK")
                 x: 20;
-                width: 100; height: 40;
-                smooth:true;
-                clip: true;
+                width: 100
+                height: 40
+                smooth:true
+                clip: true
                 bgSourceUp: "image://theme/notes/btn_spelling_up"
                 bgSourceDn: "image://theme/notes/btn_spelling_dn"
 
                 MouseArea {
                     anchors.fill: parent
-                    onClicked:
-                    {
+                    onClicked: {
                         if (okButton.active)
-                        {
-                            okButton.clicked(mouse)
-                        }
-
-                        container.buttonOKClicked(listView.selectedFont)
+                            okButton.clicked(mouse);
+                        container.buttonOKClicked(listView.selectedFont);
                     }
 
                     onPressed: if (okButton.active) okButton.pressed = true
@@ -180,26 +168,22 @@ Item {
 
             Button {
                 id: cancelButton
-                anchors.right: parent.right;
+                anchors.right: parent.right
                 anchors.rightMargin: 20
-                title: qsTr("Cancel");
-                width: 100; height: 40;
-                smooth:true;
-                clip: true;
+                text: qsTr("Cancel")
+                width: 100
+                height: 40
+                smooth:true
+                clip: true
                 bgSourceUp: "image://theme/notes/btn_spelling_up"
                 bgSourceDn: "image://theme/notes/btn_spelling_dn"
 
                 MouseArea {
                     anchors.fill: parent
-                    onClicked:
-                    {
+                    onClicked: {
                         if (cancelButton.active)
-                        {
-                            cancelButton.clicked(mouse)
-                        }
-
-                        container.buttonCancelClicked()
-                        console.log("cancelButton::fontSize = "+ fontSize)
+                            cancelButton.clicked(mouse);
+                        container.buttonCancelClicked();
                     }
 
                     onPressed: if (cancelButton.active) cancelButton.pressed = true
@@ -208,5 +192,4 @@ Item {
             }
         }
     }
-
 }

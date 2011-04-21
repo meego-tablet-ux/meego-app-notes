@@ -7,11 +7,12 @@
  */
 
 import Qt 4.7
-import MeeGo.Labs.Components 0.1
+import MeeGo.Components 0.1
 
 Item {
     id: container
     anchors.fill: parent
+
     property string fontSize: "0"
     signal buttonOKClicked()
     signal buttonCancelClicked()
@@ -36,18 +37,16 @@ Item {
         id: mainRect
         width: 300
         height: 200
-        //color: "lightblue"
         anchors.centerIn: parent
-        focus: true;
+        focus: true
 
         Text {
             id: caption
-            anchors.top: parent.top;
-            anchors.topMargin: 20;
-            anchors.horizontalCenter: parent.horizontalCenter;
-            text: qsTr("Pick font size");
-            font.bold: true;
-            //font.pixelSize: 14
+            anchors.top: parent.top
+            anchors.topMargin: 20
+            anchors.horizontalCenter: parent.horizontalCenter
+            text: qsTr("Pick font size")
+            font.bold: true
         }
 
         ListModel {
@@ -126,43 +125,39 @@ Item {
             anchors.rightMargin: 20
             anchors.left: parent.left
             anchors.leftMargin: 20
-            dataModel: fontSizeModel
+            model: fontSizeModel
             height: 30
             focus: true
-            smooth:true;
+            smooth: true
         }
 
         Row {
-            //spacing: 30
-            anchors.left: parent.left;
-            anchors.right: parent.right;
+            anchors.left: parent.left
+            anchors.right: parent.right
             anchors.top: comboBox.bottom
             anchors.topMargin: 20
 
             Button {
                 id: okButton
-                anchors.right: cancelButton.left;
+                anchors.right: cancelButton.left
                 anchors.rightMargin: 20
-                title: qsTr("OK");
-                x: 20;
-                width: 120; height: 40;
-                smooth:true;
-                clip: true;
+                text: qsTr("OK")
+                x: 20
+                width: 120
+                height: 40
+                smooth: true
+                clip: true
                 bgSourceUp: "image://theme/notes/btn_spelling_up"
                 bgSourceDn: "image://theme/notes/btn_spelling_dn"
 
                 MouseArea {
                     anchors.fill: parent
-                    onClicked:
-                    {
+                    onClicked: {
                         if (okButton.active)
-                        {
-                            okButton.clicked(mouse)
-                        }
+                            okButton.clicked(mouse);
 
                         container.fontSize = comboBox.selectedVal;
-                        container.buttonOKClicked()
-                        console.log("okButton::fontSize = "+ container.fontSize)
+                        container.buttonOKClicked();
                     }
 
                     onPressed: if (okButton.active) okButton.pressed = true
@@ -172,35 +167,30 @@ Item {
 
             Button {
                 id: cancelButton
-                anchors.right: parent.right;
+                anchors.right: parent.right
                 anchors.rightMargin: 20
-                title: qsTr("Cancel");
-                width: 120; height: 40;
-                smooth:true;
-                clip: true;
+                text: qsTr("Cancel")
+                width: 120
+                height: 40
+                smooth: true
+                clip: true
                 bgSourceUp: "image://theme/notes/btn_spelling_up"
                 bgSourceDn: "image://theme/notes/btn_spelling_dn"
 
                 MouseArea {
                     anchors.fill: parent
-                    onClicked:
-                    {
+                    onClicked: {
                         if (cancelButton.active)
-                        {
-                            cancelButton.clicked(mouse)
-                        }
+                            cancelButton.clicked(mouse);
 
                         container.fontSize = "0";
-                        container.buttonCancelClicked()
-                        console.log("cancelButton::fontSize = "+ container.fontSize)
+                        container.buttonCancelClicked();
                     }
 
                     onPressed: if (cancelButton.active) cancelButton.pressed = true
                     onReleased: if (cancelButton.active) cancelButton.pressed = false
                 }
             }
-
-
         }
     }
 }

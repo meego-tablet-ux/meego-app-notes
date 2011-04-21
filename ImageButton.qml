@@ -16,8 +16,8 @@ Item {
     property bool pressed: false
     property bool active: true
     property alias imageScale: label.scale
+
     opacity: active ? 1.0 : 0.5
-    //border.width: 1
 
     signal clicked(variant mouse)
 
@@ -48,7 +48,7 @@ Item {
                 when: container.pressed
                 PropertyChanges {
                     target: label
-                    source: dnSource;
+                    source: dnSource
                 }
             }
         ]
@@ -59,9 +59,7 @@ Item {
         anchors.fill: parent
         onClicked: {
             if (container.active)
-            {
                 container.clicked(mouse)
-            }
         }
         onPressed: if (container.active) parent.pressed = true
         onReleased: if (container.active) parent.pressed = false

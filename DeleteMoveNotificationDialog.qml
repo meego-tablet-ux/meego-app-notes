@@ -7,12 +7,12 @@
  */
 
 import Qt 4.7
-import MeeGo.Labs.Components 0.1
+import MeeGo.Components 0.1 as UX
 
 Item {
     id: container
 
-    property alias buttonText: button.title
+    property alias buttonText: button.text
     property alias dialogTitle: title.text
     property alias menuHeight: contents.height
     property alias text: textReport.text
@@ -97,7 +97,7 @@ Item {
                 wrapMode: Text.Wrap
             }
 
-            Button {
+            UX.Button {
                 id: button
                 width: 120
                 height: 40

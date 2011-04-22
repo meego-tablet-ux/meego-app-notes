@@ -7,7 +7,7 @@
  */
 
 import Qt 4.7
-import MeeGo.Labs.Components 0.1
+import MeeGo.Components 0.1
 
 Item {
     id: container
@@ -195,7 +195,7 @@ Item {
                         id: sendButton
                         anchors.right: cancelButton.left;
                         anchors.rightMargin:20;
-                        title: qsTr("Send");
+                        text: qsTr("Send");
                         width: 180; height: 60;
                         smooth:true;
                         bgSourceUp: "image://theme/btn_blue_up"
@@ -221,7 +221,7 @@ Item {
                     Button {
                         id: cancelButton
                         anchors.right: parent.right;
-                        title: qsTr("Cancel");
+                        text: qsTr("Cancel");
                         width: sendButton.width; height: sendButton.height;
                         smooth:true;
 

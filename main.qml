@@ -12,7 +12,7 @@ import MeeGo.Components 0.1 as UX
 import MeeGo.App.Notes 0.1
 
 Window {
-    id: scene
+    id: window
     title: qsTr("Notes")          //labs
     filterModel: filterModelList  //labs
 
@@ -67,7 +67,7 @@ Window {
             title: qsTr("Notes")
 
             onNotebookClicked: {
-                scene.addApplicationPage(noteList);
+                window.addApplicationPage(noteList);
                 notebookName = name;
             }
 
@@ -85,13 +85,13 @@ Window {
             model: noteModel
 
             onNoteClicked: {
-                scene.addApplicationPage(noteDetailPage);
+                window.addApplicationPage(noteDetailPage);
                 noteName = name;
                 filterModel = [];
             }
 
             onCloseWindow: {
-                scene.applicationPage = notebookList;
+                window.applicationPage = notebookList;
             }
 
         }
@@ -103,14 +103,14 @@ Window {
         NoteDetail {
             id: noteDetail
             anchors.fill: parent
-            notebookID: scene.notebookName
-            noteName: scene.noteName
+            notebookID: window.notebookName
+            noteName: window.noteName
             caption: noteName
 
             onCloseWindow:
             {
-                scene.applicationPage = notebookList;
-                scene.addApplicationPage(noteList);
+                window.applicationPage = notebookList;
+                window.addApplicationPage(noteList);
                 filterModel = filterModelList;
             }
         }

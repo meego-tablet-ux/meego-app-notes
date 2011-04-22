@@ -184,9 +184,9 @@ Item {
                     id: button
                     bgSourceUp: "image://theme/btn_blue_up"
                     bgSourceDn: "image://theme/btn_blue_dn"
-                    active: container.text.length > 0
+                    active: textInput.text.length > 0
                     //anchors.left: parent.left
-                    onClicked: container.button1Clicked();
+                    onClicked:if (active) container.button1Clicked();
 
                 }
 

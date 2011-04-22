@@ -139,7 +139,11 @@ Item {
                     property string text: item.text
                     property string defaultText: item.defaultText
 
-                    onTextChanged: item.text = textInput.text
+                    onTextChanged: {
+                        if (item.text == textInput.text)
+                            return;
+                        item.text = textInput.text;
+                    }
                     onDefaultTextChanged: item.defaultText = textInput.defaultText
 
                     Connections {
@@ -147,8 +151,10 @@ Item {
                         onTextChanged: {
                             var string = textInput.item.text;
                             charsIndicator.text = qsTr("%1/%2").arg(container.maxCharactersCount - string.length).arg(container.maxCharactersCount);
-                            if (string.length <= container.maxCharactersCount)
+                            if (string.length <= container.maxCharactersCount) {
+                                textInput.text = string;
                                 return;
+                            }
                             var cursorPosition = textInput.item.cursorPosition;
                             textInput.item.text = string.slice(0, container.maxCharactersCount);
                             textInput.item.cursorPosition = cursorPosition > container.maxCharactersCount ? cursorPosition - 1 : cursorPosition;

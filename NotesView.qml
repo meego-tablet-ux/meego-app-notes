@@ -10,6 +10,7 @@ import Qt 4.7
 import MeeGo.Labs.Components 0.1
 import MeeGo.Components 0.1 as UX
 import MeeGo.App.Notes 0.1
+import MeeGo.Sharing 0.1
 
 ApplicationPage {
     id: noteListPage
@@ -32,9 +33,9 @@ ApplicationPage {
     signal updateView();
 
     menuContent: Column {
-        ActionMenu {
+        UX.ActionMenu {
             id: actionsAddNote
-            maxWidth: scene.width
+            maxWidth: window.width
             model:{
                 if((listView.count == 1) || (showCheckBox) ) {
                     return [qsTr("New Note")];
@@ -128,11 +129,12 @@ ApplicationPage {
                         selectedNote = name;
                         selectedTitle = title;
                         selectedIndex = index;
-                        itemX = note.x + mouseX;
-                        itemY = note.y + nameLabel.height + 50/*header*/ + mouseY;
-                        menu.menuX = note.x + mouseX;
-                        menu.menuY = note.y + nameLabel.height + 50/*header*/ + mouseY;
-                        menu.visible = true;
+                        var map = mapToItem(listView, mouseX, mouseY);
+//                        itemX = note.x + mouseX;
+//                        itemY = note.y + nameLabel.height + 50/*header*/ + mouseY;
+
+                        menu.setPosition(map.x, map.y + 50);
+                        menu.show();
                     }
                 }
 
@@ -236,9 +238,8 @@ ApplicationPage {
                         selectedIndex = index;
                         itemX = note.x + mouseX;
                         itemY = note.y + nameLabel.height + 50/*header*/ + mouseY;
-                        menu.menuX = note.x + mouseX;
-                        menu.menuY = note.y + nameLabel.height + 50/*header*/ + mouseY;
-                        menu.visible = true;
+                        menu.setPosition(itemX, itemY);
+                        menu.show();
                     }
                 }
 
@@ -325,23 +326,23 @@ ApplicationPage {
             Row {
                 spacing: 10
                 anchors.horizontalCenter: parent.horizontalCenter
-                Button {
+                UX.Button {
                     id: deleteButton
-                    title: qsTr("Delete")
+                    text: qsTr("Delete")
                     height: 80
                     active: selectedItems.length > 0
                     bgSourceUp: "image://theme/btn_red_up"
                     bgSourceDn: "image://theme/btn_red_dn"
                     onClicked: {
-                        deleteConfirmationDialog.opacity = 1;
+                        deleteConfirmationDialog.show();
                         showCheckBox = false;
                         multiSelectRow.opacity = 0;
                     }
                 }
 
-                Button {
+                UX.Button {
                     id: cancelButton
-                    title: qsTr("Cancel")
+                    text: qsTr("Cancel")
                     anchors.bottom: listView.bottom
                     height: 80
                     onClicked: {
@@ -361,11 +362,8 @@ ApplicationPage {
 
     }
 
-    ContextMenu {
+    UX.ModalContextMenu {
         id: menu
-        visible: false
-        menuX: 0
-        menuY: 0
         width: 150
         height: 300
 
@@ -375,91 +373,92 @@ ApplicationPage {
         property string deleteChoice: qsTr("Delete");
         property string renameChoice: qsTr("Rename");
 
-        property variant choices: [ openChoice, /*emailChoice,*/ moveChoice, deleteChoice, renameChoice ]
-        model: choices
+        property variant choices: [ openChoice, emailChoice, moveChoice, deleteChoice, renameChoice ]
+        content: UX.ActionMenu {
+            model:  menu.choices
+            onTriggered: {
+                if (model[index] == menu.openChoice)
+                {
+                    noteClicked(selectedNote);
+                }
+                else if (model[index] == menu.emailChoice)
+                {
+                    shareDialog.opacity = 1;
+                }
+                else if (model[index] == menu.moveChoice)
+                {
+                 notebookSelector.setPosition(itemX, itemY);
+                 notebookSelector.show();
+                }
+                else if (model[index] == menu.deleteChoice)
+                {
+                    if (selectedItems.length > 1)
+                    {
+                        deleteReportWindow.text = qsTr("%1 notes have been deleted").arg(selectedItems.length);
+                    }
+                    else if (selectedItems.length == 1)
+                    {
+                        deleteReportWindow.text = qsTr("\"%1\" has been deleted").arg(selectedItems[0]);
+                    }
+                    else
+                    {
+                        deleteReportWindow.text = qsTr("\"%1\" has been deleted").arg(selectedNote);
+                    }
 
-        onTriggered: {
-            console.log("triggered: " + index);
-            if (model[index] == openChoice)
-            {
-                noteClicked(selectedNote);
-            }
-            else if (model[index] == emailChoice)
-            {
-                //shareDialog.opacity = 1;
-                /*shareObj.clearItems();
-                shareObj.addItem() // URI
-                shareObj.shareType = MeeGoUXSharingClientQmlObj.ShareTypeImage
-                shareObj.showContextTypes(mouseX, mouseY)*/
-            }
-            else if (model[index] == moveChoice)
-            {
-                notebookSelector.menuX = itemX;
-                notebookSelector.menuY = itemY;
-                notebookSelector.visible = true;
-            }
-            else if (model[index] == deleteChoice)
-            {
-                if (selectedItems.length > 1)
-                {
-                    deleteReportWindow.text = qsTr("%1 notes have been deleted").arg(selectedItems.length);
+                    deleteConfirmationDialog.show();
                 }
-                else if (selectedItems.length == 1)
-                {
-                    deleteReportWindow.text = qsTr("\"%1\" has been deleted").arg(selectedItems[0]);
-                }
-                else
-                {
-                    deleteReportWindow.text = qsTr("\"%1\" has been deleted").arg(selectedNote);
+                else if(model[index] == menu.renameChoice) {
+                    renameWindow.oldName =  selectedNote;
+                    renameWindow.opacity = 1;
                 }
 
-                deleteConfirmationDialog.opacity = 1;
-            }
-            else if(model[index] == renameChoice) {
-                renameWindow.oldName =  selectedNote;
-                renameWindow.opacity = 1;
+                 menu.hide();
             }
         }
+
+
+
     }
 
 
     ShareObj {
         id: shareObj
+        shareType: MeeGoUXSharingClientQmlObj.ShareTypeText//ShareTypeText prints warning to the console
     }
 
 
-    ContextMenu {
+    UX.ModalContextMenu {
         id: notebookSelector
 
-        visible: false
-
         property variant choices: dataHandler.getNoteBooks();
-        model: choices
+        content: UX.ActionMenu {
+            model: notebookSelector.choices
+            onTriggered: {
+                newNotebook = model[index];
 
-        onTriggered: {
-            newNotebook = model[index];
+                if (selectedItems.length > 1)
+                {
+                    moveReportWindow.text = qsTr("%1 notes have successfully been moved to \"%2\"").arg(selectedItems.length).arg(newNotebook);
+                }
+                else
+                {
+                    moveReportWindow.text = qsTr("\"%1\" has successfully been moved to \"%2\"").arg(selectedNote).arg(newNotebook);
+                }
 
-            if (selectedItems.length > 1)
-            {
-                moveReportWindow.text = qsTr("%1 notes have successfully been moved to \"%2\"").arg(selectedItems.length).arg(newNotebook);
-            }
-            else
-            {
-                moveReportWindow.text = qsTr("\"%1\" has successfully been moved to \"%2\"").arg(selectedNote).arg(newNotebook);
+                if (selectedItems.length > 0)
+                {
+                    dataHandler.moveNotes(noteListPage.caption, selectedItems, newNotebook);
+                    selectedItems = [];
+                }
+                else
+                {
+                    dataHandler.moveNote(noteListPage.caption, selectedNote, newNotebook);
+                }
+
+                visible = false;
+                moveReportWindow.opacity = 1;
             }
 
-            if (selectedItems.length > 0)
-            {
-                dataHandler.moveNotes(noteListPage.caption, selectedItems, newNotebook);
-                selectedItems = [];
-            }
-            else
-            {
-                dataHandler.moveNote(noteListPage.caption, selectedNote, newNotebook);
-            }
-
-            visible = false;
-            moveReportWindow.opacity = 1;
         }
     }
 
@@ -474,6 +473,11 @@ ApplicationPage {
         {
             console.log("shareDialog::onButtonSendClicked");
             shareDialog.opacity = 0;
+
+            var uri = model.dumpNote(selectedIndex);
+            shareObj.clearItems();
+            shareObj.addItem(uri);
+            shareObj.showContext(qsTr("Email"), noteListPage.width / 2, noteListPage.height / 2);
         }
 
         onButtonCancelClicked:
@@ -527,22 +531,19 @@ ApplicationPage {
         onOkClicked: informationDialog.visible = false;
     }
 
-    ModalDialog {
+    UX.ModalDialog {
         id: deleteConfirmationDialog
 
         opacity: 0
 
-        leftButtonText: qsTr("Delete");
-        rightButtonText: qsTr("Cancel");
-        dialogTitle: (selectedItems.length > 1) ?
+        acceptButtonText: qsTr("Delete");
+
+        title: (selectedItems.length > 1) ?
                          qsTr("Are you sure you want to delete these %1 notes?").arg(selectedItems.length)
                        : qsTr("Are you sure you want to delete \"%1\"?").arg(componentText)
         property string componentText: (selectedItems.length > 0) ? selectedItems[0] : selectedNote;
-        bgSourceUpLeft: "image://theme/btn_red_up"
-        bgSourceDnLeft: "image://theme/btn_red_dn"
 
-        onDialogClicked: {
-            if (button == 1) {
+        onAccepted: {
                 if (selectedItems.length > 0)
                 {
                     dataHandler.deleteNotes(noteListPage.caption, selectedItems);
@@ -551,14 +552,12 @@ ApplicationPage {
                 {
                     dataHandler.deleteNote(noteListPage.caption, selectedNote);
                 }
-                opacity = 0;
+                hide();
                 deleteReportWindow.opacity = 1;
             }
-            else if (button == 2) {
-                // No
-                opacity = 0;
+        onRejected: {
+                hide();
                 selectedItems = [];
-            }
         }
     }
 

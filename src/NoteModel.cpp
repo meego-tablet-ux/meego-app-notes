@@ -8,6 +8,8 @@
 
 #include "NoteModel.h"
 #include <QDebug>
+#include <QTemporaryFile>
+
 /********************************************************************
  * Note class declaration
  *
@@ -187,6 +189,9 @@ void NoteModel::clear()
         qDeleteAll(m_Notes);
         m_Notes.clear();
         m_notesNames.clear();
+        QList<QTemporaryFile *> tempFiles = m_dumpFiles.values();
+        qDeleteAll(tempFiles);
+        m_dumpFiles.clear();
         endResetModel();
     }
 }
@@ -278,5 +283,33 @@ void NoteModel::quickSort(QStringList &list, int left, int right)
         quickSort(list, i, right);
 }
 
+QString NoteModel::dumpNote(int row)
+{
+    if (row < 0 || row >= m_Notes.count())
+        return QString();
 
+    QTemporaryFile *file = m_dumpFiles.value(row);
+    if (!file) {
+        file = new QTemporaryFile();
+        m_dumpFiles.insert(row, file);
+    }
 
+    if (!file->open()) {
+        delete file;
+        m_dumpFiles.remove(row);
+        return QString();
+    }
+
+    Note *note = m_Notes[row];
+    Q_ASSERT(note);
+    if (!note) {
+        delete file;
+        m_dumpFiles.remove(row);
+        return QString();
+    }
+
+    QTextStream out(file);
+    out << note->text();
+
+    return file->fileName();
+}

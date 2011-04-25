@@ -330,7 +330,8 @@ ApplicationPage {
                     id: deleteButton
                     text: qsTr("Delete")
                     height: 80
-                    active: selectedItems.length > 0
+                    enabled: selectedItems.length > 0
+                    hasBackground: true
                     bgSourceUp: "image://theme/btn_red_up"
                     bgSourceDn: "image://theme/btn_red_dn"
                     onClicked: {
@@ -542,6 +543,9 @@ ApplicationPage {
                          qsTr("Are you sure you want to delete these %1 notes?").arg(selectedItems.length)
                        : qsTr("Are you sure you want to delete \"%1\"?").arg(componentText)
         property string componentText: (selectedItems.length > 0) ? selectedItems[0] : selectedNote;
+
+        acceptButtonImage: "image://theme/btn_red_up"
+        acceptButtonImagePressed: "image://theme/btn_red_dn"
 
         onAccepted: {
                 if (selectedItems.length > 0)

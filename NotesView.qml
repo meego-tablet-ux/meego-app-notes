@@ -10,6 +10,7 @@ import Qt 4.7
 import MeeGo.Labs.Components 0.1
 import MeeGo.Components 0.1 as UX
 import MeeGo.App.Notes 0.1
+import MeeGo.Sharing 0.1
 
 ApplicationPage {
     id: noteListPage
@@ -372,7 +373,7 @@ ApplicationPage {
         property string deleteChoice: qsTr("Delete");
         property string renameChoice: qsTr("Rename");
 
-        property variant choices: [ openChoice, /*emailChoice,*/ moveChoice, deleteChoice, renameChoice ]
+        property variant choices: [ openChoice, emailChoice, moveChoice, deleteChoice, renameChoice ]
         content: UX.ActionMenu {
             model:  menu.choices
             onTriggered: {
@@ -382,11 +383,7 @@ ApplicationPage {
                 }
                 else if (model[index] == menu.emailChoice)
                 {
-                    //shareDialog.opacity = 1;
-                    /*shareObj.clearItems();
-                         shareObj.addItem() // URI
-                         shareObj.shareType = MeeGoUXSharingClientQmlObj.ShareTypeImage
-                         shareObj.showContextTypes(mouseX, mouseY)*/
+                    shareDialog.opacity = 1;
                 }
                 else if (model[index] == menu.moveChoice)
                 {
@@ -426,6 +423,7 @@ ApplicationPage {
 
     ShareObj {
         id: shareObj
+        shareType: MeeGoUXSharingClientQmlObj.ShareTypeText//ShareTypeText prints warning to the console
     }
 
 
@@ -475,6 +473,11 @@ ApplicationPage {
         {
             console.log("shareDialog::onButtonSendClicked");
             shareDialog.opacity = 0;
+
+            var uri = model.dumpNote(selectedIndex);
+            shareObj.clearItems();
+            shareObj.addItem(uri);
+            shareObj.showContext(qsTr("Email"), noteListPage.width / 2, noteListPage.height / 2);
         }
 
         onButtonCancelClicked:

@@ -219,15 +219,12 @@ ApplicationPage {
     UX.ModalContextMenu {
         id: contextMenu
 
-        width: 150
-        height: 300
-
         property string openChoice: qsTr("Open");
         property string emailChoice: qsTr("Email");
         property string deleteChoice: qsTr("Delete");
 
-        property variant choices: [ openChoice, /*emailChoice,*/ deleteChoice ]
-        property variant defaultListChoices: [ openChoice, /*emailChoice*/ ]
+        property variant choices: [ openChoice,  deleteChoice ]
+        property variant defaultListChoices: [ openChoice ]
 
 
         content: UX.ActionMenu {
@@ -242,9 +239,6 @@ ApplicationPage {
             onTriggered: {
                 if (model[index] == contextMenu.openChoice) {
                     notebookClicked(selectedNotebook, selectedTitle)
-                }
-                else if (model[index] == contextMenu.emailChoice) {
-                    shareDialog.opacity = 1;
                 }
                 else if (model[index] == contextMenu.deleteChoice) {
                     if (selectedItems.length > 1) {
@@ -269,25 +263,6 @@ ApplicationPage {
         }
     }
 
-    // dialogs
-    ShareNote {
-        id: shareDialog
-        opacity: 0;
-        anchors.centerIn: parent
-        //focus: true;
-
-        onButtonSendClicked:
-        {
-            console.log("shareDialog::onButtonSendClicked");
-            shareDialog.opacity = 0;
-        }
-
-        onButtonCancelClicked:
-        {
-            console.log("ShareNote::onButtonCancelClicked");
-            shareDialog.opacity = 0;
-        }
-    }
 
     Loader {
         id: addDialogLoader

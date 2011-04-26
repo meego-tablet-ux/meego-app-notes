@@ -366,16 +366,20 @@ ApplicationPage {
 
     }
 
+
     UX.ModalContextMenu {
         id: menu
-        width: 150
-        height: 300
 
         property string openChoice: qsTr("Open");
-        property string emailChoice: qsTr("Share");
+        property string emailChoice: qsTr("Email");
         property string moveChoice: qsTr("Move");
         property string deleteChoice: qsTr("Delete");
         property string renameChoice: qsTr("Rename");
+
+        ShareObj {
+            id: shareObj
+            shareType: MeeGoUXSharingClientQmlObj.ShareTypeText
+        }
 
         property variant choices: [ openChoice, emailChoice, moveChoice, deleteChoice, renameChoice ]
         content: UX.ActionMenu {
@@ -387,12 +391,16 @@ ApplicationPage {
                 }
                 else if (model[index] == menu.emailChoice)
                 {
-                    shareDialog.opacity = 1;
+                     var uri = noteListPage.model.dumpNote(noteListPage.selectedIndex);
+                     shareObj.clearItems();
+                     shareObj.addItem(uri);
+                     shareObj.setParam(uri, "subject", noteListPage.selectedTitle);
+                     shareObj.showContext(qsTr("Email"), noteListPage.width / 2, noteListPage.height / 2);
                 }
                 else if (model[index] == menu.moveChoice)
                 {
-                 notebookSelector.setPosition(itemX, itemY);
-                 notebookSelector.show();
+                     notebookSelector.setPosition(itemX, itemY);
+                     notebookSelector.show();
                 }
                 else if (model[index] == menu.deleteChoice)
                 {
@@ -423,13 +431,6 @@ ApplicationPage {
 
 
     }
-
-
-    ShareObj {
-        id: shareObj
-        shareType: MeeGoUXSharingClientQmlObj.ShareTypeText
-    }
-
 
     UX.ModalContextMenu {
         id: notebookSelector
@@ -480,30 +481,6 @@ ApplicationPage {
         }
     }
 
-    ShareNote {
-        id: shareDialog
-        opacity: 0;
-        anchors.centerIn: parent
-        dialogTitle: qsTr("Email note \"%1\"").arg(selectedNote);
-
-        onButtonSendClicked:
-        {
-            console.log("shareDialog::onButtonSendClicked");
-            shareDialog.opacity = 0;
-
-
-            var uri = model.dumpNote(selectedIndex);
-            shareObj.clearItems();
-            shareObj.addItem(uri);
-            shareObj.showContext(qsTr("Email"), noteListPage.width / 2, noteListPage.height / 2);
-        }
-
-        onButtonCancelClicked:
-        {
-            console.log("ShareNote::onButtonCancelClicked");
-            shareDialog.opacity = 0;
-        }
-    }
 
     Loader {
         id: addDialogLoader

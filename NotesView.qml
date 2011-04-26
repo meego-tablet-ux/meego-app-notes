@@ -133,6 +133,9 @@ ApplicationPage {
 //                        itemX = note.x + mouseX;
 //                        itemY = note.y + nameLabel.height + 50/*header*/ + mouseY;
 
+                        itemX = map.x;
+                        itemY = map.y + 50;
+
                         menu.setPosition(map.x, map.y + 50);
                         menu.show();
                     }
@@ -431,7 +434,21 @@ ApplicationPage {
     UX.ModalContextMenu {
         id: notebookSelector
 
-        property variant choices: dataHandler.getNoteBooks();
+        //Removes current notebook's name from a list of notebooks.
+        //Fixes moving a note to current notebook and prevent vanishing of the note.
+        function filterNoteBooksList()
+        {
+            var res = [];
+            var list = dataHandler.getNoteBooks();
+            for (var i = 0; i < list.length; ++i) {
+                if (list[i] == model.notebookName)
+                    continue;
+                res.push(list[i]);
+            }
+            return res;
+        }
+
+        property variant choices: filterNoteBooksList()//dataHandler.getNoteBooks();
         content: UX.ActionMenu {
             model: notebookSelector.choices
             onTriggered: {

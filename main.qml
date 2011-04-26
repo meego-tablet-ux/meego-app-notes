@@ -93,7 +93,6 @@ Window {
             onCloseWindow: {
                 window.applicationPage = notebookList;
             }
-
         }
     }
 
@@ -111,6 +110,10 @@ Window {
             {
                 window.applicationPage = notebookList;
                 window.addApplicationPage(noteList);
+                filterModel = filterModelList;
+            }
+
+            onClose: {
                 filterModel = filterModelList;
             }
         }

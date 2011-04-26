@@ -45,6 +45,9 @@ protected:
  * This class implements note data model.
  *
  *******************************************************************/
+
+class QTemporaryFile;
+
 class NoteModel : public QAbstractListModel
 {
     Q_OBJECT
@@ -80,12 +83,14 @@ public slots:
     void removeNote(const QString &name);
     void sort();
     void refresh();
+    QString dumpNote(int row);
 
 protected:
     QStringList m_notesNames;
     QList<Note*> m_Notes;
     CDataHandler *m_handler;
     QString m_notebookName;
+    QMap<int, QTemporaryFile *> m_dumpFiles;
 
 private:
     void init();

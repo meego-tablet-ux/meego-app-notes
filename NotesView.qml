@@ -10,6 +10,7 @@ import Qt 4.7
 import MeeGo.Labs.Components 0.1
 import MeeGo.Components 0.1 as UX
 import MeeGo.App.Notes 0.1
+import MeeGo.Sharing 0.1
 
 ApplicationPage {
     id: noteListPage
@@ -139,7 +140,7 @@ ApplicationPage {
 
                 MouseArea {
                     anchors.right: parent.right
-                    width: parent.height
+                    width: parent.height * 2 //big thumbs + little screen = sad panda; so we be a little lenient
                     height: parent.height
 
                     drag.target: parent
@@ -244,7 +245,7 @@ ApplicationPage {
 
                 MouseArea {
                     anchors.right: parent.right
-                    width: parent.height
+                    width: (parent.height * 2) //Because we want to be lenient with peopel who have big thumbs
                     height: parent.height
 
                     drag.target: parent
@@ -329,7 +330,8 @@ ApplicationPage {
                     id: deleteButton
                     text: qsTr("Delete")
                     height: 80
-                    active: selectedItems.length > 0
+                    enabled: selectedItems.length > 0
+                    hasBackground: true
                     bgSourceUp: "image://theme/btn_red_up"
                     bgSourceDn: "image://theme/btn_red_dn"
                     onClicked: {
@@ -372,7 +374,7 @@ ApplicationPage {
         property string deleteChoice: qsTr("Delete");
         property string renameChoice: qsTr("Rename");
 
-        property variant choices: [ openChoice, /*emailChoice,*/ moveChoice, deleteChoice, renameChoice ]
+        property variant choices: [ openChoice, emailChoice, moveChoice, deleteChoice, renameChoice ]
         content: UX.ActionMenu {
             model:  menu.choices
             onTriggered: {
@@ -382,11 +384,7 @@ ApplicationPage {
                 }
                 else if (model[index] == menu.emailChoice)
                 {
-                    //shareDialog.opacity = 1;
-                    /*shareObj.clearItems();
-                         shareObj.addItem() // URI
-                         shareObj.shareType = MeeGoUXSharingClientQmlObj.ShareTypeImage
-                         shareObj.showContextTypes(mouseX, mouseY)*/
+                    shareDialog.opacity = 1;
                 }
                 else if (model[index] == menu.moveChoice)
                 {
@@ -426,6 +424,7 @@ ApplicationPage {
 
     ShareObj {
         id: shareObj
+        shareType: MeeGoUXSharingClientQmlObj.ShareTypeText//ShareTypeText prints warning to the console
     }
 
 
@@ -475,6 +474,11 @@ ApplicationPage {
         {
             console.log("shareDialog::onButtonSendClicked");
             shareDialog.opacity = 0;
+
+            var uri = model.dumpNote(selectedIndex);
+            shareObj.clearItems();
+            shareObj.addItem(uri);
+            shareObj.showContext(qsTr("Email"), noteListPage.width / 2, noteListPage.height / 2);
         }
 
         onButtonCancelClicked:
@@ -539,6 +543,9 @@ ApplicationPage {
                          qsTr("Are you sure you want to delete these %1 notes?").arg(selectedItems.length)
                        : qsTr("Are you sure you want to delete \"%1\"?").arg(componentText)
         property string componentText: (selectedItems.length > 0) ? selectedItems[0] : selectedNote;
+
+        acceptButtonImage: "image://theme/btn_red_up"
+        acceptButtonImagePressed: "image://theme/btn_red_dn"
 
         onAccepted: {
                 if (selectedItems.length > 0)

@@ -14,6 +14,8 @@ Item {
 
     anchors.fill: parent
     property alias dialogTitle: title.text
+    property alias email: emailAddress.text
+    property alias message: message.text
     signal buttonSendClicked()
     signal buttonCancelClicked()
 

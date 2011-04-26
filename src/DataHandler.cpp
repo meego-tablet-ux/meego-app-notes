@@ -413,7 +413,7 @@ void CDataHandler::deleteNoteBooks(const QStringList& _notebooks)
 void CDataHandler::modifyNote(const QString& _notebookID, const QString& _noteName, const QString& _text)
 {
     m_mutex.lock();
-    save(_notebookID, _noteName, _text);
+    save(_notebookID, _noteName, _text);    
     m_mutex.unlock();
     emit noteChanged();
 }

@@ -26,6 +26,9 @@ ApplicationPage {
     signal closeWindow();
 
 
+    Component.onDestruction: {
+        noteModel.refresh();
+    }
 
     //page specific context menu
     menuContent: UX.ActionMenu {

@@ -53,7 +53,7 @@ class NoteModel : public QAbstractListModel
     Q_OBJECT
 public:
     Q_PROPERTY(CDataHandler *dataHandler READ dataHandler WRITE setDataHandler)
-    Q_PROPERTY(QString notebookName READ notebookName WRITE setNotebookName)
+    Q_PROPERTY(QString notebookName READ notebookName WRITE setNotebookName NOTIFY noteBookNameChanged)
     enum NotesRoles
     {
         NameRole = Qt::UserRole + 1,
@@ -74,11 +74,14 @@ public:
         m_handler = handler;
         connect(m_handler, SIGNAL(noteAdded(QString)), this, SLOT(addNote(QString)));
         connect(m_handler, SIGNAL(noteRemoved(QString)), this, SLOT(removeNote(QString)));
-        connect(m_handler, SIGNAL(noteChanged()),this,SLOT(refresh()));
     }
     CDataHandler * dataHandler() { return m_handler; }
-    void setNotebookName(const QString &name) { m_notebookName = name; init(); }
+    void setNotebookName(const QString &name) { m_notebookName = name; init(); emit noteBookNameChanged(); }
     QString notebookName() { return m_notebookName; }
+
+signals:
+    void noteBookNameChanged();
+
 public slots:
     void addNote(const QString &name);
     void removeNote(const QString &name);

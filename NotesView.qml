@@ -424,7 +424,7 @@ ApplicationPage {
 
     ShareObj {
         id: shareObj
-        shareType: MeeGoUXSharingClientQmlObj.ShareTypeText//ShareTypeText prints warning to the console
+        shareType: MeeGoUXSharingClientQmlObj.ShareTypeText
     }
 
 
@@ -467,13 +467,13 @@ ApplicationPage {
         id: shareDialog
         opacity: 0;
         anchors.centerIn: parent
-        //focus: true;
         dialogTitle: qsTr("Email note \"%1\"").arg(selectedNote);
 
         onButtonSendClicked:
         {
             console.log("shareDialog::onButtonSendClicked");
             shareDialog.opacity = 0;
+
 
             var uri = model.dumpNote(selectedIndex);
             shareObj.clearItems();

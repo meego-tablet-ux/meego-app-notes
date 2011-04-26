@@ -308,8 +308,13 @@ QString NoteModel::dumpNote(int row)
         return QString();
     }
 
+    //because note->text() is empty, I have to do this:
+    QString theRealText_OMG_THIS_IS_STUPID = m_handler->loadNoteData(m_notebookName,note->title());
+
     QTextStream out(file);
-    out << note->text();
+    out << theRealText_OMG_THIS_IS_STUPID;
+
+    out.flush();
 
     return file->fileName();
 }

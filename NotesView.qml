@@ -367,7 +367,7 @@ ApplicationPage {
     }
 
 
-    UX.ModalContextMenu {
+    UX.ContextMenu {
         id: menu
 
         property string openChoice: qsTr("Open");
@@ -432,7 +432,7 @@ ApplicationPage {
 
     }
 
-    UX.ModalContextMenu {
+    UX.ContextMenu {
         id: notebookSelector
 
         //Removes current notebook's name from a list of notebooks.

@@ -216,7 +216,7 @@ ApplicationPage {
     }
 
     // context menu system
-    UX.ModalContextMenu {
+    UX.ContextMenu {
         id: contextMenu
 
         property string openChoice: qsTr("Open");

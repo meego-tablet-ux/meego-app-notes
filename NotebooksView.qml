@@ -7,11 +7,10 @@
  */
 
 import Qt 4.7
-import MeeGo.Labs.Components 0.1
-import MeeGo.Components 0.1 as UX
+import MeeGo.Components 0.1
 import MeeGo.App.Notes 0.1
 
-ApplicationPage {
+AppPage {
     id: notebookListPage
 
     property string selectedNotebook: qsTr("Everyday Notes (default)")
@@ -19,33 +18,89 @@ ApplicationPage {
     property string selectedTitle
     property bool showCheckBox: dataHandler.getCheckBox()
     property variant selectedItems: [];
+//    property variant filterModelList: [qsTr("All"), qsTr("Alphabetical order")]
 
     signal notebookClicked(string name, string title)
     signal updateView();
 
+    enableCustomActionMenu: true
 
-    menuContent: Column {
-        UX.ActionMenu {
-            id: firstActionMenu
-            maxWidth: window.width
-            model: {
-                if((listView.count == 1) || (showCheckBox) ) {
-                    return [qsTr("New Notebook")];
-                } else {
-                    return [qsTr("New Notebook"), qsTr("Select Multiple")];
+//    actionMenuModel: {
+//        if((listView.count == 1) || (showCheckBox) ) {
+//            return [qsTr("New Notebook"), qsTr("All"), qsTr("Alphabetical order")];
+//        } else {
+//            return [qsTr("New Notebook"), qsTr("Select Multiple"), qsTr("All"), qsTr("Alphabetical order")];
+//        }
+//    }
+
+//    actionMenuPayload: [ 0, 1 ]
+
+//    onActionMenuTriggered: {
+//        if(selectedItem == 0) {
+//            addDialogLoader.sourceComponent = addDialogComponent;
+//            addDialogLoader.item.parent = notebookListPage;
+//        } else if(selectedItem == 1) {
+//            console.log("NotebooksView MultiSelect");
+//            showCheckBox = true;
+//            multiSelectRow.opacity = 1;
+//        }
+//    }
+
+    onActionMenuIconClicked: {
+        if (window.pageStack.currentPage == notebookListPage) {
+            customMenu.setPosition(mouseX, mouseY);
+            customMenu.show();
+        }
+    }
+
+    ContextMenu {
+        id: customMenu
+        content: Column {
+            ActionMenu {
+                id: firstActionMenu
+                model: {
+                    if((listView.count == 1) || (showCheckBox) ) {
+                        return [qsTr("New Notebook")];
+                    } else {
+                        return [qsTr("New Notebook"), qsTr("Select Multiple")];
+                    }
                 }
+                onTriggered: {
+                    if(index == 0) {
+                        addDialogLoader.sourceComponent = addDialogComponent;
+                        addDialogLoader.item.parent = notebookListPage;
+                    } else if(index == 1) {
+                        showCheckBox = true;
+                        multiSelectRow.opacity = 1;
+                    }
+                    customMenu.hide();
+                }//ontriggered
+            }//action menu
+            Text {
+                id: viewByText
+                anchors.left: parent.left
+                anchors.leftMargin: 5
+                text: qsTr("View by:")
+                font.pixelSize: theme_fontPixelSizeLarge
+                color: theme_fontColorNormal
             }
-            onTriggered: {
-                if(index == 0) {
-                    addDialogLoader.sourceComponent = addDialogComponent;
-                    addDialogLoader.item.parent = notebookListPage;
-                } else if(index == 1) {
-                    showCheckBox = true;
-                    multiSelectRow.opacity = 1;
-                }
-                notebookListPage.closeMenu();
-            }//ontriggered
-        }//action menu
+            ActionMenu {
+                id: secondActionMenu
+                model: [qsTr("All"), qsTr("A-Z")]
+                onTriggered: {
+                    if(index == 0) {
+                        dataHandler.setSort(false);
+                        updateView();
+                    } else if(index == 1) {
+                        dataHandler.setSort(true);
+                        notebooksModel.sort();
+                        updateView();
+                    }
+                    customMenu.hide();
+                }//ontriggered
+            }
+
+        }
     }
 
     Component {
@@ -138,7 +193,7 @@ ApplicationPage {
 
     Item {
         id: mainContainer
-        anchors.fill: notebookListPage.content
+        anchors.fill: notebookListPage
 
         ListView {
             id: listView
@@ -180,7 +235,7 @@ ApplicationPage {
             Row {
                 spacing: 10
                 anchors.horizontalCenter: parent.horizontalCenter
-                UX.Button {
+                Button {
                     id: deleteButton
                     text: qsTr("Delete")
                     height: 80
@@ -195,7 +250,7 @@ ApplicationPage {
                     }
                 }
 
-                UX.Button {
+                Button {
                     id: cancelButton
                     text: qsTr("Cancel")
                     anchors.bottom: listView.bottom
@@ -216,7 +271,7 @@ ApplicationPage {
     }
 
     // context menu system
-    UX.ContextMenu {
+    ContextMenu {
         id: contextMenu
 
         property string openChoice: qsTr("Open");
@@ -227,7 +282,7 @@ ApplicationPage {
         property variant defaultListChoices: [ openChoice ]
 
 
-        content: UX.ActionMenu {
+        content: ActionMenu {
             model:  {
                 if(selectedNotebook == defaultNotebook) {
                     return contextMenu.defaultListChoices;
@@ -310,7 +365,7 @@ ApplicationPage {
         }
     }
 
-    UX.ModalDialog {
+    ModalDialog {
         id: deleteConfirmationDialog
         acceptButtonText: qsTr("Delete");
         title: (selectedItems.length > 1) ?

@@ -7,10 +7,10 @@
  */
 
 import Qt 4.7
-import MeeGo.Labs.Components 0.1 as Labs
 import MeeGo.Components 0.1
 import MeeGo.App.Notes 0.1
 import MeeGo.Sharing 0.1
+import MeeGo.Sharing.UI 0.1
 
 AppPage {
     id: noteListPage
@@ -410,7 +410,7 @@ AppPage {
         property string deleteChoice: qsTr("Delete");
         property string renameChoice: qsTr("Rename");
 
-        Labs.ShareObj {
+        ShareObj {
             id: shareObj
             shareType: MeeGoUXSharingClientQmlObj.ShareTypeText
         }

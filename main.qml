@@ -7,41 +7,25 @@
  */
 
 import Qt 4.7
-import MeeGo.Labs.Components 0.1
-import MeeGo.Components 0.1 as UX
+import MeeGo.Components 0.1
 import MeeGo.App.Notes 0.1
 
 Window {
     id: window
-    title: qsTr("Notes")          //labs
-    filterModel: filterModelList  //labs
+    toolBarTitle: qsTr("Notes")
+
 
     property string notebookName
     property string noteName
     property string noteData
-    property variant filterModelList: [qsTr("All"), qsTr("Alphabetical order")]
 
-    applicationPage: notebookList //labs
+    Component.onCompleted: {
+        console.log("load MainPage")
+        switchBook( notebookList )
+    }
 
     onNotebookNameChanged: {
         noteModel.notebookName = notebookName;
-    }
-
-    onFilterTriggered: {  //labs
-        if(index == 0) {
-            dataHandler.setSort(false);
-            console.log("DisableSort");
-        } else if(index == 1) {
-            dataHandler.setSort(true);
-            console.log("EnableSort");
-            if (applicationPage == notebookList) {
-                notebooksModel.sort();
-                console.log("notebooksModel");
-            } else if(applicationPage == noteList) {
-                noteModel.sort();
-                console.log("noteModel");
-            }
-        }
     }
 
     DataHandler {
@@ -64,10 +48,10 @@ Window {
         NotebooksView {
             id: notebooksView
             anchors.fill: parent
-            title: qsTr("Notes")
+            pageTitle: qsTr("Notes")
 
             onNotebookClicked: {
-                window.addApplicationPage(noteList);
+                window.addPage(noteList);
                 notebookName = name;
             }
 
@@ -80,18 +64,18 @@ Window {
         NotesView {
             id: notesView
             anchors.fill: parent
-            title: qsTr("Notes")
+            pageTitle: qsTr("Notes")
             caption: notebookName
             model: noteModel
 
             onNoteClicked: {
-                window.addApplicationPage(noteDetailPage);
+                window.addPage(noteDetailPage);
                 noteName = name;
                 filterModel = [];
             }
 
             onCloseWindow: {
-                window.applicationPage = notebookList;
+                window.switchBook(notebookList);
             }
         }
     }
@@ -108,14 +92,14 @@ Window {
 
             onCloseWindow:
             {
-                window.applicationPage = notebookList;
-                window.addApplicationPage(noteList);
+                window.switchBook(notebookList);
+                window.addPage(noteList);
                 filterModel = filterModelList;
             }
 
-            onClose: {
-                filterModel = filterModelList;
-            }
+//            onClose: {
+//                filterModel = filterModelList;
+//            }
         }
     }
 }

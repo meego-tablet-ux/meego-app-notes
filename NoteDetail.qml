@@ -7,11 +7,10 @@
  */
 
 import Qt 4.7
-import MeeGo.Labs.Components 0.1
-import MeeGo.Components 0.1 as UX
+import MeeGo.Components 0.1
 import MeeGo.App.Notes 0.1
 
-ApplicationPage {
+AppPage {
     id: topRect;
     property string notebookID: qsTr("Everyday Notes (default)")
     property string noteName: qsTr("Note name...")
@@ -30,22 +29,21 @@ ApplicationPage {
         noteModel.refresh();
     }
 
-    //page specific context menu
-    menuContent: UX.ActionMenu {
-        id: actions
-        model: [qsTr("Save"), qsTr("Delete"),/* qsTr("Share")*/ ]
-        onTriggered: {
-            if(index == 0) {
-                manualSaveTimer.running = true;
-                dataHandler.modifyNote(notebookID, nameLabel.text, editor.text);
-            } else if(index == 1) {
-                deleteConfirmationDialog.show();
-            } else {
-                shareDialog.opacity = 1;
-            }
-            topRect.closeMenu();
-        }//ontriggered
-    }//action menu
+    actionMenuModel: [qsTr("Save"), qsTr("Delete"),/* qsTr("Share")*/ ]
+
+    actionMenuPayload: [0, 1, 2]
+
+
+    onActionMenuTriggered: {
+        if(selectedItem == 0) {
+            manualSaveTimer.running = true;
+            dataHandler.modifyNote(notebookID, nameLabel.text, editor.text);
+        } else if(selectedItem == 1) {
+            deleteConfirmationDialog.show();
+        } else {
+            shareDialog.opacity = 1;
+        }
+    }
 
     TextEditHandler {
         id: textEditHandler
@@ -53,7 +51,7 @@ ApplicationPage {
 
     Item {
         id: content
-        anchors.fill: topRect.content
+        anchors.fill: topRect
 
         Rectangle {
             id: textRect;
@@ -81,7 +79,7 @@ ApplicationPage {
             }
         }
 
-        UX.TextField {
+        TextField {
             id: editor
             property int topMargins: 20
             anchors.top: textRect.bottom;
@@ -116,7 +114,7 @@ ApplicationPage {
             interval: 5000
         }
 
-        UX.ModalDialog {
+        ModalDialog {
             id: deleteConfirmationDialog
             opacity: 0
             acceptButtonText: qsTr("Yes");

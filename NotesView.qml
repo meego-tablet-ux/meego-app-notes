@@ -7,12 +7,12 @@
  */
 
 import Qt 4.7
-import MeeGo.Labs.Components 0.1
-import MeeGo.Components 0.1 as UX
+import MeeGo.Labs.Components 0.1 as Labs
+import MeeGo.Components 0.1
 import MeeGo.App.Notes 0.1
 import MeeGo.Sharing 0.1
 
-ApplicationPage {
+AppPage {
     id: noteListPage
 
     property string notebook  
@@ -32,30 +32,64 @@ ApplicationPage {
     signal closeWindow();
     signal updateView();
 
-    menuContent: Column {
-        UX.ActionMenu {
-            id: actionsAddNote
-            maxWidth: window.width
-            model:{
-                if((listView.count == 1) || (showCheckBox) ) {
-                    return [qsTr("New Note")];
-                } else {
-                    return [qsTr("New Note"), qsTr("Select Multiple")];
-                }
-            }
-            onTriggered: {
-                if(index == 0) {
-                    addDialogLoader.sourceComponent = addDialogComponent;
-                    addDialogLoader.item.parent = noteListPage;
-                } else if(index ==1) {
-                    showCheckBox = true;
-                    multiSelectRow.opacity = 1;
-                }
-                noteListPage.closeMenu();
-            }//ontriggered
-        }//action menu
+    enableCustomActionMenu: true
+
+    onActionMenuIconClicked: {
+        if (window.pageStack.currentPage == noteListPage) {
+            notesCustomMenu.setPosition(mouseX, mouseY);
+            notesCustomMenu.show();
+        }
     }
 
+    ContextMenu {
+        id: notesCustomMenu
+        content: Column {
+            ActionMenu {
+                id: firstActionMenu
+                model: {
+                    if((listView.count == 1) || (showCheckBox) ) {
+                        return [qsTr("New Note")];
+                    } else {
+                        return [qsTr("New Note"), qsTr("Select Multiple")];
+                    }
+                }
+                onTriggered: {
+                    if(index == 0) {
+                        addDialogLoader.sourceComponent = addDialogComponent;
+                        addDialogLoader.item.parent = noteListPage;
+                    } else if(index ==1) {
+                        showCheckBox = true;
+                        multiSelectRow.opacity = 1;
+                    }
+                    notesCustomMenu.hide();
+                }//ontriggered
+            }//action menu
+            Text {
+                id: viewByText
+                anchors.left: parent.left
+                anchors.leftMargin: 5
+                text: qsTr("View by:")
+                font.pixelSize: theme_fontPixelSizeLarge
+                color: theme_fontColorNormal
+            }
+            ActionMenu {
+                id: secondActionMenu
+                model: [qsTr("All"), qsTr("A-Z")]
+                onTriggered: {
+                    if(index == 0) {
+                        dataHandler.setSort(false);
+                        updateView();
+                    } else if(index == 1) {
+                        dataHandler.setSort(true);
+                        notebooksModel.sort();
+                        updateView();
+                    }
+                    notesCustomMenu.hide();
+                }//ontriggered
+            }
+
+        }
+    }
 
     TextEditHandler {
         id: textEditHandler
@@ -72,7 +106,7 @@ ApplicationPage {
 
     Item {
         id: content
-        anchors.fill: noteListPage.content
+        anchors.fill: noteListPage
 
         Text {
             id: nameLabel
@@ -329,7 +363,7 @@ ApplicationPage {
             Row {
                 spacing: 10
                 anchors.horizontalCenter: parent.horizontalCenter
-                UX.Button {
+                Button {
                     id: deleteButton
                     text: qsTr("Delete")
                     height: 80
@@ -344,7 +378,7 @@ ApplicationPage {
                     }
                 }
 
-                UX.Button {
+                Button {
                     id: cancelButton
                     text: qsTr("Cancel")
                     anchors.bottom: listView.bottom
@@ -367,7 +401,7 @@ ApplicationPage {
     }
 
 
-    UX.ContextMenu {
+    ContextMenu {
         id: menu
 
         property string openChoice: qsTr("Open");
@@ -376,13 +410,13 @@ ApplicationPage {
         property string deleteChoice: qsTr("Delete");
         property string renameChoice: qsTr("Rename");
 
-        ShareObj {
+        Labs.ShareObj {
             id: shareObj
             shareType: MeeGoUXSharingClientQmlObj.ShareTypeText
         }
 
         property variant choices: [ openChoice, emailChoice, moveChoice, deleteChoice, renameChoice ]
-        content: UX.ActionMenu {
+        content: ActionMenu {
             model:  menu.choices
             onTriggered: {
                 if (model[index] == menu.openChoice)
@@ -432,7 +466,7 @@ ApplicationPage {
 
     }
 
-    UX.ContextMenu {
+    ContextMenu {
         id: notebookSelector
 
         //Removes current notebook's name from a list of notebooks.
@@ -450,7 +484,7 @@ ApplicationPage {
         }
 
         property variant choices: filterNoteBooksList()//dataHandler.getNoteBooks();
-        content: UX.ActionMenu {
+        content: ActionMenu {
             model: notebookSelector.choices
             onTriggered: {
                 newNotebook = model[index];
@@ -526,7 +560,7 @@ ApplicationPage {
         onOkClicked: informationDialog.visible = false;
     }
 
-    UX.ModalDialog {
+    ModalDialog {
         id: deleteConfirmationDialog
 
         opacity: 0

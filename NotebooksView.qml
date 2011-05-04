@@ -277,8 +277,9 @@ AppPage {
         property string openChoice: qsTr("Open");
         property string emailChoice: qsTr("Email");
         property string deleteChoice: qsTr("Delete");
+        property string renameChoice: qsTr("Rename")
 
-        property variant choices: [ openChoice,  deleteChoice ]
+        property variant choices: [ openChoice,  deleteChoice, renameChoice ]
         property variant defaultListChoices: [ openChoice ]
 
 
@@ -312,8 +313,12 @@ AppPage {
                     {
                         deleteConfirmationDialog.show();
                     }
+                } else if (model[index] == contextMenu.renameChoice) {
+                    renameWindow.oldName = notebookListPage.selectedTitle;
+                    renameWindow.visible = true;
                 }
-                 contextMenu.hide();
+
+                contextMenu.hide();
             }
         }
     }
@@ -426,6 +431,38 @@ AppPage {
         visible: false
 
         onOkClicked: informationDialog.visible = false;
+    }
+
+    TwoButtonsModalDialog {
+        id: renameWindow
+        visible: false
+        buttonText: qsTr("OK");
+        button2Text: qsTr("Cancel");
+        dialogTitle: qsTr("Rename NoteBook")
+        property string oldName
+        text: oldName
+        menuHeight: 150
+        minWidth: 260
+        onButton1Clicked: {
+            var newName = renameWindow.text;
+
+            if (dataHandler.noteBookExists(newName)) {
+                visible = false;
+                updateView();
+
+                informationDialog.info = qsTr("A NoteBook <b>'%1'</b> already exists.").arg(newName);
+                informationDialog.visible = true;
+                return;
+            }
+
+            dataHandler.renameNoteBook(oldName, newName);
+
+            visible = false;
+            updateView();
+        }
+        onButton2Clicked: {
+            visible = false;
+        }
     }
 }
 

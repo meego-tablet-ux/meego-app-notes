@@ -63,6 +63,7 @@ public:
 public slots:
     void addNotebook(const QString &name);
     void removeNotebook(const QString &name);
+    void renameNotebook(const QString &oldName, const QString &newName);
     void handleNotesChanging() { this->reset(); }
     void sort();
 

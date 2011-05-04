@@ -1461,3 +1461,86 @@ bool CDataHandler::noteExists(const QString &noteBookName, const QString &noteNa
     return notes.contains(noteName);
 }
 
+bool CDataHandler::renameNoteBookHelper(QFile& dbs, QFile& dbs2, const QString& oldName, const QString &newName)
+{
+    bool bFound = false;
+
+    QString strLine, strName;
+
+    dbs.reset();
+    QTextStream in(&dbs);
+    QTextStream out(&dbs2);
+    while (!in.atEnd()) {
+        strLine = in.readLine();
+        strName = getStringAttribute(strLine, "name=");
+        if (strName == oldName) {
+            bFound = true;
+            //it's unbelievable overhead,
+            //but it's really neccessary to prevent situation when an oldName consists of letter(s) which is/are present in strLine.
+
+            QString position = getStringAttribute(strLine, "position=");
+            QString path = getStringAttribute(strLine, "path=");
+            path = path.mid(0, path.lastIndexOf('/') + 1) + newName;
+
+            strLine = QString("name=%1,position=%2,path=%3,title=%4,").arg(newName).arg(position).arg(path).arg(newName);
+        }
+        out << strLine << "\n";
+    }
+
+    return bFound;
+}
+
+void CDataHandler::renameNoteBook(const QString &oldNoteBookName, const QString &newNoteBookName)
+{
+    bool bFound = false;
+    // cannot remove default note book
+    if (oldNoteBookName == STR_DEFAULT_NOTEBOOK)
+        return;
+
+    //check if the data folder exists
+    if (!checkAppData())
+        return;
+
+    QString home(QDir::homePath());
+    if (!home.endsWith("/"))
+        home.append("/");
+
+    QFile dbs(home + ".MeeGo/Notes/data");
+    if (!dbs.exists())
+        return;
+
+    QFile dbs2(home + ".MeeGo/Notes/data.bak");
+    if (dbs.open(QIODevice::ReadOnly))
+    {
+        if (dbs2.open(QIODevice::WriteOnly | QIODevice::Append))
+        {
+            bFound = renameNoteBookHelper(dbs, dbs2, oldNoteBookName, newNoteBookName);
+            dbs2.close();
+        }
+        dbs.close();
+    }
+
+    if (bFound) //now we should replace old file with new one
+    {
+        if (QFile::remove(home + ".MeeGo/Notes/data")) //remove old file
+        {
+            QFile::rename(home + ".MeeGo/Notes/data.bak", home + ".MeeGo/Notes/data");
+
+            QDir dir(home + ".MeeGo/Notes/");
+            if (!dir.rename(oldNoteBookName, newNoteBookName)) {
+                if (dbs.open(QIODevice::ReadOnly))
+                {
+                    if (dbs2.open(QIODevice::WriteOnly | QIODevice::Append))
+                    {
+                        bFound = renameNoteBookHelper(dbs, dbs2, newNoteBookName, oldNoteBookName);
+                        dbs2.close();
+                    }
+                    dbs.close();
+                }
+                return;
+            }
+
+            emit notebookRenamed(oldNoteBookName, newNoteBookName);
+        }
+    }
+}

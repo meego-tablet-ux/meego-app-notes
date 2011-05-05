@@ -98,11 +98,11 @@ Item {
                         color: "white"
                         //focus: true
 
-                        TextInput {
+                        TextEntry {
                             id: emailAddress
                             text: qsTr("Enter Email addresses");
                             opacity: 0.25
-                            font.italic: true
+//                            font.italic: true
                             //focus: true
                             anchors.fill: parent
 
@@ -158,11 +158,11 @@ Item {
                     color: "white"
                     // focus: true
 
-                    TextEdit {
+                    TextField {
                         id: message
                         text: qsTr("Add a message");
                         opacity: 0.25
-                        font.italic: true
+//                        font.italic: true
                         anchors.fill: parent
                         height: parent.height
                         //focus: true

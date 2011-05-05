@@ -274,15 +274,15 @@ Item {
 
                 clip: true
 
-                TextEdit {
+                TextField {
                     id: edit
 
                     width: flick.width
                     height: flick.height
 
-                    wrapMode: TextEdit.Wrap
-                    onCursorRectangleChanged: flick.ensureVisible(cursorRectangle)
-                    font.pixelSize: theme.fontPixelSizeNormal
+//                    wrapMode: TextEdit.Wrap
+//                    onCursorRectangleChanged: flick.ensureVisible(cursorRectangle)
+//                    font.pixelSize: theme.fontPixelSizeNormal
 
                     onTextChanged: borderImage.textChanged()//Fix for TextField
                 }

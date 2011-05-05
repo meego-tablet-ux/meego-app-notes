@@ -62,6 +62,7 @@ public:
 public slots:
     bool noteBookExists(const QString &noteBookName);
     bool noteExists(const QString &noteBookName, const QString &noteName);
+    void renameNoteBook(const QString &oldNoteBookName, const QString &newNoteBookName);
 
 protected:
     bool checkAppData();
@@ -77,9 +78,13 @@ protected:
 private:
     QMutex m_mutex;
 
+private:
+    bool renameNoteBookHelper(QFile &dbs, QFile &dbs2, const QString &oldName, const QString &newName);
+
 signals:
     void notebookAdded(const QString &name);
     void notebookRemoved(const QString &name);
+    void notebookRenamed(const QString &oldName, const QString &newName);
     void noteAdded(const QString &name);
     void noteRemoved(const QString &name);
     void noteChanged();

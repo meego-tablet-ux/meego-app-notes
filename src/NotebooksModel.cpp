@@ -156,6 +156,7 @@ void NotebooksModel::init()
 {
     connect(m_handler, SIGNAL(notebookAdded(QString)), this, SLOT(addNotebook(QString)));
     connect(m_handler, SIGNAL(notebookRemoved(QString)), this, SLOT(removeNotebook(QString)));
+    connect(m_handler, SIGNAL(notebookRenamed(QString,QString)), SLOT(renameNotebook(QString,QString)));
     connect(m_handler, SIGNAL(noteAdded(QString)), this, SLOT(handleNotesChanging()));
     connect(m_handler, SIGNAL(noteRemoved(QString)), this, SLOT(handleNotesChanging()));
 
@@ -180,6 +181,17 @@ void NotebooksModel::removeNotebook(const QString &name)
         m_notebooksTitles.removeAt(index);
         endRemoveRows();
     }
+}
+
+void NotebooksModel::renameNotebook(const QString &oldName, const QString &newName)
+{
+    const int index = m_notebooksTitles.indexOf(oldName);
+    if (index < 0)
+        return;
+    delete m_notebooks[index];
+    m_notebooks[index] = new Notebook(newName, newName);
+    m_notebooksTitles[index] = newName;
+    reset();
 }
 
 void NotebooksModel::sort()

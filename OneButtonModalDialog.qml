@@ -83,11 +83,11 @@ Item {
                 //border.width: 1
                 focus: true
 
-                TextInput {
+                TextEntry {
                     id: textInput
                     anchors.fill: parent;
                     text: qsTr("Some text here");
-                    font.italic: true
+//                    font.italic: true
                     //fixme: focus issue
                     opacity: 0.25
                     focus: true

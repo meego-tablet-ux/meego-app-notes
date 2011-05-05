@@ -318,3 +318,9 @@ QString NoteModel::dumpNote(int row)
 
     return file->fileName();
 }
+
+void NoteModel::notebookNameChanged(const QString &oldName, const QString &newName)
+{
+    Q_UNUSED(oldName);
+    setNotebookName(newName);
+}

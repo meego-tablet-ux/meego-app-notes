@@ -350,7 +350,7 @@ AppPage {
                 addDialogLoader.sourceComponent = undefined;
 
                 if (dataHandler.noteBookExists(text)) {
-                    informationDialog.info = qsTr("A NoteBook <b>'" + text + "'</b> already exists.");
+                    informationDialog.info = qsTr("A NoteBook <b>'%1'</b> already exists.").arg(text);
                     informationDialog.visible = true;
                     return;
                 }

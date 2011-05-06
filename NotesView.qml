@@ -541,7 +541,7 @@ AppPage {
                     noteClicked(text);
                     addDialogLoader.sourceComponent = undefined;
                 } else {
-                    informationDialog.info = qsTr("A Note <b>'" + text + "'</b> already exists.");
+                    informationDialog.info = qsTr("A Note <b>'%1'</b> already exists.").arg(text);
                     informationDialog.visible = true;
                 }
             }

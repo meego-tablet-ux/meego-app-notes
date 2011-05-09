@@ -74,15 +74,23 @@ AppPage {
             }
             ActionMenu {
                 id: secondActionMenu
+
+                function forceUpdate()
+                {
+                    var prev = listView.model.notebookName;
+                    listView.model.notebookName = "something else"; //this is a hack to force the model to update (no need for translation)
+                    listView.model.notebookName = prev;
+                }
+
                 model: [qsTr("All"), qsTr("A-Z")]
                 onTriggered: {
                     if(index == 0) {
                         dataHandler.setSort(false);
-                        updateView();
+                        forceUpdate();
                     } else if(index == 1) {
                         dataHandler.setSort(true);
                         notebooksModel.sort();
-                        updateView();
+                        forceUpdate();
                     }
                     notesCustomMenu.hide();
                 }//ontriggered
@@ -136,6 +144,7 @@ AppPage {
                 property string notePos: position
                 checkBoxVisible: false;
                 property int startY
+                showGrip: !dataHandler.isSorted()
 
                 function prepareText(text)
                 {
@@ -179,6 +188,7 @@ AppPage {
                     anchors.right: parent.right
                     width: parent.height * 2 //big thumbs + little screen = sad panda; so we be a little lenient
                     height: parent.height
+                    enabled: !dataHandler.isSorted()
 
                     drag.target: parent
                     drag.axis: Drag.YAxis
@@ -229,6 +239,7 @@ AppPage {
                 comment: prepareText(dataHandler.loadNoteData(notebook, name));
                 property string notePos: position
                 checkBoxVisible: true;
+                showGrip: !dataHandler.isSorted()
 
                 function prepareText(text)
                 {
@@ -284,6 +295,7 @@ AppPage {
                     anchors.right: parent.right
                     width: (parent.height * 2) //Because we want to be lenient with peopel who have big thumbs
                     height: parent.height
+                    enabled: !dataHandler.isSorted()
 
                     drag.target: parent
                     drag.axis: Drag.YAxis

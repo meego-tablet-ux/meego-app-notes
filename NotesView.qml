@@ -47,7 +47,7 @@ AppPage {
             ActionMenu {
                 id: firstActionMenu
                 model: {
-                    if((listView.count == 1) || (showCheckBox) ) {
+                    if((listView.count < 2) || (showCheckBox) ) {
                         return [qsTr("New Note")];
                     } else {
                         return [qsTr("New Note"), qsTr("Select Multiple")];

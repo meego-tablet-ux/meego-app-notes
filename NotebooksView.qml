@@ -59,7 +59,7 @@ AppPage {
             ActionMenu {
                 id: firstActionMenu
                 model: {
-                    if((listView.count == 1) || (showCheckBox) ) {
+                    if((listView.count < 3) || (showCheckBox) ) {
                         return [qsTr("New Notebook")];
                     } else {
                         return [qsTr("New Notebook"), qsTr("Select Multiple")];

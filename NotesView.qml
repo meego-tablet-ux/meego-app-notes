@@ -520,7 +520,7 @@ AppPage {
                     dataHandler.moveNote(noteListPage.caption, selectedNote, newNotebook);
                 }
 
-                visible = false;
+                notebookSelector.hide();
                 moveReportWindow.opacity = 1;
             }
 

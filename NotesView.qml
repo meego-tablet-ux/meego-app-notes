@@ -135,8 +135,8 @@ AppPage {
 
             NoteButton {
                 id: note
-                x: 40;
-                width: listView.width - 80;
+//                x: 40;
+                width: listView.width
                 height: theme_listBackgroundPixelHeightTwo
                 z: 0
                 title: name
@@ -231,8 +231,8 @@ AppPage {
 
             NoteButton {
                 id: note2
-                x: 40;
-                width: listView.width - 80;
+//                x: 40;
+                width: listView.width
                 height: theme_listBackgroundPixelHeightTwo
                 z: 0
                 title: name
@@ -339,6 +339,13 @@ AppPage {
                 Item {
                 width:listView.width
                 height: 50
+
+                Image {
+                    id: separator
+                    width: parent.width
+                    anchors.bottom: parent.bottom
+                    source: "image://theme/tasks/ln_grey_l"
+                }
             }
             footer:
                 Item {

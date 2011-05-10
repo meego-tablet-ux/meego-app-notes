@@ -108,8 +108,8 @@ AppPage {
 
         NoteButton {
             id: notebook
-            x: 40
-            width: listView.width - 80;
+//            x: 40
+            width: listView.width
             height:theme_listBackgroundPixelHeightTwo
             title: name
             comment: {
@@ -144,8 +144,8 @@ AppPage {
 
         NoteButton {
             id: notebook2
-            x: 40
-            width: listView.width - 80;
+//            x: 40
+            width: listView.width
             height: theme_listBackgroundPixelHeightTwo
             title: name
             comment: {
@@ -212,11 +212,11 @@ AppPage {
             cacheBuffer: 600
             interactive: contentHeight > listView.height
 
-            header:
-                Item {
-                width:listView.width
-                height: 50
-            }
+//            header:
+//                Item {
+//                width:listView.width
+//                height: 50
+//            }
             footer:
                 Item {
                 width:listView.width

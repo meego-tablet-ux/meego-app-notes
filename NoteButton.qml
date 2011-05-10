@@ -142,4 +142,11 @@ Rectangle {
             }
 	}
     }
+
+    Image {
+        id: separator
+        width: parent.width
+        anchors.bottom: parent.bottom
+        source: "image://theme/tasks/ln_grey_l"
+    }
 }

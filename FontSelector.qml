@@ -122,8 +122,9 @@ Item {
 
                 Text {
                     anchors.horizontalCenter: parent.horizontalCenter
-                    text: qsTr("<b>Pick a font</b>")
+                    text: qsTr("Pick a font")
                     color: "white"
+                    font.bold: true
                 }
             }
 

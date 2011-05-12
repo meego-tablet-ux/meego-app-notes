@@ -99,6 +99,7 @@ Rectangle {
 //                clip: true
                 anchors.top: parent.top
                 anchors.left: parent.left;
+                anchors.leftMargin: 40
                 anchors.right: parent.right;
                 height: parent.height /2
                 font.pixelSize: theme_fontPixelSizeNormal
@@ -109,7 +110,7 @@ Rectangle {
             Text {
                 id: textComment
                 anchors.left: parent.left;
-                anchors.leftMargin: 3;
+                anchors.leftMargin: 43;
                 anchors.bottom:parent.bottom
                 anchors.bottomMargin: 3
                 width: parent.width

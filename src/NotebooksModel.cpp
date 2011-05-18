@@ -123,6 +123,8 @@ void NotebooksModel::addNotebook(const QString &name)
     m_notebooksTitles.append(name);
     endInsertRows();
 
+    emit countChanged();
+
     if (m_handler->isSorted())
         sort();
 }
@@ -133,6 +135,8 @@ void NotebooksModel::addNotebook(Notebook *notebook)
     m_notebooks.append(notebook);
     m_notebooksTitles.append(notebook->name());
     endInsertRows();
+
+    emit countChanged();
 }
 
 /********************************************************************
@@ -149,6 +153,8 @@ void NotebooksModel::clear()
             delete m_notebooks[i];
         m_notebooks.clear();
         endRemoveRows();
+
+        emit countChanged();
     }
 }
 
@@ -180,6 +186,8 @@ void NotebooksModel::removeNotebook(const QString &name)
         delete m_notebooks.takeAt(index);
         m_notebooksTitles.removeAt(index);
         endRemoveRows();
+
+        emit countChanged();
     }
 }
 
@@ -192,6 +200,8 @@ void NotebooksModel::renameNotebook(const QString &oldName, const QString &newNa
     m_notebooks[index] = new Notebook(newName, newName);
     m_notebooksTitles[index] = newName;
     reset();
+
+    emit countChanged();
 }
 
 void NotebooksModel::sort()

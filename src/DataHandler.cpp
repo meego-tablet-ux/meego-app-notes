@@ -14,6 +14,7 @@
 #include <QtCore/QDate>
 #include <QtCore/QDateTime>
 #include <QtCore/QTextStream>
+#include <QtCore/QSettings>
 
 //#include <sys/types.h>
 //#include <sys/stat.h>
@@ -1543,4 +1544,27 @@ void CDataHandler::renameNoteBook(const QString &oldNoteBookName, const QString 
             emit notebookRenamed(oldNoteBookName, newNoteBookName);
         }
     }
+}
+
+void CDataHandler::unsetFirstTimeUse(bool isNotebooks)
+{
+    QSettings settings("Intel", "Notes");
+
+    if (isNotebooks)
+        settings.setValue("FirstTimeUseNotebooks", false);
+    else
+        settings.setValue("FirstTimeUseNotes", false);
+}
+
+bool CDataHandler::isFirstTimeUse(bool isNotebooks)
+{
+    QSettings settings("Intel", "Notes");
+
+    QVariant var;
+    if (isNotebooks)
+        var = settings.value("FirstTimeUseNotebooks");
+    else
+        var = settings.value("FirstTimeUseNotes");
+
+    return var.isNull();
 }

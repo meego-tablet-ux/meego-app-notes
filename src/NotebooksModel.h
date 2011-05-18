@@ -44,6 +44,7 @@ class NotebooksModel : public QAbstractListModel
     Q_OBJECT
 public:
     Q_PROPERTY(CDataHandler *dataHandler READ dataHandler WRITE setDataHandler)
+    Q_PROPERTY(int count READ count NOTIFY countChanged);
 
     enum NotebooksRoles
     {
@@ -54,11 +55,15 @@ public:
 
     NotebooksModel(QObject *parent = 0);
     int rowCount(const QModelIndex& parent = QModelIndex()) const;
+    int count() { return rowCount(); }
     QVariant data(const QModelIndex& index, int role = Qt::DisplayRole) const;
     void addNotebook(Notebook *notebook);
     void clear();
     void setDataHandler(CDataHandler *handler) { m_handler = handler; init(); }
     CDataHandler * dataHandler() { return m_handler; }
+
+signals:
+    void countChanged();
 
 public slots:
     void addNotebook(const QString &name);

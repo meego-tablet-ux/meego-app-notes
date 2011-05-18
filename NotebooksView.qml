@@ -53,6 +53,37 @@ AppPage {
         }
     }
 
+    Loader {
+        id: blankStateScreenLoader
+
+        sourceComponent: listView.model.count == 1 ? blankStateScreenComponent : undefined
+    }
+
+    Component {
+        id: blankStateScreenComponent
+
+        BlankStateScreen {
+            id: blankStateScreen
+            width: mainContainer.width
+            height: mainContainer.height
+            parent: mainContainer
+            y: theme_listBackgroundPixelHeightTwo + 10
+
+            mainTitleText: qsTr("Use the default notebook, or make a new one")
+            buttonText: qsTr("Create a new notebook")
+            firstHelpTitle: qsTr("What's a notebook?")
+            secondHelpTitle: qsTr("How do I create notes?")
+            firstHelpText: qsTr("A notebook is a collection of notes. Use the default notebook we have created for you, or make a new one.")
+            secondHelpText: qsTr("Tap the 'Create the first note' button. You can also tap the icon in the top right corner of the screen, then select 'New note'.")
+            helpContentVisible: dataHandler.isFirstTimeUse()
+
+            onButtonClicked: {
+                addDialogLoader.sourceComponent = addDialogComponent;
+                addDialogLoader.item.parent = notebookListPage;
+            }
+        }
+    }
+
     ContextMenu {
         id: customMenu
         content: Column {
@@ -344,6 +375,12 @@ AppPage {
                 //workaround (max length of the folder name - 256)
                 if (text.length > 256)
                     text = text.slice(0, 255);
+
+                //first time use feature
+                if (dataHandler.isFirstTimeUse()) {
+                    dataHandler.unsetFirstTimeUse();
+                    blankStateScreen.helpContentVisible = false;
+                }
 
                 updateView();
                 //            opacity = 0;

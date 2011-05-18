@@ -51,6 +51,8 @@ public:
     Q_INVOKABLE bool getCheckBox();
     Q_INVOKABLE QStringList removeFromString(const QStringList& _array, const QString& _value);
     Q_INVOKABLE QStringList getNoteNames(QString _noteBook);
+    Q_INVOKABLE void unsetFirstTimeUse(bool isNotebooks = true);
+    Q_INVOKABLE bool isFirstTimeUse(bool isNotebooks = true);
 
     Q_INVOKABLE bool isSorted();
     void save(const QString& _notebookID, const QString& _fileName, const QString& _data);

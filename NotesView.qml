@@ -41,6 +41,37 @@ AppPage {
         }
     }
 
+    Loader {
+        id: blankStateScreenLoader
+
+        sourceComponent: listView.count == 0? blankStateScreenComponent : undefined
+    }
+
+    Component {
+        id: blankStateScreenComponent
+
+        BlankStateScreen {
+            id: blankStateScreen
+            width: listView.width
+            height: listView.height
+            parent: listView
+            y: 65
+
+            mainTitleText: qsTr("This notebook is empty")
+            buttonText: qsTr("Create the first note")
+            firstHelpTitle: qsTr("How do I create notes?")
+            secondHelpTitle: qsTr("Share your notes by email")
+            firstHelpText: qsTr("Tap the 'Create the first note' button. You can also tap the icon in the top right corner of the screen, then select 'New note'.")
+            secondHelpText: qsTr("To send a note by email, tap and hold the note you want to send, then select 'Email'.")
+            helpContentVisible: dataHandler.isFirstTimeUse(false)
+
+            onButtonClicked: {
+                addDialogLoader.sourceComponent = addDialogComponent;
+                addDialogLoader.item.parent = notebookListPage;
+            }
+        }
+    }
+
     ContextMenu {
         id: notesCustomMenu
         content: Column {
@@ -554,6 +585,12 @@ AppPage {
                 //workaround (max length of the file name - 256)
                 if (text.length > 256)
                     text = text.slice(0, 255);
+
+                //first time use feature
+                if (dataHandler.isFirstTimeUse(false)) {
+                    dataHandler.unsetFirstTimeUse(false);
+                    blankStateScreen.helpContentVisible = false;
+                }
 
                 if (!dataHandler.noteExists(model.notebookName, text)) {
                     dataHandler.createNote(noteListPage.caption, text, "");

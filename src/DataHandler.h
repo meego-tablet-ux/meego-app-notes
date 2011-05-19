@@ -81,7 +81,12 @@ private:
     QMutex m_mutex;
 
 private:
-    bool renameNoteBookHelper(QFile &dbs, QFile &dbs2, const QString &oldName, const QString &newName);
+    QString noteBookPathNormalizer1(const QString &source, const QString &oldName, const QString &newName);
+    QString noteBookPathNormalizer2(const QString &source, const QString &oldName, const QString &newName);
+
+    bool renameNoteBookHelper(QFile &dbs, QFile &dbs2,
+                              const QString &oldName, const QString &newName,
+                              QString (CDataHandler::*stringNormalizer)(const QString &, const QString &, const QString &));
 
 signals:
     void notebookAdded(const QString &name);

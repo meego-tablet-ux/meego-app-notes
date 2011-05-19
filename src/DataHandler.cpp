@@ -1462,7 +1462,36 @@ bool CDataHandler::noteExists(const QString &noteBookName, const QString &noteNa
     return notes.contains(noteName);
 }
 
-bool CDataHandler::renameNoteBookHelper(QFile& dbs, QFile& dbs2, const QString& oldName, const QString &newName)
+QString CDataHandler::noteBookPathNormalizer1(const QString &source, const QString &oldName, const QString &newName)
+{
+    Q_UNUSED(oldName);
+
+    const QString position = getStringAttribute(source, "position=");
+    QString path = getStringAttribute(source, "path=");
+    path = path.mid(0, path.lastIndexOf('/') + 1) + newName;
+    return QString("name=%1,position=%2,path=%3,title=%4,")
+            .arg(newName)
+            .arg(position)
+            .arg(path)
+            .arg(newName);
+}
+
+QString CDataHandler::noteBookPathNormalizer2(const QString &source, const QString &oldName, const QString &newName)
+{
+    const QString name = getStringAttribute(source, "name=");
+    const QString position = getStringAttribute(source, "position=");
+    QString path = getStringAttribute(source, "path=");
+    path.replace(path.lastIndexOf('/') - oldName.length(), oldName.length(), newName);
+    const QString title = getStringAttribute(source, "title=");
+    return QString("name=%1,position=%2,path=%3,title=%4,")
+            .arg(name)
+            .arg(position)
+            .arg(path)
+            .arg(title);
+}
+
+bool CDataHandler::renameNoteBookHelper(QFile& dbs, QFile& dbs2, const QString& oldName, const QString &newName,
+                                        QString (CDataHandler::*stringNormalizer)(const QString &, const QString &, const QString &))
 {
     bool bFound = false;
 
@@ -1473,17 +1502,12 @@ bool CDataHandler::renameNoteBookHelper(QFile& dbs, QFile& dbs2, const QString& 
     QTextStream out(&dbs2);
     while (!in.atEnd()) {
         strLine = in.readLine();
-        strName = getStringAttribute(strLine, "name=");
-        if (strName == oldName) {
+        strName = getStringAttribute(strLine, "path=");
+        if (strName.contains(oldName)) {
             bFound = true;
             //it's unbelievable overhead,
             //but it's really neccessary to prevent situation when an oldName consists of letter(s) which is/are present in strLine.
-
-            QString position = getStringAttribute(strLine, "position=");
-            QString path = getStringAttribute(strLine, "path=");
-            path = path.mid(0, path.lastIndexOf('/') + 1) + newName;
-
-            strLine = QString("name=%1,position=%2,path=%3,title=%4,").arg(newName).arg(position).arg(path).arg(newName);
+            strLine = (this->*stringNormalizer)(strLine, oldName, newName);
         }
         out << strLine << "\n";
     }
@@ -1510,37 +1534,43 @@ void CDataHandler::renameNoteBook(const QString &oldNoteBookName, const QString 
     if (!dbs.exists())
         return;
 
+    QFile oldNoteDataFile(home + ".MeeGo/Notes/" + oldNoteBookName + "/data");
+    if (!oldNoteDataFile.exists())
+        return;
+
     QFile dbs2(home + ".MeeGo/Notes/data.bak");
     if (dbs.open(QIODevice::ReadOnly))
     {
         if (dbs2.open(QIODevice::WriteOnly | QIODevice::Append))
         {
-            bFound = renameNoteBookHelper(dbs, dbs2, oldNoteBookName, newNoteBookName);
+            bFound = renameNoteBookHelper(dbs, dbs2, oldNoteBookName, newNoteBookName, &CDataHandler::noteBookPathNormalizer1);
             dbs2.close();
         }
         dbs.close();
     }
 
+    QFile oldNoteDataBakFile(home + ".MeeGo/Notes/" + oldNoteBookName + "/data.bak");
+    if (oldNoteDataFile.open(QIODevice::ReadOnly))
+    {
+        if (oldNoteDataBakFile.open(QIODevice::WriteOnly | QIODevice::Append))
+        {
+            bFound |= renameNoteBookHelper(oldNoteDataFile, oldNoteDataBakFile, oldNoteBookName, newNoteBookName, &CDataHandler::noteBookPathNormalizer2);
+            oldNoteDataBakFile.close();
+        }
+        oldNoteDataFile.close();
+    }
+
+
     if (bFound) //now we should replace old file with new one
     {
-        if (QFile::remove(home + ".MeeGo/Notes/data")) //remove old file
+        if (QFile::remove(home + ".MeeGo/Notes/data")
+            && QFile::remove(home + ".MeeGo/Notes/" + oldNoteBookName + "/data")) //remove old file
         {
             QFile::rename(home + ".MeeGo/Notes/data.bak", home + ".MeeGo/Notes/data");
+            QFile::rename(home + ".MeeGo/Notes/" + oldNoteBookName + "/data.bak", home + ".MeeGo/Notes/" + oldNoteBookName + "/data");
 
             QDir dir(home + ".MeeGo/Notes/");
-            if (!dir.rename(oldNoteBookName, newNoteBookName)) {
-                if (dbs.open(QIODevice::ReadOnly))
-                {
-                    if (dbs2.open(QIODevice::WriteOnly | QIODevice::Append))
-                    {
-                        bFound = renameNoteBookHelper(dbs, dbs2, newNoteBookName, oldNoteBookName);
-                        dbs2.close();
-                    }
-                    dbs.close();
-                }
-                return;
-            }
-
+            Q_ASSERT(dir.rename(oldNoteBookName, newNoteBookName));
             emit notebookRenamed(oldNoteBookName, newNoteBookName);
         }
     }

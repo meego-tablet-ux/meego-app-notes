@@ -98,6 +98,7 @@ Rectangle {
                 id: textElement
 //                clip: true
                 anchors.top: parent.top
+                anchors.topMargin: 7
                 anchors.left: parent.left;
                 anchors.leftMargin: 40
                 anchors.right: parent.right;
@@ -112,7 +113,6 @@ Rectangle {
                 anchors.left: parent.left;
                 anchors.leftMargin: 43;
                 anchors.bottom:parent.bottom
-                anchors.bottomMargin: 3
                 width: parent.width
                 height: parent.height / 2
                 font.pixelSize: theme_fontPixelSizeSmall

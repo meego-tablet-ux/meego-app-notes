@@ -13,6 +13,7 @@
 #include <QtCore/QFile>
 #include <QtCore/QStringList>
 #include <QtCore/QMutex>
+#include <QtCore/QSettings>
 
 /********************************************************************
  * CDataHandler class declaration
@@ -79,6 +80,7 @@ protected:
 
 private:
     QMutex m_mutex;
+    QSettings m_settings;
 
 private:
     QString noteBookPathNormalizer1(const QString &source, const QString &oldName, const QString &newName);

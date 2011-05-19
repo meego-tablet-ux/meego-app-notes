@@ -56,7 +56,7 @@ AppPage {
     Loader {
         id: blankStateScreenLoader
 
-        sourceComponent: listView.model.count == 1 ? blankStateScreenComponent : undefined
+        sourceComponent: (dataHandler.isFirstTimeUse() && listView.model.count == 1) ? blankStateScreenComponent : undefined
     }
 
     Component {
@@ -75,7 +75,6 @@ AppPage {
             secondHelpTitle: qsTr("How do I create notes?")
             firstHelpText: qsTr("A notebook is a collection of notes. Use the default notebook we have created for you, or make a new one.")
             secondHelpText: qsTr("Tap the 'Create the first note' button. You can also tap the icon in the top right corner of the screen, then select 'New note'.")
-            helpContentVisible: dataHandler.isFirstTimeUse()
 
             onButtonClicked: {
                 addDialogLoader.sourceComponent = addDialogComponent;

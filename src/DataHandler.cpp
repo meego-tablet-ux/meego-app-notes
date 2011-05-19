@@ -14,7 +14,6 @@
 #include <QtCore/QDate>
 #include <QtCore/QDateTime>
 #include <QtCore/QTextStream>
-#include <QtCore/QSettings>
 
 //#include <sys/types.h>
 //#include <sys/stat.h>
@@ -39,7 +38,7 @@ static const QString STR_DEFAULT_NOTEBOOK = QObject::tr("Everyday Notes (default
  *
  *
  *******************************************************************/
-CDataHandler::CDataHandler()
+CDataHandler::CDataHandler() : m_settings("Intel", "Notes")
 {
     Init();
 }
@@ -1578,23 +1577,19 @@ void CDataHandler::renameNoteBook(const QString &oldNoteBookName, const QString 
 
 void CDataHandler::unsetFirstTimeUse(bool isNotebooks)
 {
-    QSettings settings("Intel", "Notes");
-
     if (isNotebooks)
-        settings.setValue("FirstTimeUseNotebooks", false);
+        m_settings.setValue("FirstTimeUseNotebooks", false);
     else
-        settings.setValue("FirstTimeUseNotes", false);
+        m_settings.setValue("FirstTimeUseNotes", false);
 }
 
 bool CDataHandler::isFirstTimeUse(bool isNotebooks)
 {
-    QSettings settings("Intel", "Notes");
-
     QVariant var;
     if (isNotebooks)
-        var = settings.value("FirstTimeUseNotebooks");
+        var = m_settings.value("FirstTimeUseNotebooks");
     else
-        var = settings.value("FirstTimeUseNotes");
+        var = m_settings.value("FirstTimeUseNotes");
 
     return var.isNull();
 }

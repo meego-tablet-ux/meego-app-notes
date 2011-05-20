@@ -476,7 +476,11 @@ AppPage {
         button2Text: qsTr("Cancel");
         dialogTitle: qsTr("Rename NoteBook")
         property string oldName
-        text: oldName
+
+        onOldNameChanged: {
+            text = oldName;
+        }
+
         menuHeight: 150
         minWidth: 260
         onButton1Clicked: {

@@ -176,6 +176,9 @@ void NotebooksModel::init()
     {
         this->addNotebook(new Notebook(noteBooksNames[i], noteBooksTitles[i]));
     }
+
+    if (bSorted)
+        sort();
 }
 
 void NotebooksModel::removeNotebook(const QString &name)
@@ -220,9 +223,9 @@ void NotebooksModel::quickSort(QStringList &list, int left, int right)
 
     /* partition */
     while (i <= j) {
-        while (list.at(i) < pivot)
+        while (list.at(i).toLower() < pivot.toLower())
             i++;
-        while (list.at(j) > pivot)
+        while (list.at(j).toLower() > pivot.toLower())
             j--;
         if (i <= j) {
             tmp = list.at(i);

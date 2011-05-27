@@ -19,15 +19,18 @@ Item {
     signal buttonSendClicked()
     signal buttonCancelClicked()
 
+    Theme {
+        id: theme
+    }
 
     Rectangle {
         id: fog
 
         anchors.fill: parent
-        color: theme_dialogFogColor
-        opacity: theme_dialogFogOpacity
+        color: theme.dialogFogColor
+        opacity: theme.dialogFogOpacity
         Behavior on opacity {
-            PropertyAnimation { duration: theme_dialogAnimationDuration }
+            PropertyAnimation { duration: theme.dialogAnimationDuration }
         }
     }
 
@@ -70,7 +73,7 @@ Item {
                     id: title
                     text: qsTr("Title");
                     font.weight: Font.Bold
-                    color: theme_dialogTitleFontColor
+                    color: theme.dialogTitleFontColor
                 }
 
 

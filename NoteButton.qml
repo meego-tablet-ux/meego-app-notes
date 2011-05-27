@@ -23,6 +23,10 @@ Rectangle {
     signal noteSelected(string noteName)
     signal noteDeselected(string noteName)
 
+    Theme {
+        id: theme
+    }
+
     Row {
         id: rowElement;
 //        anchors.fill: parent
@@ -103,7 +107,7 @@ Rectangle {
                 anchors.leftMargin: 40
                 anchors.right: parent.right;
                 height: parent.height /2
-                font.pixelSize: theme_fontPixelSizeNormal
+                font.pixelSize: theme.fontPixelSizeNormal
                 text: qsTr("Text Element");
                 wrapMode: Text.Wrap
             }
@@ -115,10 +119,10 @@ Rectangle {
 //                anchors.bottom:parent.bottom
                 width: parent.width
                 height: parent.height / 2
-                font.pixelSize: theme_fontPixelSizeSmall
+                font.pixelSize: theme.fontPixelSizeSmall
                 text: qsTr("Add some comments here");
                 elide: Text.ElideRight
-                color: theme_fontColorInactive
+                color: theme.fontColorInactive
             }
         }
 

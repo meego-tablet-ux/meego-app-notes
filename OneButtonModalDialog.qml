@@ -21,14 +21,18 @@ Item {
     anchors.fill: parent
     signal dialogClicked
 
+    Theme {
+        id: theme
+    }
+
     Rectangle {
          id: fog
 
          anchors.fill: parent
-         color: theme_dialogFogColor
-         opacity: theme_dialogFogOpacity
+         color: theme.dialogFogColor
+         opacity: theme.dialogFogOpacity
          Behavior on opacity {
-             PropertyAnimation { duration: theme_dialogAnimationDuration }
+             PropertyAnimation { duration: theme.dialogAnimationDuration }
          }
      }
 

@@ -283,7 +283,6 @@ AppPage {
                 Button {
                     id: cancelButton
                     text: qsTr("Cancel")
-                    anchors.bottom: listView.bottom
                     height: 80
                     onClicked: {
                         multiSelectRow.opacity = 0;
@@ -364,8 +363,10 @@ AppPage {
 
         TwoButtonsModalDialog {
             id: addDialog
-            menuHeight: 125
+
+            menuHeight: 150
             minWidth: 260
+
             dialogTitle: qsTr("Create a new Notebook");
             buttonText: qsTr("Create");
             button2Text: qsTr("Cancel");

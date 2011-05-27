@@ -575,8 +575,10 @@ AppPage {
         id: addDialogComponent
         TwoButtonsModalDialog {
             id: addDialog
-            menuHeight: 125
+
+            menuHeight: 150
             minWidth: 260
+
             dialogTitle: qsTr("Create a new Note");
             buttonText: qsTr("Create");
             button2Text: qsTr("Cancel");

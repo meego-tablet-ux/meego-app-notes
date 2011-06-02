@@ -41,7 +41,7 @@ AppPage {
         } else if(selectedItem == 1) {
             deleteConfirmationDialog.show();
         } else {
-            shareDialog.opacity = 1;
+            //shareDialog.opacity = 1;
         }
     }
 
@@ -137,26 +137,6 @@ AppPage {
                 hide();
             }
         }
-
-        ShareNote {
-            id: shareDialog
-            opacity: 0;
-            anchors.centerIn: parent
-            //focus: true;
-
-            onButtonSendClicked:
-            {
-                console.log("shareDialog::onButtonSendClicked");
-                shareDialog.opacity = 0;
-            }
-
-            onButtonCancelClicked:
-            {
-                console.log("ShareNote::onButtonCancelClicked");
-                shareDialog.opacity = 0;
-            }
-        }
-
     }
 }
 

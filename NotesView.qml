@@ -66,8 +66,7 @@ AppPage {
             helpContentVisible: dataHandler.isFirstTimeUse(false)
 
             onButtonClicked: {
-                addDialogLoader.sourceComponent = addDialogComponent;
-                addDialogLoader.item.parent = notebookListPage;
+                addDialog.show();
             }
         }
     }
@@ -86,11 +85,10 @@ AppPage {
                 }
                 onTriggered: {
                     if(index == 0) {
-                        addDialogLoader.sourceComponent = addDialogComponent;
-                        addDialogLoader.item.parent = noteListPage;
+                        addDialog.show();
                     } else if(index ==1) {
                         showCheckBox = true;
-                        multiSelectRow.opacity = 1;
+                        multiSelectRow.show();
                     }
                     notesCustomMenu.hide();
                 }//ontriggered
@@ -166,7 +164,7 @@ AppPage {
 
             NoteButton {
                 id: note
-//                x: 40;
+                //                x: 40;
                 width: listView.width
                 height: theme_listBackgroundPixelHeightTwo
                 z: 0
@@ -204,8 +202,8 @@ AppPage {
                         selectedTitle = title;
                         selectedIndex = index;
                         var map = mapToItem(listView, mouseX, mouseY);
-//                        itemX = note.x + mouseX;
-//                        itemY = note.y + nameLabel.height + 50/*header*/ + mouseY;
+                        //                        itemX = note.x + mouseX;
+                        //                        itemY = note.y + nameLabel.height + 50/*header*/ + mouseY;
 
                         itemX = map.x;
                         itemY = map.y + 50;
@@ -262,7 +260,7 @@ AppPage {
 
             NoteButton {
                 id: note2
-//                x: 40;
+                //                x: 40;
                 width: listView.width
                 height: theme_listBackgroundPixelHeightTwo
                 z: 0
@@ -400,51 +398,36 @@ AppPage {
             }
         }
 
-
-
-        BorderImage {
+        BottomToolBar {
             id: multiSelectRow
-            source: "image://meegotheme/widgets/common/action-bar/action-bar-background"
             anchors.bottom: listView.bottom
             width: listView.width
-            height: 80
-            opacity: 0
 
-            Row {
-                spacing: 10
-                anchors.horizontalCenter: parent.horizontalCenter
-                Button {
-                    id: deleteButton
-                    text: qsTr("Delete")
-                    height: 80
-                    enabled: selectedItems.length > 0
-                    hasBackground: true
-                    bgSourceUp: "image://theme/btn_red_up"
-                    bgSourceDn: "image://theme/btn_red_dn"
-                    onClicked: {
-                        deleteConfirmationDialog.show();
-                        showCheckBox = false;
-                        multiSelectRow.opacity = 0;
+            content: BottomToolBarRow {
+                centerContent: Row {
+                    spacing: 10
+                    Button {
+                        id: deleteButton
+                        text: qsTr("Delete")
+                        enabled: selectedItems.length > 0
+                        bgSourceUp: "image://themedimage/images/btn_red_up"
+                        bgSourceDn: "image://themedimage/images/btn_red_dn"
+                        onClicked: {
+                            deleteConfirmationDialog.show();
+                            showCheckBox = false;
+                            multiSelectRow.hide();
+                        }
+                    }
+                    Button {
+                        id: cancelButton
+                        text: qsTr("Cancel")
+                        onClicked: {
+                            multiSelectRow.hide();
+                            showCheckBox = false;
+                            selectedItems = [];
+                        }
                     }
                 }
-
-                Button {
-                    id: cancelButton
-                    text: qsTr("Cancel")
-                    anchors.bottom: listView.bottom
-                    height: 80
-                    onClicked: {
-                        multiSelectRow.opacity = 0;
-                        showCheckBox = false;
-                        selectedItems = [];
-                    }
-                }
-            }
-
-            Image {
-                source: "image://meegotheme/widgets/common/action-bar/action-bar-shadow"
-                anchors.bottom: multiSelectRow.top
-                width: parent.width
             }
         }
 
@@ -475,16 +458,16 @@ AppPage {
                 }
                 else if (model[index] == menu.emailChoice)
                 {
-                     var uri = noteListPage.model.dumpNote(noteListPage.selectedIndex);
-                     shareObj.clearItems();
-                     shareObj.addItem(uri);
-                     shareObj.setParam(uri, "subject", noteListPage.selectedTitle);
-                     shareObj.showContext(qsTr("Email"), noteListPage.width / 2, noteListPage.height / 2);
+                    var uri = noteListPage.model.dumpNote(noteListPage.selectedIndex);
+                    shareObj.clearItems();
+                    shareObj.addItem(uri);
+                    shareObj.setParam(uri, "subject", noteListPage.selectedTitle);
+                    shareObj.showContext(qsTr("Email"), noteListPage.width / 2, noteListPage.height / 2);
                 }
                 else if (model[index] == menu.moveChoice)
                 {
-                     notebookSelector.setPosition(itemX, itemY);
-                     notebookSelector.show();
+                    notebookSelector.setPosition(itemX, itemY);
+                    notebookSelector.show();
                 }
                 else if (model[index] == menu.deleteChoice)
                 {
@@ -508,12 +491,9 @@ AppPage {
                     renameWindow.opacity = 1;
                 }
 
-                 menu.hide();
+                menu.hide();
             }
         }
-
-
-
     }
 
     ContextMenu {
@@ -571,126 +551,118 @@ AppPage {
         anchors.fill: parent
     }
 
-    Component {
-        id: addDialogComponent
-        TwoButtonsModalDialog {
-            id: addDialog
-
-            menuHeight: 150
-            minWidth: 260
-
-            dialogTitle: qsTr("Create a new Note");
-            buttonText: qsTr("Create");
-            button2Text: qsTr("Cancel");
+    ModalDialog {
+        id: addDialog
+        title: qsTr("Create a new Note");
+        acceptButtonText: qsTr("Create");
+        cancelButtonText: qsTr("Cancel");
+        content: TextEntry {
+            id: newName
             defaultText: qsTr("Note name");
-            onButton1Clicked: {
-                //workaround (max length of the file name - 256)
-                if (text.length > 256)
-                    text = text.slice(0, 255);
+            anchors.fill: parent
+        }
+        onAccepted: {
+            //workaround (max length of the file name - 256)
+            if (newName.text.length > 256)
+                newName.text = text.slice(0, 255);
 
-                //first time use feature
-                if (dataHandler.isFirstTimeUse(false)) {
-                    dataHandler.unsetFirstTimeUse(false);
-                    blankStateScreen.helpContentVisible = false;
-                }
-
-                if (!dataHandler.noteExists(model.notebookName, text)) {
-                    dataHandler.createNote(noteListPage.caption, text, "");
-                    noteClicked(text);
-                    addDialogLoader.sourceComponent = undefined;
-                } else {
-                    informationDialog.info = qsTr("A Note <b>'%1'</b> already exists.").arg(text);
-                    informationDialog.visible = true;
-                }
+            //first time use feature
+            if (dataHandler.isFirstTimeUse(false)) {
+                dataHandler.unsetFirstTimeUse(false);
+                //blankStateScreen.helpContentVisible = false;
             }
 
-            onButton2Clicked: {
+            if (!dataHandler.noteExists(model.notebookName, newName.text)) {
+                dataHandler.createNote(noteListPage.caption, newName.text, "");
+                noteClicked(newName.text);
                 addDialogLoader.sourceComponent = undefined;
+            } else {
+                informationDialog.info = qsTr("A Note <b>'%1'</b> already exists.").arg(newName.text);
+                informationDialog.show();
             }
+            newName.text= "";
         }
     }
 
-    InformationDialog {
+    ModalDialog {
         id: informationDialog
-        z: 10
-        visible: false
-
-        onOkClicked: informationDialog.visible = false;
+        property alias info: textInfo.text
+        showCancelButton: false
+        showAcceptButton: true
+        acceptButtonText: qsTr("OK");
+        content: Text {
+            id: textInfo
+            anchors.fill: parent
+        }
     }
 
     ModalDialog {
         id: deleteConfirmationDialog
 
-        opacity: 0
-
         acceptButtonText: qsTr("Delete");
 
         title: (selectedItems.length > 1) ?
-                         qsTr("Are you sure you want to delete these %1 notes?").arg(selectedItems.length)
-                       : qsTr("Are you sure you want to delete \"%1\"?").arg(componentText)
+                   qsTr("Are you sure you want to delete these %1 notes?").arg(selectedItems.length)
+                 : qsTr("Are you sure you want to delete \"%1\"?").arg(componentText)
         property string componentText: (selectedItems.length > 0) ? selectedItems[0] : selectedNote;
 
-        acceptButtonImage: "image://theme/btn_red_up"
-        acceptButtonImagePressed: "image://theme/btn_red_dn"
+        acceptButtonImage: "image://themedimage/images/btn_red_up"
+        acceptButtonImagePressed:"image://themedimage/images/btn_red_dn"
 
         onAccepted: {
-                if (selectedItems.length > 0)
-                {
-                    dataHandler.deleteNotes(noteListPage.caption, selectedItems);
-                }
-                else
-                {
-                    dataHandler.deleteNote(noteListPage.caption, selectedNote);
-                }
-                hide();
-                deleteReportWindow.opacity = 1;
+            if (selectedItems.length > 0)
+            {
+                dataHandler.deleteNotes(noteListPage.caption, selectedItems);
             }
+            else
+            {
+                dataHandler.deleteNote(noteListPage.caption, selectedNote);
+            }
+            hide();
+            deleteReportWindow.show();
+        }
         onRejected: {
-                hide();
-                selectedItems = [];
+            selectedItems = [];
         }
     }
 
-    DeleteMoveNotificationDialog {
+    ModalDialog {
         id: deleteReportWindow
-        opacity: 0;
-        minWidth: 270
-        buttonText: qsTr("OK");
-        dialogTitle: (selectedItems.length > 1) ? qsTr("Notes deleted") : qsTr("Note deleted")
-        text:  {
-            if(selectedItems.length > 1) {
-                return qsTr("%1 notes have been deleted").arg(selectedItems.length);
-            } else if(selectedItems.length == 1) {
-                return qsTr("%1 has been deleted").arg(selectedItems[0]);
-            } else  {
-                return qsTr("%1 has been deleted").arg(selectedNote);
+        acceptButtonText: qsTr("OK");
+        title: (selectedItems.length > 1) ? qsTr("Notes deleted") : qsTr("Note deleted")
+        content: Text  {
+            text: {
+                if(selectedItems.length > 1) {
+                    return qsTr("%1 notes have been deleted").arg(selectedItems.length);
+                } else if(selectedItems.length == 1) {
+                    return qsTr("%1 has been deleted").arg(selectedItems[0]);
+                } else  {
+                    return qsTr("%1 has been deleted").arg(selectedNote);
+                }
             }
         }
 
-        onDialogClicked:
+        onAccepted:
         {
             selectedItems = [];
-            opacity = 0;
             updateView();
         }
     }
 
-    TwoButtonsModalDialog {
+    ModalDialog {
         id: renameWindow
-        opacity: 0;
-        buttonText:qsTr("OK");
-        button2Text:  qsTr("Cancel");
-        dialogTitle: qsTr("Rename Note")
+        acceptButtonText: qsTr("OK");
+        cancelButtonText:  qsTr("Cancel");
+        title: qsTr("Rename Note")
         property string oldName
 
-        onOldNameChanged: {
-            text = oldName;
+        content: TextEntry {
+            id: newNameTextEntry
+            defaultText: renameWindow.oldName
         }
 
-        menuHeight: 150
-        minWidth: 260
-        onButton1Clicked: {
-            var newName = renameWindow.text;
+        onAccepted: {
+            var newName = newNameTextEntry.text;
             var noteNames = dataHandler.getNoteNames(model.notebookName);
             for(var i=0;i<noteNames.length;i++) {
                 if(noteNames[i] == newName) {
@@ -707,25 +679,17 @@ AppPage {
             model.notebookName = "something else"; //this is a hack to force the model to update (no need for translation)
             model.notebookName = prev;
 
-            opacity = 0;
             updateView();
-        }
-        onButton2Clicked: {
-            opacity = 0;
         }
     }
 
-    DeleteMoveNotificationDialog {
+    ModalDialog {
         id: moveReportWindow
-        minWidth: 270
-        opacity: 0;
 
-        buttonText: qsTr("OK");
-        dialogTitle: qsTr("Note moved");
+        acceptButtonText: qsTr("OK");
+        title: qsTr("Note moved");
 
-        onDialogClicked:
-        {
-            opacity = 0;
+        onAccepted: {
             updateView();
         }
     }

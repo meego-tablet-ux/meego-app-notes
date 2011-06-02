@@ -96,10 +96,6 @@ Window {
                 window.addPage(noteList);
                 filterModel = filterModelList;
             }
-
-//            onClose: {
-//                filterModel = filterModelList;
-//            }
         }
     }
 }

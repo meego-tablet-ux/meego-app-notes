@@ -7,7 +7,7 @@
  */
 
 import Qt 4.7
-import MeeGo.Components 0.1 as UX
+import MeeGo.Components 0.1
 
 Item {
     id: container
@@ -22,15 +22,18 @@ Item {
     anchors.fill: parent
     signal dialogClicked
 
+    Theme {
+        id: theme
+    }
 
     Rectangle {
         id: fog
 
         anchors.fill: parent
-        color: theme_dialogFogColor
-        opacity: theme_dialogFogOpacity
+        color: theme.dialogFogColor
+        opacity: theme.dialogFogOpacity
         Behavior on opacity {
-            PropertyAnimation { duration: theme_dialogAnimationDuration }
+            PropertyAnimation { duration: theme.dialogAnimationDuration }
         }
     }
 
@@ -97,7 +100,7 @@ Item {
                 wrapMode: Text.Wrap
             }
 
-            UX.Button {
+            Button {
                 id: button
                 width: 120
                 height: 40

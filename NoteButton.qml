@@ -23,9 +23,13 @@ Rectangle {
     signal noteSelected(string noteName)
     signal noteDeselected(string noteName)
 
+    Theme {
+        id: theme
+    }
+
     Row {
         id: rowElement;
-        anchors.fill: parent
+//        anchors.fill: parent
         width: parent.width;
         height: parent.height;
 
@@ -86,7 +90,7 @@ Rectangle {
 
         Column {
             id: textColumn;
-            anchors.top: parent.top
+//            anchors.top: parent.top
             anchors.left: checkBoxVisible? checkboxContainer.right : parent.left;
             anchors.leftMargin:25
             anchors.right:gridView.left
@@ -97,13 +101,13 @@ Rectangle {
             Text {
                 id: textElement
 //                clip: true
-                anchors.top: parent.top
+//                anchors.top: parent.top
                 anchors.topMargin: 7
                 anchors.left: parent.left;
                 anchors.leftMargin: 40
                 anchors.right: parent.right;
                 height: parent.height /2
-                font.pixelSize: theme_fontPixelSizeNormal
+                font.pixelSize: theme.fontPixelSizeNormal
                 text: qsTr("Text Element");
                 wrapMode: Text.Wrap
             }
@@ -112,13 +116,13 @@ Rectangle {
                 id: textComment
                 anchors.left: parent.left;
                 anchors.leftMargin: 43;
-                anchors.bottom:parent.bottom
+//                anchors.bottom:parent.bottom
                 width: parent.width
                 height: parent.height / 2
-                font.pixelSize: theme_fontPixelSizeSmall
+                font.pixelSize: theme.fontPixelSizeSmall
                 text: qsTr("Add some comments here");
                 elide: Text.ElideRight
-                color: theme_fontColorInactive
+                color: theme.fontColorInactive
             }
         }
 

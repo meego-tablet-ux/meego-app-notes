@@ -22,12 +22,16 @@ Item {
         anchors.fill: parent
     }
 
+    Theme {
+        id: theme
+    }
+
     Rectangle {
         anchors.fill: parent
-        color: theme_dialogFogColor
-        opacity: theme_dialogFogOpacity
+        color: theme.dialogFogColor
+        opacity: theme.dialogFogOpacity
         Behavior on opacity {
-            PropertyAnimation { duration: theme_dialogAnimationDuration }
+            PropertyAnimation { duration: theme.dialogAnimationDuration }
         }
     }
 

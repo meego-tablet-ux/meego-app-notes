@@ -575,8 +575,10 @@ AppPage {
         id: addDialogComponent
         TwoButtonsModalDialog {
             id: addDialog
-            menuHeight: 125
+
+            menuHeight: 150
             minWidth: 260
+
             dialogTitle: qsTr("Create a new Note");
             buttonText: qsTr("Create");
             button2Text: qsTr("Cancel");
@@ -680,7 +682,11 @@ AppPage {
         button2Text:  qsTr("Cancel");
         dialogTitle: qsTr("Rename Note")
         property string oldName
-        text: oldName
+
+        onOldNameChanged: {
+            text = oldName;
+        }
+
         menuHeight: 150
         minWidth: 260
         onButton1Clicked: {

@@ -7,7 +7,7 @@
  */
 
 import Qt 4.7
-
+//TODO: This component is not used enywhere
 Rectangle
 {
     id: addButton

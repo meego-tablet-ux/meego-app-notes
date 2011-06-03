@@ -16,6 +16,10 @@ Item {
 
     signal buttonClicked()
 
+    Theme {
+        id: theme
+    }
+
     Column {
         id: titlePart
         width: parent.width
@@ -81,13 +85,13 @@ Item {
 
             Text {
                 id: firstTitle
-                font.pixelSize: theme_fontPixelSizeLarge
+                font.pixelSize: theme.fontPixelSizeLarge
             }
 
             Text {
                id: firstText
                width: blankStateScreen.width / 3.7
-               font.pixelSize: theme_fontPixelSizeSmall
+               font.pixelSize: theme.fontPixelSizeSmall
                wrapMode: Text.WordWrap
             }
         }
@@ -108,13 +112,13 @@ Item {
 
             Text {
                 id: secondTitle
-                font.pixelSize: theme_fontPixelSizeLarge
+                font.pixelSize: theme.fontPixelSizeLarge
             }
 
             Text {
                id: secondText
                width: blankStateScreen.width / 3.7
-               font.pixelSize: theme_fontPixelSizeSmall
+               font.pixelSize: theme.fontPixelSizeSmall
                wrapMode: Text.WordWrap
             }
         }

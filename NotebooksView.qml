@@ -313,22 +313,31 @@ AppPage {
         }
     }
 
-
     ModalDialog {
         id: addDialog
         title: qsTr("Create a new Notebook");
         acceptButtonText: qsTr("Create");
         cancelButtonText: qsTr("Cancel");
-        content: TextEntry {
-            id: newName
+        content: Column {
             anchors.fill: parent
-            defaultText: qsTr("Notebook name");
+            TextEntry {
+                id: newName
+                defaultText: qsTr("Notebook name");
+                onTextChanged: {
+                    newName.text = newName.text.slice(0, window.maxCharactersCount);
+                }
+                width: parent.width
+                height: parent.height - charsIndicator.height
+            }
+            Text {
+                id: charsIndicator
+                font.italic: true
+                font.pixelSize: 10
+                text: qsTr("%1/%2").arg(newName.text.length).arg(window.maxCharactersCount)
+            }
         }
-        onAccepted: {
-            //workaround (max length of the folder name - 256)
-            if (newName.text.length > 256)
-                newName.text = text.slice(0, 255);
 
+        onAccepted: {
             //first time use feature
             if (dataHandler.isFirstTimeUse()) {
                 dataHandler.unsetFirstTimeUse();
@@ -421,9 +430,22 @@ AppPage {
         title: qsTr("Rename NoteBook")
         property string oldName
 
-        content: TextEntry {
-            id: renameTextEntry
+        content: Column {
             anchors.fill: parent
+            TextEntry {
+                id: renameTextEntry
+                onTextChanged: {
+                    renameTextEntry.text = renameTextEntry.text.slice(0, window.maxCharactersCount);
+                }
+                width: parent.width
+                height: parent.height - renameCharsIndicator.height
+            }
+            Text {
+                id: renameCharsIndicator
+                font.italic: true
+                font.pixelSize: 10
+                text: qsTr("%1/%2").arg(renameTextEntry.text.length).arg(window.maxCharactersCount)
+            }
         }
 
         onOldNameChanged: {

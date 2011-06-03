@@ -556,20 +556,28 @@ AppPage {
         title: qsTr("Create a new Note");
         acceptButtonText: qsTr("Create");
         cancelButtonText: qsTr("Cancel");
-        content: TextEntry {
-            id: newName
-            defaultText: qsTr("Note name");
+        content: Column {
             anchors.fill: parent
+            TextEntry {
+                id: newName
+                defaultText: qsTr("Notebook name");
+                onTextChanged: {
+                    newName.text = newName.text.slice(0, window.maxCharactersCount);
+                }
+                width: parent.width
+                height: parent.height - charsIndicator.height
+            }
+            Text {
+                id: charsIndicator
+                font.italic: true
+                font.pixelSize: 10
+                text: qsTr("%1/%2").arg(newName.text.length).arg(window.maxCharactersCount)
+            }
         }
         onAccepted: {
-            //workaround (max length of the file name - 256)
-            if (newName.text.length > 256)
-                newName.text = text.slice(0, 255);
-
             //first time use feature
             if (dataHandler.isFirstTimeUse(false)) {
                 dataHandler.unsetFirstTimeUse(false);
-                //blankStateScreen.helpContentVisible = false;
             }
 
             if (!dataHandler.noteExists(model.notebookName, newName.text)) {
@@ -656,13 +664,28 @@ AppPage {
         title: qsTr("Rename Note")
         property string oldName
 
-        content: TextEntry {
-            id: newNameTextEntry
-            defaultText: renameWindow.oldName
+        content: Column {
+            anchors.fill: parent
+            TextEntry {
+                id: renameTextEntry
+                onTextChanged: {
+                    renameTextEntry.text = renameTextEntry.text.slice(0, window.maxCharactersCount);
+                }
+                width: parent.width
+                height: parent.height - renameCharsIndicator.height
+            }
+            Text {
+                id: renameCharsIndicator
+                font.italic: true
+                font.pixelSize: 10
+                text: qsTr("%1/%2").arg(renameTextEntry.text.length).arg(window.maxCharactersCount)
+            }
         }
 
+        onOldNameChanged: renameTextEntry.text = oldName;
+
         onAccepted: {
-            var newName = newNameTextEntry.text;
+            var newName = renameTextEntry.text;
             var noteNames = dataHandler.getNoteNames(model.notebookName);
             for(var i=0;i<noteNames.length;i++) {
                 if(noteNames[i] == newName) {

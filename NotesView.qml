@@ -63,7 +63,7 @@ AppPage {
             secondHelpTitle: qsTr("Share your notes by email")
             firstHelpText: qsTr("Tap the 'Create the first note' button. You can also tap the icon in the top right corner of the screen, then select 'New note'.")
             secondHelpText: qsTr("To send a note by email, tap and hold the note you want to send, then select 'Email'.")
-            helpContentVisible: dataHandler.isFirstTimeUse(false)
+            helpContentVisible: (saveRestore.value("FirstTimeUseNotes") == undefined) && (listView.count == 0)
 
             onButtonClicked: {
                 addDialog.show();
@@ -576,9 +576,14 @@ AppPage {
         }
         onAccepted: {
             //first time use feature
-            if (dataHandler.isFirstTimeUse(false)) {
-                dataHandler.unsetFirstTimeUse(false);
+            if (saveRestore.value("FirstTimeUseNotes") == undefined) {
+                saveRestore.setValue("FirstTimeUseNotes", false);
+                saveRestore.sync();
             }
+
+//            if (dataHandler.isFirstTimeUse(false)) {
+//                dataHandler.unsetFirstTimeUse(false);
+//            }
 
             if (!dataHandler.noteExists(model.notebookName, newName.text)) {
                 dataHandler.createNote(noteListPage.caption, newName.text, "");

@@ -43,6 +43,10 @@ Window {
         dataHandler: dataHandler
     }
 
+    SaveRestoreState {
+        id: saveRestore
+    }
+
     Component {
         id: notebookList
 

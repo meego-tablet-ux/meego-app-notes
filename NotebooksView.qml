@@ -34,7 +34,7 @@ AppPage {
     Loader {
         id: blankStateScreenLoader
 
-        sourceComponent: (dataHandler.isFirstTimeUse() && listView.model.count == 1) ? blankStateScreenComponent : undefined
+        sourceComponent: ((saveRestore.value("FirstTimeUseNotebooks") == undefined) && listView.model.count == 1) ? blankStateScreenComponent : undefined
     }
 
     Component {
@@ -339,10 +339,15 @@ AppPage {
 
         onAccepted: {
             //first time use feature
-            if (dataHandler.isFirstTimeUse()) {
-                dataHandler.unsetFirstTimeUse();
-                //blankStateScreen.helpContentVisible = false; //I don't know why this was needed, but putting in here casues a scoping error
+            if (saveRestore.value("FirstTimeUseNotebooks") == undefined) {
+                saveRestore.setValue("FirstTimeUseNotebooks", false);
+                saveRestore.sync();
             }
+
+//            if (dataHandler.isFirstTimeUse()) {
+//                dataHandler.unsetFirstTimeUse();
+//                //blankStateScreen.helpContentVisible = false; //I don't know why this was needed, but putting in here casues a scoping error
+//            }
 
             updateView();
 
@@ -462,6 +467,7 @@ AppPage {
                 return;
             }
 
+            console.log("Renaming...");
             dataHandler.renameNoteBook(oldName, newName);
             updateView();
         }

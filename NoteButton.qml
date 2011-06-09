@@ -142,7 +142,7 @@ Rectangle {
                     width: 8;
                     height: 8;
                     smooth: true
-                    source: "image://theme/settings/icn_brightness_low"
+                    source: "image://themedimage/images/settings/icn_brightness_low"
                 }
             }
 	}
@@ -152,6 +152,6 @@ Rectangle {
         id: separator
         width: parent.width
         anchors.bottom: parent.bottom
-        source: "image://theme/tasks/ln_grey_l"
+        source: "image://themedimage/images/tasks/ln_grey_l"
     }
 }

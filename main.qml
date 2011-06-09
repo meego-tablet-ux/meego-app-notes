@@ -18,6 +18,7 @@ Window {
     property string notebookName
     property string noteName
     property string noteData
+    property int maxCharactersCount: 50
 
     Component.onCompleted: {
         console.log("load MainPage")
@@ -40,6 +41,10 @@ Window {
     NoteModel {
         id: noteModel
         dataHandler: dataHandler
+    }
+
+    SaveRestoreState {
+        id: saveRestore
     }
 
     Component {
@@ -71,7 +76,7 @@ Window {
             onNoteClicked: {
                 window.addPage(noteDetailPage);
                 noteName = name;
-                filterModel = [];
+                //filterModel = [];
             }
 
             onCloseWindow: {
@@ -96,10 +101,6 @@ Window {
                 window.addPage(noteList);
                 filterModel = filterModelList;
             }
-
-//            onClose: {
-//                filterModel = filterModelList;
-//            }
         }
     }
 }

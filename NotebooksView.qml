@@ -18,33 +18,11 @@ AppPage {
     property string selectedTitle
     property bool showCheckBox: dataHandler.getCheckBox()
     property variant selectedItems: [];
-//    property variant filterModelList: [qsTr("All"), qsTr("Alphabetical order")]
 
     signal notebookClicked(string name, string title)
     signal updateView();
 
     enableCustomActionMenu: true
-
-//    actionMenuModel: {
-//        if((listView.count == 1) || (showCheckBox) ) {
-//            return [qsTr("New Notebook"), qsTr("All"), qsTr("Alphabetical order")];
-//        } else {
-//            return [qsTr("New Notebook"), qsTr("Select Multiple"), qsTr("All"), qsTr("Alphabetical order")];
-//        }
-//    }
-
-//    actionMenuPayload: [ 0, 1 ]
-
-//    onActionMenuTriggered: {
-//        if(selectedItem == 0) {
-//            addDialogLoader.sourceComponent = addDialogComponent;
-//            addDialogLoader.item.parent = notebookListPage;
-//        } else if(selectedItem == 1) {
-//            console.log("NotebooksView MultiSelect");
-//            showCheckBox = true;
-//            multiSelectRow.opacity = 1;
-//        }
-//    }
 
     onActionMenuIconClicked: {
         if (window.pageStack.currentPage == notebookListPage) {
@@ -56,7 +34,7 @@ AppPage {
     Loader {
         id: blankStateScreenLoader
 
-        sourceComponent: (dataHandler.isFirstTimeUse() && listView.model.count == 1) ? blankStateScreenComponent : undefined
+        sourceComponent: ((saveRestore.value("FirstTimeUseNotebooks") == undefined) && listView.model.count == 1) ? blankStateScreenComponent : undefined
     }
 
     Component {
@@ -77,8 +55,7 @@ AppPage {
             secondHelpText: qsTr("Tap the 'Create the first note' button. You can also tap the icon in the top right corner of the screen, then select 'New note'.")
 
             onButtonClicked: {
-                addDialogLoader.sourceComponent = addDialogComponent;
-                addDialogLoader.item.parent = notebookListPage;
+                addDialog.show();
             }
         }
     }
@@ -89,7 +66,7 @@ AppPage {
             ActionMenu {
                 id: firstActionMenu
                 model: {
-                    if((listView.count < 3) || (showCheckBox) ) {
+                    if((listView.model.count < 3) || (showCheckBox) ) {
                         return [qsTr("New Notebook")];
                     } else {
                         return [qsTr("New Notebook"), qsTr("Select Multiple")];
@@ -97,11 +74,10 @@ AppPage {
                 }
                 onTriggered: {
                     if(index == 0) {
-                        addDialogLoader.sourceComponent = addDialogComponent;
-                        addDialogLoader.item.parent = notebookListPage;
+                        addDialog.show();
                     } else if(index == 1) {
                         showCheckBox = true;
-                        multiSelectRow.opacity = 1;
+                        multiSelectRow.show();
                     }
                     customMenu.hide();
                 }//ontriggered
@@ -242,11 +218,6 @@ AppPage {
             cacheBuffer: 600
             interactive: contentHeight > listView.height
 
-//            header:
-//                Item {
-//                width:listView.width
-//                height: 50
-//            }
             footer:
                 Item {
                 width:listView.width
@@ -254,47 +225,37 @@ AppPage {
             }
         }
 
-        BorderImage {
+        BottomToolBar {
             id: multiSelectRow
-            source: "image://meegotheme/widgets/common/action-bar/action-bar-background"
             anchors.bottom: listView.bottom
             width: listView.width
-            height: 80
-            opacity: 0
 
-            Row {
-                spacing: 10
-                anchors.horizontalCenter: parent.horizontalCenter
-                Button {
-                    id: deleteButton
-                    text: qsTr("Delete")
-                    height: 80
-                    enabled: selectedItems.length > 0
-                    hasBackground: true
-                    bgSourceUp: "image://theme/btn_red_up"
-                    bgSourceDn: "image://theme/btn_red_dn"
-                    onClicked: {
-                        deleteConfirmationDialog.show();
-                        showCheckBox = false;
-                        multiSelectRow.opacity = 0;
+            content: BottomToolBarRow {
+                centerContent: Row {
+                    spacing: 10
+                    Button {
+                        id: deleteButton
+                        text: qsTr("Delete")
+                        enabled: selectedItems.length > 0
+                        bgSourceUp: "image://themedimage/images/btn_red_up"
+                        bgSourceDn: "image://themedimage/images/btn_red_dn"
+                        onClicked: {
+                            deleteConfirmationDialog.show();
+                            showCheckBox = false;
+                            multiSelectRow.hide();
+                        }
+                    }
+                    Button {
+                        id: cancelButton
+                        text: qsTr("Cancel")
+                        onClicked: {
+                            multiSelectRow.hide();
+                            showCheckBox = false;
+                            selectedItems = [];
+                        }
                     }
                 }
 
-                Button {
-                    id: cancelButton
-                    text: qsTr("Cancel")
-                    height: 80
-                    onClicked: {
-                        multiSelectRow.opacity = 0;
-                        showCheckBox = false;
-                    }
-                }
-            }
-
-            Image {
-                source: "image://meegotheme/widgets/common/action-bar/action-bar-shadow"
-                anchors.bottom: multiSelectRow.top
-                width: parent.width
             }
         }
     }
@@ -344,7 +305,7 @@ AppPage {
                     }
                 } else if (model[index] == contextMenu.renameChoice) {
                     renameWindow.oldName = notebookListPage.selectedTitle;
-                    renameWindow.visible = true;
+                    renameWindow.show();
                 }
 
                 contextMenu.hide();
@@ -352,58 +313,55 @@ AppPage {
         }
     }
 
-
-    Loader {
-        id: addDialogLoader
-        anchors.fill: parent
-    }
-
-    Component {
-        id: addDialogComponent
-
-        TwoButtonsModalDialog {
-            id: addDialog
-
-            menuHeight: 150
-            minWidth: 260
-
-            dialogTitle: qsTr("Create a new Notebook");
-            buttonText: qsTr("Create");
-            button2Text: qsTr("Cancel");
-            defaultText: qsTr("Notebook name");
-            onButton1Clicked: {
-                //workaround (max length of the folder name - 256)
-                if (text.length > 256)
-                    text = text.slice(0, 255);
-
-                //first time use feature
-                if (dataHandler.isFirstTimeUse()) {
-                    dataHandler.unsetFirstTimeUse();
-                    blankStateScreen.helpContentVisible = false;
+    ModalDialog {
+        id: addDialog
+        title: qsTr("Create a new Notebook");
+        acceptButtonText: qsTr("Create");
+        cancelButtonText: qsTr("Cancel");
+        content: Column {
+            anchors.fill: parent
+            TextEntry {
+                id: newName
+                defaultText: qsTr("Notebook name");
+                onTextChanged: {
+                    newName.text = newName.text.slice(0, window.maxCharactersCount);
                 }
+                width: parent.width
+                height: parent.height - charsIndicator.height
+            }
+            Text {
+                id: charsIndicator
+                font.italic: true
+                font.pixelSize: 10
+                text: qsTr("%1/%2").arg(newName.text.length).arg(window.maxCharactersCount)
+            }
+        }
 
-                updateView();
-                //            opacity = 0;
-                addDialogLoader.sourceComponent = undefined;
-
-                if (dataHandler.noteBookExists(text)) {
-                    informationDialog.info = qsTr("A NoteBook '%1' already exists.").arg(text);
-                    informationDialog.visible = true;
-                    return;
-                }
-
-                dataHandler.createNoteBook(text);
-                //                updateView();
-                //                //            opacity = 0;
-                //                addDialogLoader.sourceComponent = undefined;
+        onAccepted: {
+            //first time use feature
+            if (saveRestore.value("FirstTimeUseNotebooks") == undefined) {
+                saveRestore.setValue("FirstTimeUseNotebooks", false);
+                saveRestore.sync();
             }
 
-            onButton2Clicked: {
-                updateView();
-                //            opacity = 0;
-                addDialogLoader.sourceComponent = undefined;
+//            if (dataHandler.isFirstTimeUse()) {
+//                dataHandler.unsetFirstTimeUse();
+//                //blankStateScreen.helpContentVisible = false; //I don't know why this was needed, but putting in here casues a scoping error
+//            }
+
+            updateView();
+
+            if (dataHandler.noteBookExists(newName.text)) {
+                informationDialog.info = qsTr("A NoteBook '%1' already exists.").arg(newName.text);
+                informationDialog.visible = true;
+                return;
             }
 
+            dataHandler.createNoteBook(newName.text);
+            newName.text =""; //reset it for next time
+        }
+        onRejected: {
+            updateView();
         }
     }
 
@@ -414,95 +372,104 @@ AppPage {
                          qsTr("Are you sure you want to delete these %1 notebooks?").arg(selectedItems.length)
                        :  qsTr("Are you sure you want to delete \"%1\"?").arg(componentText);
         property string componentText: (selectedItems.length > 0) ? selectedItems[0] : selectedNotebook;
-        acceptButtonImage: "image://theme/btn_red_up"
-        acceptButtonImagePressed: "image://theme/btn_red_dn"
+        acceptButtonImage: "image://themedimage/images/btn_red_up"
+        acceptButtonImagePressed:"image://themedimage/images/btn_red_dn"
 
         onAccepted: {
             if (selectedItems.length > 0)
             {
                 dataHandler.deleteNoteBooks(selectedItems);
-                selectedItems = [];
             }
             else
             {
                 dataHandler.deleteNoteBook(selectedNotebook);
             }
-
-            opacity = 0;
-            deleteReportWindow.opacity = 1;
+            deleteReportWindow.show();
         }
 
         onRejected: {
-            opacity = 0;
             selectedItems = [];
         }
     }
 
-
-    DeleteMoveNotificationDialog {
+    ModalDialog {
         id: deleteReportWindow
-        opacity: 0;
-        minWidth: 270
-        buttonText: qsTr("OK");
-        dialogTitle: (selectedItems.length > 1) ? qsTr("Notebooks deleted") : qsTr("Notebook deleted")
-        text:  {
-            if(selectedItems.length > 1) {
-                return qsTr("\"%1\" notebooks have been deleted").arg(selectedItems.length);
-            } else if(selectedItems.length == 1) {
-                return qsTr("\"%1\" has been deleted").arg(selectedItems[0]);
-            } else  {
-                return qsTr("\"%1\" has been deleted").arg(selectedNotebook);
+        showCancelButton: false
+        showAcceptButton: true
+        acceptButtonText: qsTr("OK");
+        title: (selectedItems.length > 1) ? qsTr("Notebooks deleted") : qsTr("Notebook deleted")
+        content: Text {
+            anchors.fill: parent
+            text:  {
+                if(selectedItems.length > 1) {
+                    return qsTr("%1 notebooks have been deleted").arg(selectedItems.length);
+                } else if(selectedItems.length == 1) {
+                    return qsTr("\"%1\" has been deleted").arg(selectedItems[0]);
+                } else  {
+                    return qsTr("\"%1\" has been deleted").arg(selectedNotebook);
+                }
             }
         }
-
-        onDialogClicked:
-        {
+        onAccepted: {
             selectedItems = [];
-            opacity = 0;
             updateView();
         }
     }
 
-    InformationDialog {
+    ModalDialog {
         id: informationDialog
-        visible: false
-
-        onOkClicked: informationDialog.visible = false;
+        property alias info: textInfo.text
+        showCancelButton: false
+        showAcceptButton: true
+        acceptButtonText: qsTr("OK");
+        content: Text {
+            id: textInfo
+            anchors.fill: parent
+        }
     }
 
-    TwoButtonsModalDialog {
+    ModalDialog {
         id: renameWindow
-        visible: false
-        buttonText: qsTr("OK");
-        button2Text: qsTr("Cancel");
-        dialogTitle: qsTr("Rename NoteBook")
+        acceptButtonText: qsTr("OK");
+        cancelButtonText: qsTr("Cancel");
+        title: qsTr("Rename NoteBook")
         property string oldName
 
-        onOldNameChanged: {
-            text = oldName;
+        content: Column {
+            anchors.fill: parent
+            TextEntry {
+                id: renameTextEntry
+                onTextChanged: {
+                    renameTextEntry.text = renameTextEntry.text.slice(0, window.maxCharactersCount);
+                }
+                width: parent.width
+                height: parent.height - renameCharsIndicator.height
+            }
+            Text {
+                id: renameCharsIndicator
+                font.italic: true
+                font.pixelSize: 10
+                text: qsTr("%1/%2").arg(renameTextEntry.text.length).arg(window.maxCharactersCount)
+            }
         }
 
-        menuHeight: 150
-        minWidth: 260
-        onButton1Clicked: {
-            var newName = renameWindow.text;
+        onOldNameChanged: {
+            renameTextEntry.text = oldName;
+        }
 
+        onAccepted: {
+            var newName = renameTextEntry.text;
             if (dataHandler.noteBookExists(newName)) {
                 visible = false;
                 updateView();
-
                 informationDialog.info = qsTr("A NoteBook '%1' already exists.").arg(newName);
-                informationDialog.visible = true;
+                informationDialog.show();
                 return;
             }
 
+            console.log("Renaming...");
             dataHandler.renameNoteBook(oldName, newName);
-
-            visible = false;
             updateView();
-        }
-        onButton2Clicked: {
-            visible = false;
         }
     }
 }

@@ -90,7 +90,7 @@ AppPage {
         }
 
         onAccepted: {
-            page.model.removeNoteById(page.note.id);
+            page.model.removeNote(page.note.id);
             hide();
             page.windowClosed();
         }

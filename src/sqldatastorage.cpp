@@ -91,7 +91,7 @@ bool AbstractSqlDataStorage::createStorage()
     const QString script = QString("INSERT INTO %1 (id, title, position) VALUES (?, ?, ?)").arg(noteBooksTableName());
     query.prepare(script);
     query.addBindValue(defaultNoteBookId());
-    query.addBindValue(tr("Everyday Notes (default)"));
+    query.addBindValue(tr("Everyday notes (default)"));
     query.addBindValue(0);
     if (!query.exec()) {
         emit error(QString("%1: %2").arg(Q_FUNC_INFO).arg(query.lastError().text()));
@@ -600,7 +600,7 @@ bool SQLiteStorage::noteExists(quint64 noteBookId, const QString &title)
         return false;
     }
 
-    const QString script = QString("SELECT COUNT(1) AS count FROM %1 WHERE noteBookId = %2 title = '%3'")
+    const QString script = QString("SELECT COUNT(1) AS count FROM %1 WHERE noteBookId = %2 AND title = '%3'")
             .arg(notesTableName())
             .arg(noteBookId)
             .arg(title);

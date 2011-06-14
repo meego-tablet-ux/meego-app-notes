@@ -9,21 +9,12 @@
 #include <QtDeclarative>
 
 #include "notesplugin.h"
-#include "DataHandler.h"
-#include "NotebooksModel.h"
-#include "NoteModel.h"
-#include "TextEditHandler.h"
 
 #include "models.h"
 #include "sqldatastorage.h"
 
 void NotesPlugin::registerTypes(const char *uri)
 {
-    qmlRegisterType<CDataHandler>(uri, 0, 1, "DataHandler");
-    qmlRegisterType<NotebooksModel>(uri, 0, 1, "NotebooksModel");
-    qmlRegisterType<NoteModel>(uri, 0, 1, "NoteModel");
-    qmlRegisterType<CTextEditHandler>(uri, 0, 1, "TextEditHandler");
-
     qmlRegisterUncreatableType<AbstractDataStorage>(uri, 0, 1, "AbstractDataStorage", "Base class");
     qmlRegisterType<SQLiteStorage>(uri, 0, 1, "SQLiteStorage");
     qmlRegisterType<NoteBook>(uri, 0, 1, "NoteBook");

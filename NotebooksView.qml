@@ -35,8 +35,6 @@ AppPage {
         anchors.fill: parent
         parent: page
 
-        y: theme.listBackgroundPixelHeightTwo + 10
-
         mainTitleText: qsTr("Use the default notebook, or make a new one")
         buttonText: qsTr("Create a new notebook")
         firstHelpTitle: qsTr("What's a notebook?")
@@ -46,7 +44,7 @@ AppPage {
 
         onButtonClicked: addDialog.show()
 
-        visible: dataHandler.isFirstTimeUse() && listView.model.count == 1
+        visible: (saveRestore.value("FirstTimeUseNotebooks") == undefined) && listView.model.count == 1
     }
 
     ContextMenu {
@@ -75,7 +73,7 @@ AppPage {
             }
             ActionMenu {
                 id: secondActionMenu
-                model: [qsTr("All"), qsTr("A-Z")]
+                model: [qsTr("All"), qsTr("Alphabetical order")]
                 onTriggered: {
                     if(index == 0) {
                         page.model.sorting = false;
@@ -216,9 +214,10 @@ AppPage {
 
     ModalDialog {
         id: addDialog
-        title: qsTr("Create a new Notebook")
+        title: qsTr("Create a new notebook")
         acceptButtonText: qsTr("Create")
         cancelButtonText: qsTr("Cancel")
+        showAcceptButton: newName.text.length > 0
         content: Column {
             anchors.verticalCenter: parent.verticalCenter
             anchors.left: parent.left
@@ -243,14 +242,13 @@ AppPage {
 
         onAccepted: {
             //first time use feature
-            if (dataHandler.isFirstTimeUse()) {
-                dataHandler.unsetFirstTimeUse();
-                //blankStateScreen.helpContentVisible = false; //I don't know why this was needed, but putting in here casues a scoping error
+            if (saveRestore.value("FirstTimeUseNotebooks") == undefined) {
+                saveRestore.setValue("FirstTimeUseNotebooks", false);
+                saveRestore.sync();
             }
 
             var name = newName.text;
             newName.text = ""; //reset it for next time
-
             if (page.model.noteBookExists(name)) {  //TODO: do we need this checking now?
                 informationDialog.info = qsTr("A NoteBook '%1' already exists.").arg(name);
                 informationDialog.show();
@@ -264,7 +262,7 @@ AppPage {
     ModalDialog {
         id: deleteConfirmationDialog
         acceptButtonText: qsTr("Delete")
-        title: (internal.selectedNoteBooks.length > 1) ? qsTr("Delete Notebooks?") : qsTr("Delete Notebook?")
+        title: (internal.selectedNoteBooks.length > 1) ? qsTr("Delete notebooks?") : qsTr("Delete notebook?")
         content: Text {
             anchors.verticalCenter: parent.verticalCenter
             anchors.left: parent.left
@@ -286,9 +284,9 @@ AppPage {
         onAccepted: {   //TODO: check it
             if (internal.selectedNoteBooks.length > 0) {
                 for (var i = 0; i < internal.selectedNoteBooks.length; ++i)
-                    page.model.removeNoteBookById(internal.selectedNoteBooks[i].id);
+                    page.model.removeNoteBook(internal.selectedNoteBooks[i].id);
             } else {
-                page.model.removeNoteBookById(internal.selectedNoteBook.id);
+                page.model.removeNoteBook(internal.selectedNoteBook.id);
             }
             deleteReportWindow.show();
             internal.selectMultiply = false;
@@ -342,9 +340,11 @@ AppPage {
 
     ModalDialog {
         id: renameWindow
-        acceptButtonText: qsTr("OK");
-        cancelButtonText: qsTr("Cancel");
-        title: qsTr("Rename NoteBook")
+        acceptButtonText: qsTr("OK")
+        cancelButtonText: qsTr("Cancel")
+        showAcceptButton: renameTextEntry.text.length > 0
+        title: qsTr("Rename noteBook")
+
         property string oldName
 
         content: Column {
@@ -373,7 +373,7 @@ AppPage {
         onAccepted: {
             var newName = renameTextEntry.text;
             if (page.model.noteBookExists(newName)) {   //TODO: do we need this checking now?
-                informationDialog.info = qsTr("A NoteBook '%1' already exists.").arg(newName);
+                informationDialog.info = qsTr("A noteBook '%1' already exists.").arg(newName);
                 informationDialog.show();
                 return;
             }
@@ -410,15 +410,15 @@ AppPage {
         function notesCountText(noteBook)
         {
             var notesCount = noteBook ? noteBook.notesCount : 0;
-            return notesCount == 1 ? qsTr("%1 Note").arg(notesCount) : qsTr("%1 Notes").arg(notesCount);
+            return notesCount == 1 ? qsTr("%1 note").arg(notesCount) : qsTr("%1 notes").arg(notesCount);
         }
 
         function menuModel()
         {
             var res = [];
-            res.push(qsTr("New Notebook"));
+            res.push(qsTr("New notebook"));
             if(listView.model.count > 1)
-                res.push(qsTr("Select Multiple"));
+                res.push(qsTr("Select multiple"));
             return res;
         }
     }

@@ -9,19 +9,19 @@ OBJECTS_DIR = .obj
 MOC_DIR = .moc
 
 SOURCES += \
-    DataHandler.cpp \
-    NotebooksModel.cpp \
-    NoteModel.cpp \
-    TextEditHandler.cpp \
+#    DataHandler.cpp \
+#    NotebooksModel.cpp \
+#    NoteModel.cpp \
+#    TextEditHandler.cpp \
     notesplugin.cpp \
     sqldatastorage.cpp \
     models.cpp
 
 HEADERS += \
-    DataHandler.h \
-    NotebooksModel.h \
-    NoteModel.h \
-    TextEditHandler.h \
+#    DataHandler.h \
+#    NotebooksModel.h \
+#    NoteModel.h \
+#    TextEditHandler.h \
     notesplugin.h \
     sqldatastorage.h \
     models.h

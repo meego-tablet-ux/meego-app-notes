@@ -100,14 +100,14 @@ Rectangle {
                     Text {
                         id: textElement
                         font.pixelSize: theme.fontPixelSizeNormal
-                        text: qsTr("Text Element");
+                        text: qsTr("Text element")
                         wrapMode: Text.Wrap
                     }
 
                     Text {
                         id: textComment
                         font.pixelSize: theme.fontPixelSizeSmall
-                        text: qsTr("Add some comments here");
+                        text: qsTr("Add some comments here")
                         elide: Text.ElideRight
                         color: theme.fontColorInactive
                     }

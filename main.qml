@@ -18,10 +18,6 @@ Window {
 
     Component.onCompleted: switchBook(notebookList)
 
-    DataHandler {   //TODO: deprecated
-        id: dataHandler
-    }
-
     SQLiteStorage {
         id: sqliteStorage
 
@@ -37,6 +33,10 @@ Window {
         id: notesModel
         storage: sqliteStorage
         noteBook: internal.selectedNoteBook
+    }
+
+    SaveRestoreState {
+        id: saveRestore
     }
 
     Component {

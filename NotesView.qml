@@ -45,11 +45,9 @@ AppPage {
         secondHelpTitle: qsTr("Share your notes by email")
         firstHelpText: qsTr("Tap the 'Create the first note' button. You can also tap the icon in the top right corner of the screen, then select 'New note'.")
         secondHelpText: qsTr("To send a note by email, tap and hold the note you want to send, then select 'Email'.")
-        helpContentVisible: dataHandler.isFirstTimeUse(false)
+        helpContentVisible: (saveRestore.value("FirstTimeUseNotes") == undefined) && (listView.count == 0)
 
         onButtonClicked: addDialog.show()
-
-        visible: dataHandler.isFirstTimeUse() && listView.model.count == 1
     }
 
     ContextMenu {
@@ -78,7 +76,7 @@ AppPage {
             }
             ActionMenu {
                 id: secondActionMenu
-                model: [qsTr("All"), qsTr("A-Z")]
+                model: [qsTr("All"), qsTr("Alphabetical order")]
                 onTriggered: {
                     if(index == 0) {
                         page.model.sorting = false;
@@ -315,9 +313,10 @@ AppPage {
 
     ModalDialog {
         id: addDialog
-        title: qsTr("Create a new Note")
+        title: qsTr("Create a new note")
         acceptButtonText: qsTr("Create")
         cancelButtonText: qsTr("Cancel")
+        showAcceptButton: newName.text.length > 0
         content: Column {
             anchors.verticalCenter: parent.verticalCenter
             anchors.left: parent.left
@@ -342,8 +341,9 @@ AppPage {
 
         onAccepted: {
             //first time use feature
-            if (dataHandler.isFirstTimeUse(false)) {
-                dataHandler.unsetFirstTimeUse(false);
+            if (saveRestore.value("FirstTimeUseNotes") == undefined) {
+                saveRestore.setValue("FirstTimeUseNotes", false);
+                saveRestore.sync();
             }
 
             var name = newName.text;
@@ -362,7 +362,7 @@ AppPage {
     ModalDialog {
         id: deleteConfirmationDialog
         acceptButtonText: qsTr("Delete")
-        title: (internal.selectedNotes.length > 1) ? qsTr("Delete Notes?") : qsTr("Delete Note?")
+        title: (internal.selectedNotes.length > 1) ? qsTr("Delete notes?") : qsTr("Delete note?")
         content: Text {
             anchors.verticalCenter: parent.verticalCenter
             anchors.left: parent.left
@@ -384,9 +384,9 @@ AppPage {
         onAccepted: {   //TODO: check it
             if (internal.selectedNotes.length > 0) {
                 for (var i = 0; i < internal.selectedNotes.length; ++i)
-                    page.model.removeNoteById(internal.selectedNotes[i].id);
+                    page.model.removeNote(internal.selectedNotes[i].id);
             } else {
-                page.model.removeNoteById(internal.selectedNote.id);
+                page.model.removeNote(internal.selectedNote.id);
             }
             deleteReportWindow.show();
             internal.selectMultiply = false;
@@ -440,9 +440,11 @@ AppPage {
 
     ModalDialog {
         id: renameWindow
-        acceptButtonText: qsTr("OK");
-        cancelButtonText: qsTr("Cancel");
-        title: qsTr("Rename Note")
+        acceptButtonText: qsTr("OK")
+        cancelButtonText: qsTr("Cancel")
+        showAcceptButton: renameTextEntry.text.length > 0
+        title: qsTr("Rename note")
+
         property string oldName
 
         content: Column {
@@ -471,7 +473,7 @@ AppPage {
         onAccepted: {
             var newName = renameTextEntry.text;
             if (page.model.noteExists(newName)) {   //TODO: do we need this checking now?
-                informationDialog.info = qsTr("A Note '%1' already exists.").arg(newName);
+                informationDialog.info = qsTr("A note '%1' already exists.").arg(newName);
                 informationDialog.show();
                 return;
             }
@@ -527,9 +529,9 @@ AppPage {
         function menuModel()
         {
             var res = [];
-            res.push(qsTr("New Note"));
+            res.push(qsTr("New note"));
             if(listView.model.count > 1)
-                res.push(qsTr("Select Multiple"));
+                res.push(qsTr("Select multiple"));
             return res;
         }
     }

@@ -24,8 +24,9 @@ Rectangle {
     signal itemDeselected(variant itemData)
     signal itemTapped(variant gesture, variant itemData)
     signal itemTappedAndHeld(variant gesture, variant itemData)
-    signal itemPanUpdated(variant gesture, variant itemData)
-    signal itemPanFinished(variant gesture, variant itemData)
+    signal gripTappedAndHeld(variant gesture, variant itemData)
+    signal gripPanUpdated(variant gesture, variant itemData)
+    signal gripPanFinished(variant gesture, variant itemData)
 
     height: theme.listBackgroundPixelHeightTwo
 
@@ -120,6 +121,19 @@ Rectangle {
                     anchors.rightMargin: container.spacing
 
                     source: "image://themedimage/images/tasks/icn_grabhandle"
+
+                    GestureArea {
+                        anchors.fill: parent
+
+                        TapAndHold {
+                            onFinished: gripTappedAndHeld(gesture, itemData)
+                        }
+
+                        Pan {
+                            onUpdated: gripPanUpdated(gesture, itemData)
+                            onFinished: gripPanFinished(gesture, itemData)
+                        }
+                    }
                 }
 
                 GestureArea {
@@ -134,11 +148,6 @@ Rectangle {
 
                     TapAndHold {
                         onFinished: itemTappedAndHeld(gesture, itemData)
-                    }
-
-                    Pan {
-                        onUpdated: itemPanUpdated(gesture, itemData)
-                        onFinished: itemPanFinished(gesture, itemData)
                     }
                 }
             }

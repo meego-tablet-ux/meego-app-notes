@@ -113,13 +113,18 @@ AppPage {
             }
 
             //TODO: dnd
-            onItemPanUpdated: {
-
+            onGripTappedAndHeld: {
+                console.debug('---------------drag init');
             }
 
             //TODO: dnd
-            onItemPanFinished: {
+            onGripPanUpdated: {
+                console.debug('---------------drag updated');
+            }
 
+            //TODO: dnd
+            onGripPanFinished: {
+                console.debug('---------------drag finished');
             }
         }
     }
@@ -148,13 +153,18 @@ AppPage {
             }
 
             //TODO: dnd
-            onItemPanUpdated: {
-
+            onGripTappedAndHeld: {
+                console.debug('---------------drag init');
             }
 
             //TODO: dnd
-            onItemPanFinished: {
+            onGripPanUpdated: {
+                console.debug('---------------drag updated');
+            }
 
+            //TODO: dnd
+            onGripPanFinished: {
+                console.debug('---------------drag finished');
             }
         }
     }

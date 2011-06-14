@@ -6,13 +6,16 @@
  * http://www.apache.org/licenses/LICENSE-2.0
  */
 
+#include <QtDeclarative>
+
 #include "notesplugin.h"
 #include "DataHandler.h"
 #include "NotebooksModel.h"
 #include "NoteModel.h"
 #include "TextEditHandler.h"
 
-#include <qdeclarative.h>
+#include "models.h"
+#include "sqldatastorage.h"
 
 void NotesPlugin::registerTypes(const char *uri)
 {
@@ -20,7 +23,13 @@ void NotesPlugin::registerTypes(const char *uri)
     qmlRegisterType<NotebooksModel>(uri, 0, 1, "NotebooksModel");
     qmlRegisterType<NoteModel>(uri, 0, 1, "NoteModel");
     qmlRegisterType<CTextEditHandler>(uri, 0, 1, "TextEditHandler");
+
+    qmlRegisterUncreatableType<AbstractDataStorage>(uri, 0, 1, "AbstractDataStorage", "Base class");
+    qmlRegisterType<SQLiteStorage>(uri, 0, 1, "SQLiteStorage");
+    qmlRegisterType<NoteBook>(uri, 0, 1, "NoteBook");
+    qmlRegisterType<NoteBooksModel>(uri, 0, 1, "NoteBooksModel");
+    qmlRegisterType<Note>(uri, 0, 1, "Note");
+    qmlRegisterType<NotesModel>(uri, 0, 1, "NotesModel");
 }
 
-//Q_EXPORT_PLUGIN2(notesplugin, NotesPlugin);
 Q_EXPORT_PLUGIN(NotesPlugin);

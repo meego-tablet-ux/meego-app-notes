@@ -23,7 +23,7 @@
  *
  *
  *******************************************************************/
-Note::Note(const QString& name, const QString& title,
+OldNote::OldNote(const QString& name, const QString& title,
            const QString& notebook, const QString& text,
            const QString& position)
     : m_strName(name), m_strTitle(title),
@@ -37,7 +37,7 @@ Note::Note(const QString& name, const QString& title,
  *
  *
  *******************************************************************/
-QString Note::name() const
+QString OldNote::name() const
 {
     return m_strName;
 }
@@ -48,7 +48,7 @@ QString Note::name() const
  *
  *
  *******************************************************************/
-QString Note::title() const
+QString OldNote::title() const
 {
     return m_strTitle;
 }
@@ -59,7 +59,7 @@ QString Note::title() const
  *
  *
  *******************************************************************/
-QString Note::notebook() const
+QString OldNote::notebook() const
 {
     return m_strNotebook;
 }
@@ -70,7 +70,7 @@ QString Note::notebook() const
  *
  *
  *******************************************************************/
-QString Note::text() const
+QString OldNote::text() const
 {
     return m_strText;
 }
@@ -81,7 +81,7 @@ QString Note::text() const
  *
  *
  *******************************************************************/
-QString Note::position() const
+QString OldNote::position() const
 {
     return m_strPosition;
 }
@@ -143,7 +143,7 @@ QVariant NoteModel::data(const QModelIndex& index, int role) const
     if (index.row() < 0 || index.row() > m_Notes.count())
         return QVariant();
 
-    Note* note = m_Notes[index.row()];
+    OldNote* note = m_Notes[index.row()];
 
     if (NULL != note)
     {
@@ -168,7 +168,7 @@ QVariant NoteModel::data(const QModelIndex& index, int role) const
  *
  *
  *******************************************************************/
-void NoteModel::addNote(Note* note)
+void NoteModel::addNote(OldNote* note)
 {
     beginInsertRows(QModelIndex(), rowCount(), rowCount());
     m_Notes.append(note);
@@ -211,7 +211,7 @@ void NoteModel::init()
     {
         //         m_handler->load(m_notebookName, notesNames.at(i), st);
         m_handler->getNotePosition(m_notebookName, notesNames.at(i), pos);
-        this->addNote(new Note(notesNames.at(i), notesTitles.at(i), m_notebookName, QString(), pos));
+        this->addNote(new OldNote(notesNames.at(i), notesTitles.at(i), m_notebookName, QString(), pos));
     }
 }
 
@@ -220,7 +220,7 @@ void NoteModel::addNote(const QString &name)
     beginInsertRows(QModelIndex(), rowCount(), rowCount());
     QString pos;
     m_handler->getNotePosition(m_notebookName, name, pos);
-    m_Notes.append(new Note(name, name, m_notebookName, QString(), pos));
+    m_Notes.append(new OldNote(name, name, m_notebookName, QString(), pos));
     m_notesNames.append(name);
     endInsertRows();
 
@@ -255,7 +255,7 @@ void NoteModel::quickSort(QStringList &list, int left, int right)
 {
     int i = left, j = right;
     QString tmp;
-    Note *tempNote;
+    OldNote *tempNote;
     QString pivot = list.at((left + right) / 2);
 
     /* partition */
@@ -300,7 +300,7 @@ QString NoteModel::dumpNote(int row)
         return QString();
     }
 
-    Note *note = m_Notes[row];
+    OldNote *note = m_Notes[row];
     Q_ASSERT(note);
     if (!note) {
         delete file;

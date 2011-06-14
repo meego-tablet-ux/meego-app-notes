@@ -18,10 +18,10 @@
  * name, title, notebook and text
  *
  *******************************************************************/
-class Note
+class OldNote
 {
 public:
-    Note(const QString& name, const QString& title,
+    OldNote(const QString& name, const QString& title,
          const QString& notebook, const QString& text,
          const QString& position);
 
@@ -67,7 +67,7 @@ public:
     ~NoteModel();
     int rowCount(const QModelIndex& parent = QModelIndex()) const;
     QVariant data(const QModelIndex& index, int role = Qt::DisplayRole) const;
-    void addNote(Note* note);
+    void addNote(OldNote* note);
     void clear();
     void setDataHandler(CDataHandler *handler)
     {
@@ -95,7 +95,7 @@ private slots:
 
 protected:
     QStringList m_notesNames;
-    QList<Note*> m_Notes;
+    QList<OldNote*> m_Notes;
     CDataHandler *m_handler;
     QString m_notebookName;
     QMap<int, QTemporaryFile *> m_dumpFiles;

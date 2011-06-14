@@ -58,8 +58,10 @@ bool AbstractSqlDataStorage::openStorage()
         m_database = QSqlDatabase::addDatabase(driverName(), connectionName());
         m_database.setDatabaseName(databaseName());
     }
-    if (!m_database.isOpen() && !m_database.open())
-       return false;
+    if (!m_database.isOpen() && !m_database.open()) {
+        emit error(QString("%1: %2").arg(Q_FUNC_INFO).arg(m_database.lastError().text()));
+        return false;
+    }
     return createStorage();
 }
 
@@ -75,8 +77,27 @@ bool AbstractSqlDataStorage::createStorage()
     const QStringList tables = m_database.tables();
     if (tables.contains(noteBooksTableName()) && tables.contains(notesTableName()))
         return true;
+
     QSqlQuery query(m_database);
-    return query.exec(databaseCreationScript());
+    const QStringList scripts = databaseCreationScript().split(';');
+    foreach (const QString &script, scripts) {
+        if (!query.exec(script)) {
+            emit error(QString("%1: %2").arg(Q_FUNC_INFO).arg(query.lastError().text()));
+            return false;
+        }
+    }
+
+    query.clear();
+    const QString script = QString("INSERT INTO %1 (id, title, position) VALUES (?, ?, ?)").arg(noteBooksTableName());
+    query.prepare(script);
+    query.addBindValue(defaultNoteBookId());
+    query.addBindValue(tr("Everyday Notes (default)"));
+    query.addBindValue(0);
+    if (!query.exec()) {
+        emit error(QString("%1: %2").arg(Q_FUNC_INFO).arg(query.lastError().text()));
+        return false;
+    }
+    return true;
 }
 
 bool AbstractSqlDataStorage::removeStorage()
@@ -84,116 +105,284 @@ bool AbstractSqlDataStorage::removeStorage()
     if (!openStorage())
         return false;
     QSqlQuery query(m_database);
-    const bool res = query.exec(databaseDeletionScript());
+
+    const QStringList scripts = databaseDeletionScript().split(';');
+    foreach (const QString &script, scripts) {
+        if (!query.exec(script)) {
+            emit error(QString("%1: %2").arg(Q_FUNC_INFO).arg(query.lastError().text()));
+            return false;
+        }
+    }
+
     closeStorage();
-    return res;
+    return true;
 }
 
 bool AbstractSqlDataStorage::checkConnection() const
 {
     return m_database.isValid() && m_database.isOpen();
 }
-
-QString AbstractSqlDataStorage::lastErrorString() const
-{
-    return m_database.lastError().text();
-}
 //--------------------------------------------------------------------------------------------------------------------------
 bool SQLiteStorage::createNoteBook(const QString &title, qint32 position)
 {
-    if (!checkConnection())
+    if (!checkConnection()) {
+        emit error(QString("%1: %2").arg(Q_FUNC_INFO).arg("Database isn't opened."));
         return false;
+    }
 
     const QString script = QString("INSERT INTO %1 (title, position) VALUES (?, ?)").arg(noteBooksTableName());
     QSqlQuery query(m_database);
     query.prepare(script);
     query.addBindValue(title);
     query.addBindValue(position);
-    return query.exec();
+    if (!query.exec()) {
+        emit error(QString("%1: %2").arg(Q_FUNC_INFO).arg(query.lastError().text()));
+        return false;
+    }
+    emit noteBookCreated();
+    return true;
 }
 
 bool SQLiteStorage::removeNoteBook(quint64 id)
 {
-    if (!checkConnection())
+    if (!checkConnection()) {
+        emit error(QString("%1: %2").arg(Q_FUNC_INFO).arg("Database isn't opened."));
         return false;
+    }
 
-    const QString script = QString("DELETE FROM %1 WHERE id = %2")
+    const QString noteBookDeletionScript = QString("DELETE FROM %1 WHERE id = %2")
             .arg(noteBooksTableName())
             .arg(id);
-    QSqlQuery query(m_database);
-    return query.exec(script);
+    QSqlQuery noteBookDeletionQuery(m_database);
+    const QString notesDeletionScript = QString("DELETE FROM %1 WHERE noteBookId = %2")
+            .arg(notesTableName())
+            .arg(id);
+    QSqlQuery notesDeletionQuery(m_database);
+    if (!notesDeletionQuery.exec(notesDeletionScript)) {
+        emit error(QString("%1: %2").arg(Q_FUNC_INFO).arg(notesDeletionQuery.lastError().text()));
+        return false;
+    }
+    if (!noteBookDeletionQuery.exec(noteBookDeletionScript)) {
+        emit error(QString("%1: %2").arg(Q_FUNC_INFO).arg(noteBookDeletionQuery.lastError().text()));
+        return false;
+    }
+    emit noteBookRemoved();
+    return true;
 }
 
 bool SQLiteStorage::updateNoteBook(quint64 id, const QString &title, qint32 position)
 {
-    if (!checkConnection())
+    if (!checkConnection()) {
+        emit error(QString("%1: %2").arg(Q_FUNC_INFO).arg("Database isn't opened."));
         return false;
+    }
 
-    const QString script = QString("UPDATE %1 SET title = '%2', position = '%3' WHERE id = %4")
+    const QString script = QString("UPDATE %1 SET title = '%2', position = %3 WHERE id = %4")
             .arg(noteBooksTableName())
             .arg(title)
             .arg(position)
             .arg(id);
     QSqlQuery query(m_database);
-    return query.exec(script);
+    if (!query.exec(script)) {
+        emit error(QString("%1: %2").arg(Q_FUNC_INFO).arg(query.lastError().text()));
+        return false;
+    }
+    emit noteBookUpdated();
+    return true;
 }
 
-QList<quint64> SQLiteStorage::noteBooks()
+bool SQLiteStorage::updateNoteBookTitle(quint64 id, const QString &title)
 {
-    QList<quint64> res;
+    if (!checkConnection()) {
+        emit error(QString("%1: %2").arg(Q_FUNC_INFO).arg("Database isn't opened."));
+        return false;
+    }
 
-    if (!checkConnection())
-        return res;
-
-    static const QString script = QString("SELECT id FROM %1").arg(noteBooksTableName());
+    const QString script = QString("UPDATE %1 SET title = '%2' WHERE id = %3")
+            .arg(noteBooksTableName())
+            .arg(title)
+            .arg(id);
     QSqlQuery query(m_database);
-    if (!query.exec(script))
-        return res;
+    if (!query.exec(script)) {
+        emit error(QString("%1: %2").arg(Q_FUNC_INFO).arg(query.lastError().text()));
+        return false;
+    }
+    emit noteBookUpdated();
+    return true;
+}
 
-    while (query.next())
-        res << query.value(0).toUInt();
+bool SQLiteStorage::updateNoteBookPosition(quint64 id, qint32 position)
+{
+    if (!checkConnection()) {
+        emit error(QString("%1: %2").arg(Q_FUNC_INFO).arg("Database isn't opened."));
+        return false;
+    }
+
+    const QString script = QString("UPDATE %1 SET position = %2 WHERE id = %3")
+            .arg(noteBooksTableName())
+            .arg(position)
+            .arg(id);
+    QSqlQuery query(m_database);
+    if (!query.exec(script)) {
+        emit error(QString("%1: %2").arg(Q_FUNC_INFO).arg(query.lastError().text()));
+        return false;
+    }
+    emit noteBookUpdated();
+    return true;
+}
+
+QList<AbstractDataStorage::NoteBook> SQLiteStorage::noteBooks()
+{
+    QList<AbstractDataStorage::NoteBook> res;
+
+    if (!checkConnection()) {
+        emit error(QString("%1: %2").arg(Q_FUNC_INFO).arg("Database isn't opened."));
+        return res;
+    }
+
+    const QString script = QString("SELECT * FROM %1").arg(noteBooksTableName());
+    QSqlQuery query(m_database);
+    if (!query.exec(script)) {
+        emit error(QString("%1: %2").arg(Q_FUNC_INFO).arg(query.lastError().text()));
+        return res;
+    }
+
+    while (query.next()) {
+        NoteBook noteBook;
+        noteBook.id = query.record().value("id").toUInt();
+        noteBook.title = query.record().value("title").toString();
+        noteBook.position = query.record().value("position").toInt();
+        res << noteBook;
+    }
 
     return res;
 }
+
+
+quint64 SQLiteStorage::noteBooksCount()
+{
+    if (!checkConnection()) {
+        emit error(QString("%1: %2").arg(Q_FUNC_INFO).arg("Database isn't opened."));
+        return 0;
+    }
+
+    const QString script = QString("SELECT COUNT(1) AS rowsCount FROM %1")
+            .arg(noteBooksTableName());
+    QSqlQuery query(m_database);
+    if (!query.exec(script) || !query.next()) {
+        emit error(QString("%1: %2").arg(Q_FUNC_INFO).arg(query.lastError().text()));
+        return 0;
+    }
+    return query.record().value("rowsCount").toUInt();
+}
+
 
 AbstractDataStorage::NoteBook SQLiteStorage::noteBook(quint64 id)
 {
     NoteBook res;
 
-    if (!checkConnection())
+    if (!checkConnection()) {
+        emit error(QString("%1: %2").arg(Q_FUNC_INFO).arg("Database isn't opened."));
         return res;
+    }
 
-    const QString script = QString("SELECT * FROM %1 WHERE id = '%2").arg(noteBooksTableName()).arg(id);
+    const QString script = QString("SELECT * FROM %1 WHERE id = %2").arg(noteBooksTableName()).arg(id);
     QSqlQuery query(m_database);
-    if (!query.exec(script) || !query.next())
+    if (!query.exec(script) || !query.next()) {
+        emit error(QString("%1: %2").arg(Q_FUNC_INFO).arg(query.lastError().text()));
         return res;
+    }
 
     res.id = query.record().value("id").toUInt();
     res.title = query.record().value("title").toString();
-    res.position = query.record().value("position").toUInt();
+    res.position = query.record().value("position").toInt();
 
     return res;
 }
 
-bool SQLiteStorage::createNote(quint64 noteBookId, const QString &title, const QString &html, qint32 position)
+AbstractDataStorage::NoteBook SQLiteStorage::noteBookByPosition(qint32 position)
 {
-    if (!checkConnection())
-        return false;
+    NoteBook res;
 
-    const QString script = QString("INSERT INTO %1 (noteBookId, title, html, position) VALUES (?, ?, ?, ?)").arg(notesTableName());
+    if (!checkConnection()) {
+        emit error(QString("%1: %2").arg(Q_FUNC_INFO).arg("Database isn't opened."));
+        return res;
+    }
+
+    const QString script = QString("SELECT * FROM %1 WHERE position = %2").arg(noteBooksTableName()).arg(position);
+    QSqlQuery query(m_database);
+    if (!query.exec(script) || !query.next()) {
+        emit error(QString("%1: %2").arg(Q_FUNC_INFO).arg(query.lastError().text()));
+        return res;
+    }
+
+    res.id = query.record().value("id").toUInt();
+    res.title = query.record().value("title").toString();
+    res.position = query.record().value("position").toInt();
+
+    return res;
+}
+
+bool SQLiteStorage::noteBookExists(const QString &title)
+{
+    if (!checkConnection()) {
+        emit error(QString("%1: %2").arg(Q_FUNC_INFO).arg("Database isn't opened."));
+        return false;
+    }
+
+    const QString script = QString("SELECT COUNT(1) AS count FROM %1 WHERE title = '%2'").arg(noteBooksTableName()).arg(title);
+    QSqlQuery query(m_database);
+    if (!query.exec(script) || !query.next()) {
+        emit error(QString("%1: %2").arg(Q_FUNC_INFO).arg(query.lastError().text()));
+        return false;
+    }
+    return query.record().value("count").toInt() > 0;
+}
+
+qint32 SQLiteStorage::noteBookPosition(quint64 id)
+{
+    if (!checkConnection()) {
+        emit error(QString("%1: %2").arg(Q_FUNC_INFO).arg("Database isn't opened."));
+        return -1;
+    }
+
+    const QString script = QString("SELECT position FROM %1 WHERE id = '%2'").arg(noteBooksTableName()).arg(id);
+    QSqlQuery query(m_database);
+    if (!query.exec(script) || !query.next()) {
+        emit error(QString("%1: %2").arg(Q_FUNC_INFO).arg(query.lastError().text()));
+        return -1;
+    }
+    return query.record().value("position").toInt();
+
+}
+
+bool SQLiteStorage::createNote(quint64 noteBookId, const QString &title, qint32 position)
+{
+    if (!checkConnection()) {
+        emit error(QString("%1: %2").arg(Q_FUNC_INFO).arg("Database isn't opened."));
+        return false;
+    }
+
+    const QString script = QString("INSERT INTO %1 (noteBookId, title, position) VALUES (?, ?, ?)").arg(notesTableName());
     QSqlQuery query(m_database);
     query.prepare(script);
     query.addBindValue(noteBookId);
     query.addBindValue(title);
-    query.addBindValue(html);
     query.addBindValue(position);
-    return query.exec();
+    if (!query.exec()) {
+        emit error(QString("%1: %2").arg(Q_FUNC_INFO).arg(query.lastError().text()));
+        return false;
+    }
+    emit noteCreated();
+    return true;
 }
 
 bool SQLiteStorage::removeNote(quint64 noteBookId, quint64 id)
 {
-    if (!checkConnection())
+    if (!checkConnection()) {
+        emit error(QString("%1: %2").arg(Q_FUNC_INFO).arg("Database isn't opened."));
         return false;
+    }
 
     //TODO: noteBookId is unneccessary parameter since a note's id is always unique.
     const QString script = QString("DELETE FROM %1 WHERE id = %2 AND noteBookId = %3")
@@ -201,16 +390,23 @@ bool SQLiteStorage::removeNote(quint64 noteBookId, quint64 id)
             .arg(id)
             .arg(noteBookId);
     QSqlQuery query(m_database);
-    return query.exec(script);
+    if (!query.exec(script)) {
+        emit error(QString("%1: %2").arg(Q_FUNC_INFO).arg(query.lastError().text()));
+        return false;
+    }
+    emit noteRemoved();
+    return true;
 }
 
 bool SQLiteStorage::updateNote(quint64 noteBookId, quint64 id, const QString &title, const QString &html, qint32 position)
 {
-    if (!checkConnection())
+    if (!checkConnection()) {
+        emit error(QString("%1: %2").arg(Q_FUNC_INFO).arg("Database isn't opened."));
         return false;
+    }
 
     //TODO: noteBookId is unneccessary parameter since a note's id is always unique.
-    const QString script = QString("UPDATE %1 SET title = '%2', html = '%3', position = '%4' WHERE id = %5 AND noteBookId = %6")
+    const QString script = QString("UPDATE %1 SET title = '%2', html = '%3', position = %4 WHERE id = %5 AND noteBookId = %6")
             .arg(notesTableName())
             .arg(title)
             .arg(html)
@@ -218,56 +414,266 @@ bool SQLiteStorage::updateNote(quint64 noteBookId, quint64 id, const QString &ti
             .arg(id)
             .arg(noteBookId);
     QSqlQuery query(m_database);
-    return query.exec(script);
+    if (!query.exec(script)) {
+        emit error(QString("%1: %2").arg(Q_FUNC_INFO).arg(query.lastError().text()));
+        return false;
+    }
+    emit noteUpdated();
+    return true;
 }
 
-QList<quint64> SQLiteStorage::notes(quint64 noteBookId)
+bool SQLiteStorage::updateNoteTitle(quint64 noteBookId, quint64 id, const QString &title)
 {
-    QList<quint64> res;
+    if (!checkConnection()) {
+        emit error(QString("%1: %2").arg(Q_FUNC_INFO).arg("Database isn't opened."));
+        return false;
+    }
 
-    if (!checkConnection())
+    //TODO: noteBookId is unneccessary parameter since a note's id is always unique.
+    const QString script = QString("UPDATE %1 SET title = '%2' WHERE id = %3 AND noteBookId = %4")
+            .arg(notesTableName())
+            .arg(title)
+            .arg(id)
+            .arg(noteBookId);
+    QSqlQuery query(m_database);
+    if (!query.exec(script)) {
+        emit error(QString("%1: %2").arg(Q_FUNC_INFO).arg(query.lastError().text()));
+        return false;
+    }
+    emit noteUpdated();
+    return true;
+}
+
+bool SQLiteStorage::updateNotePosition(quint64 noteBookId, quint64 id, qint32 position)
+{
+    if (!checkConnection()) {
+        emit error(QString("%1: %2").arg(Q_FUNC_INFO).arg("Database isn't opened."));
+        return false;
+    }
+
+    //TODO: noteBookId is unneccessary parameter since a note's id is always unique.
+    const QString script = QString("UPDATE %1 SET position = %2 WHERE id = %3 AND noteBookId = %4")
+            .arg(notesTableName())
+            .arg(position)
+            .arg(id)
+            .arg(noteBookId);
+    QSqlQuery query(m_database);
+    if (!query.exec(script)) {
+        emit error(QString("%1: %2").arg(Q_FUNC_INFO).arg(query.lastError().text()));
+        return false;
+    }
+    emit noteUpdated();
+    return true;
+}
+
+bool SQLiteStorage::updateNoteHtml(quint64 noteBookId, quint64 id, const QString &html)
+{
+    if (!checkConnection()) {
+        emit error(QString("%1: %2").arg(Q_FUNC_INFO).arg("Database isn't opened."));
+        return false;
+    }
+
+    //TODO: noteBookId is unneccessary parameter since a note's id is always unique.
+    const QString script = QString("UPDATE %1 SET html = '%2' WHERE id = %3 AND noteBookId = %4")
+            .arg(notesTableName())
+            .arg(html)
+            .arg(id)
+            .arg(noteBookId);
+    QSqlQuery query(m_database);
+    if (!query.exec(script)) {
+        emit error(QString("%1: %2").arg(Q_FUNC_INFO).arg(query.lastError().text()));
+        return false;
+    }
+    emit noteUpdated();
+    return true;
+}
+
+QList<AbstractDataStorage::Note> SQLiteStorage::notes(quint64 noteBookId)
+{
+    QList<AbstractSqlDataStorage::Note> res;
+
+    if (!checkConnection()) {
+        emit error(QString("%1: %2").arg(Q_FUNC_INFO).arg("Database isn't opened."));
         return res;
+    }
 
-    static const QString script = QString("SELECT id FROM %1 WHERE noteBookId = %2")
+    const QString script = QString("SELECT * FROM %1 WHERE noteBookId = %2")
             .arg(notesTableName())
             .arg(noteBookId);
     QSqlQuery query(m_database);
-    if (!query.exec(script))
+    if (!query.exec(script)) {
+        emit error(QString("%1: %2").arg(Q_FUNC_INFO).arg(query.lastError().text()));
         return res;
+    }
 
-    while (query.next())
-        res << query.value(0).toUInt();
+    while (query.next()) {
+        Note note;
+        note.id = query.record().value("id").toUInt();
+        note.noteBookId = query.record().value("noteBookId").toUInt();
+        note.title = query.record().value("title").toString();
+        note.html = query.record().value("html").toString();
+        note.position = query.record().value("position").toInt();
+        res << note;
+    }
 
     return res;
 }
 
-AbstractDataStorage::Note SQLiteStorage::note(quint64 id)
+quint64 SQLiteStorage::notesCount(quint64 noteBookId)
+{
+    if (!checkConnection()) {
+        emit error(QString("%1: %2").arg(Q_FUNC_INFO).arg("Database isn't opened."));
+        return 0;
+    }
+
+    const QString script = QString("SELECT COUNT(1) AS rowsCount FROM %1 WHERE noteBookId = %2")
+            .arg(notesTableName())
+            .arg(noteBookId);
+    QSqlQuery query(m_database);
+    if (!query.exec(script) || !query.next()) {
+        emit error(QString("%1: %2").arg(Q_FUNC_INFO).arg(query.lastError().text()));
+        return 0;
+    }
+    return query.record().value("rowsCount").toUInt();
+}
+
+AbstractDataStorage::Note SQLiteStorage::note(quint64 noteBookId, quint64 id)
 {
     Note res;
 
-    if (!checkConnection())
+    if (!checkConnection()) {
+        emit error(QString("%1: %2").arg(Q_FUNC_INFO).arg("Database isn't opened."));
         return res;
+    }
 
-    const QString script = QString("SELECT * FROM %1 WHERE id = '%2").arg(notesTableName()).arg(id);
+    const QString script = QString("SELECT * FROM %1 WHERE noteBookId = %2 AND id = %3")
+            .arg(notesTableName())
+            .arg(noteBookId)
+            .arg(id);
     QSqlQuery query(m_database);
-    if (!query.exec(script) || !query.next())
+    if (!query.exec(script) || !query.next()) {
+        emit error(QString("%1: %2").arg(Q_FUNC_INFO).arg(query.lastError().text()));
         return res;
+    }
 
     res.id = query.record().value("id").toUInt();
     res.noteBookId = query.record().value("noteBookId").toUInt();
     res.title = query.record().value("title").toString();
     res.html = query.record().value("html").toString();
-    res.position = query.record().value("position").toUInt();
+    res.position = query.record().value("position").toInt();
 
     return res;
 }
 
+AbstractDataStorage::Note SQLiteStorage::noteByPosition(quint64 noteBookId, qint32 position)
+{
+    Note res;
+
+    if (!checkConnection()) {
+        emit error(QString("%1: %2").arg(Q_FUNC_INFO).arg("Database isn't opened."));
+        return res;
+    }
+
+    const QString script = QString("SELECT * FROM %1 WHERE noteBookId = %2 AND position = %3")
+            .arg(notesTableName())
+            .arg(noteBookId)
+            .arg(position);
+    QSqlQuery query(m_database);
+    if (!query.exec(script) || !query.next()) {
+        emit error(QString("%1: %2").arg(Q_FUNC_INFO).arg(query.lastError().text()));
+        return res;
+    }
+
+    res.id = query.record().value("id").toUInt();
+    res.noteBookId = query.record().value("noteBookId").toUInt();
+    res.title = query.record().value("title").toString();
+    res.html = query.record().value("html").toString();
+    res.position = query.record().value("position").toInt();
+
+    return res;
+}
+
+bool SQLiteStorage::noteExists(quint64 noteBookId, const QString &title)
+{
+    if (!checkConnection()) {
+        emit error(QString("%1: %2").arg(Q_FUNC_INFO).arg("Database isn't opened."));
+        return false;
+    }
+
+    const QString script = QString("SELECT COUNT(1) AS count FROM %1 WHERE noteBookId = %2 title = '%3'")
+            .arg(notesTableName())
+            .arg(noteBookId)
+            .arg(title);
+    QSqlQuery query(m_database);
+    if (!query.exec(script) || !query.next()) {
+        emit error(QString("%1: %2").arg(Q_FUNC_INFO).arg(query.lastError().text()));
+        return false;
+    }
+    return query.record().value("count").toInt() > 0;
+}
+
+qint32 SQLiteStorage::notePosition(quint64 noteBookId, quint64 id)
+{
+    if (!checkConnection()) {
+        emit error(QString("%1: %2").arg(Q_FUNC_INFO).arg("Database isn't opened."));
+        return -1;
+    }
+
+    const QString script = QString("SELECT position FROM %1 WHERE noteBookId = %2 AND id = %3")
+            .arg(notesTableName())
+            .arg(noteBookId)
+            .arg(id);
+    QSqlQuery query(m_database);
+    if (!query.exec(script) || !query.next()) {
+        emit error(QString("%1: %2").arg(Q_FUNC_INFO).arg(query.lastError().text()));
+        return -1;
+    }
+    return query.record().value("position").toInt();
+}
+
+bool SQLiteStorage::moveNote(quint64 oldNoteBookId, quint64 newNoteBookId, quint64 id)
+{
+    if (!checkConnection()) {
+        emit error(QString("%1: %2").arg(Q_FUNC_INFO).arg("Database isn't opened."));
+        return false;
+    }
+
+    QSqlQuery lastPositionQuery(m_database);
+    const QString lastPositionScript = QString("SELECT MAX(position) AS position FROM %1 WHERE noteBookId = %2")
+            .arg(notesTableName())
+            .arg(newNoteBookId);
+    if (!lastPositionQuery.exec(lastPositionScript) || !lastPositionQuery.next()) {
+        emit error(QString("%1: %2").arg(Q_FUNC_INFO).arg(lastPositionQuery.lastError().text()));
+        return false;
+    }
+
+    bool ok = true;
+    int position = lastPositionQuery.record().value("position").toInt(&ok);
+    if (ok)
+        position += 1;
+    //TODO: noteBookId is unneccessary parameter since a note's id is always unique.
+    const QString script = QString("UPDATE %1 SET noteBookId = %2, position = %3 WHERE id = %4 AND noteBookId = %5")
+            .arg(notesTableName())
+            .arg(newNoteBookId)
+            .arg(position)
+            .arg(id)
+            .arg(oldNoteBookId);
+    QSqlQuery query(m_database);
+    if (!query.exec(script)) {
+        emit error(QString("%1: %2").arg(Q_FUNC_INFO).arg(query.lastError().text()));
+        return false;
+    }
+    emit noteUpdated();
+    emit noteMoved();
+    return true;
+}
+
 QString SQLiteStorage::databaseCreationScript() const
 {
-    static const QString script = QString("CREATE TABLE %1 (id INTEGER PRIMARY KEY AUTOINCREMENT,"
+    const QString script = QString("CREATE TABLE IF NOT EXISTS %1 (id INTEGER PRIMARY KEY AUTOINCREMENT,"
                                     "title VARCHAR(255),"
                                     "position INTEGER);"
-                                    "CREATE TABLE %2 (id INTEGER PRIMARY KEY AUTOINCREMENT,"
+                                    "CREATE TABLE IF NOT EXISTS %2 (id INTEGER PRIMARY KEY AUTOINCREMENT,"
                                     "noteBookId INTEGER,"
                                     "title VARCHAR(255),"
                                     "html TEXT,"
@@ -277,7 +683,7 @@ QString SQLiteStorage::databaseCreationScript() const
 
 QString SQLiteStorage::databaseDeletionScript() const
 {
-    static const QString script = QString("DROP TABLE %1;"
+    const QString script = QString("DROP TABLE %1;"
                                     "DROP TABLE %2;").arg(noteBooksTableName()).arg(notesTableName());
     return script;
 }

@@ -14,33 +14,29 @@ Window {
     id: window
     toolBarTitle: qsTr("Notes")
 
-
-    property string notebookName
-    property string noteName
-    property string noteData
     property int maxCharactersCount: 50
 
-    Component.onCompleted: {
-        console.log("load MainPage")
-        switchBook( notebookList )
-    }
+    Component.onCompleted: switchBook(notebookList)
 
-    onNotebookNameChanged: {
-        noteModel.notebookName = notebookName;
-    }
-
-    DataHandler {
+    DataHandler {   //TODO: deprecated
         id: dataHandler
     }
 
-    NotebooksModel {
-        id: notebooksModel
-        dataHandler: dataHandler
+    SQLiteStorage {
+        id: sqliteStorage
+
+        onError: console.debug(error)
     }
 
-    NoteModel {
-        id: noteModel
-        dataHandler: dataHandler
+    NoteBooksModel {
+        id: noteBooksModel
+        storage: sqliteStorage
+    }
+
+    NotesModel {
+        id: notesModel
+        storage: sqliteStorage
+        noteBook: internal.selectedNoteBook
     }
 
     Component {
@@ -50,12 +46,12 @@ Window {
             id: notebooksView
             anchors.fill: parent
             pageTitle: qsTr("Notes")
+            model: noteBooksModel
 
-            onNotebookClicked: {
+            onNoteBookClicked: {
                 window.addPage(noteList);
-                notebookName = name;
+                internal.selectedNoteBook = noteBook;
             }
-
         }
     }
 
@@ -66,17 +62,12 @@ Window {
             id: notesView
             anchors.fill: parent
             pageTitle: qsTr("Notes")
-            caption: notebookName
-            model: noteModel
+            model: notesModel
 
             onNoteClicked: {
                 window.addPage(noteDetailPage);
-                noteName = name;
+                internal.selectedNote = note;
                 //filterModel = [];
-            }
-
-            onCloseWindow: {
-                window.switchBook(notebookList);
             }
         }
     }
@@ -87,16 +78,22 @@ Window {
         NoteDetail {
             id: noteDetail
             anchors.fill: parent
-            notebookID: window.notebookName
-            noteName: window.noteName
-            caption: noteName
+            note: internal.selectedNote
+            model: notesModel
 
-            onCloseWindow:
+            onWindowClosed:
             {
                 window.switchBook(notebookList);
                 window.addPage(noteList);
-                filterModel = filterModelList;
+//                filterModel = filterModelList;
             }
         }
+    }
+
+    QtObject {
+        id: internal
+
+        property variant selectedNoteBook: null
+        property variant selectedNote: null
     }
 }

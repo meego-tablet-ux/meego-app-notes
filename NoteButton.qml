@@ -8,150 +8,146 @@
 
 import Qt 4.7
 import MeeGo.Components 0.1
+import MeeGo.Ux.Gestures 0.1
 
 Rectangle {
     id: noteButton
-    smooth: true;
+    smooth: true
 
+    property variant itemData: null //Note: noteBook or note
     property alias title: textElement.text
     property alias comment: textComment.text
-    property bool checkBoxVisible: false
-    property bool isNote : true
-    property int checkBoxWidth: width/ 15
-    property alias showGrip: gridView.visible
+    property alias checkBoxVisible: checkboxContainer.visible
+    property alias showGrip: grip.visible
 
-    signal noteSelected(string noteName)
-    signal noteDeselected(string noteName)
+    signal itemSelected(variant itemData)
+    signal itemDeselected(variant itemData)
+    signal itemTapped(variant gesture, variant itemData)
+    signal itemTappedAndHeld(variant gesture, variant itemData)
+    signal itemPanUpdated(variant gesture, variant itemData)
+    signal itemPanFinished(variant gesture, variant itemData)
+
+    height: theme.listBackgroundPixelHeightTwo
 
     Theme {
         id: theme
     }
 
-    Row {
-        id: rowElement;
-//        anchors.fill: parent
-        width: parent.width;
-        height: parent.height;
-
-        Item {
-            id:checkboxContainer
-            opacity: checkBoxVisible
-            anchors.top: parent.top
-            anchors.bottom: parent.bottom
-            anchors.left:parent.left
-            width: checkBoxWidth
-
-            MouseArea {
-                anchors.fill:parent
-                onClicked: {
-                    checkbox.isChecked=!checkbox.isChecked
-                    noteButton.color = checkbox.isChecked ?  Qt.rgba ( 230/255, 240/255, 255/255, 1) : "white";
-
-                    if (checkbox.isChecked)
-                    {
-                        noteSelected(title);
-                    }
-                    else
-                    {
-                        noteDeselected(title);
-                    }
-                }
-            }
-
-            CheckBox {
-                id:checkbox
-                anchors.centerIn:parent
-
-                MouseArea {
-                    anchors.fill:parent
-                    onClicked: {
-                        checkbox.isChecked=!checkbox.isChecked
-                        noteButton.color = checkbox.isChecked ?  Qt.rgba ( 230/255, 240/255, 255/255, 1) : "white";
-                        if (checkbox.isChecked)
-                        {
-                            noteSelected(title);
-                        }
-                        else
-                        {
-                            noteDeselected(title);
-                        }
-                    }
-                }
-            }
-
-            Rectangle {
-                anchors.top: parent.top
-                anchors.right:parent.right
-                anchors.bottom: parent.bottom
-                width:1
-                color: Qt.rgba ( 189/255, 189/255, 189/255, 1) //THEME
-            }
-        }
-
-        Column {
-            id: textColumn;
-//            anchors.top: parent.top
-            anchors.left: checkBoxVisible? checkboxContainer.right : parent.left;
-            anchors.leftMargin:25
-            anchors.right:gridView.left
-            anchors.rightMargin: 10;
-            height: parent.height
-
-
-            Text {
-                id: textElement
-//                clip: true
-//                anchors.top: parent.top
-                anchors.topMargin: 7
-                anchors.left: parent.left;
-                anchors.leftMargin: 40
-                anchors.right: parent.right;
-                height: parent.height /2
-                font.pixelSize: theme.fontPixelSizeNormal
-                text: qsTr("Text Element");
-                wrapMode: Text.Wrap
-            }
-
-            Text {
-                id: textComment
-                anchors.left: parent.left;
-                anchors.leftMargin: 43;
-//                anchors.bottom:parent.bottom
-                width: parent.width
-                height: parent.height / 2
-                font.pixelSize: theme.fontPixelSizeSmall
-                text: qsTr("Add some comments here");
-                elide: Text.ElideRight
-                color: theme.fontColorInactive
-            }
-        }
-
-        Grid {
-            id: gridView
-            anchors.verticalCenter: parent.verticalCenter
-            anchors.right: parent.right;
-            anchors.rightMargin: 10;
-            columns:3
-            rows:3
-            spacing:3
-
-            Repeater {
-                model: 9
-
-                Image {
-                    width: 8;
-                    height: 8;
-                    smooth: true
-                    source: "image://themedimage/images/settings/icn_brightness_low"
-                }
-            }
-	}
+    Text {
+        id: gridView
+        visible: false
     }
 
-    Image {
-        id: separator
-        width: parent.width
-        anchors.bottom: parent.bottom
-        source: "image://themedimage/images/tasks/ln_grey_l"
+    Column {
+        anchors.fill: parent
+        spacing: 0
+
+        Image {
+            anchors.left: parent.left
+            anchors.right: parent.right
+            source: "image://themedimage/images/tasks/ln_grey_l"
+        }
+
+        Row {
+            id: container
+            anchors.left: parent.left
+            anchors.right: parent.right
+            spacing: 20
+            anchors.leftMargin: checkBoxVisible ? 0 : spacing
+            height: noteButton.height
+
+            Item {
+                id:checkboxContainer
+                anchors.verticalCenter: parent.verticalCenter
+                width: container.height
+                height: container.height
+
+                CheckBox {
+                    id:checkbox
+                    anchors.centerIn:parent
+
+                    onClicked: {
+                        noteButton.color = checkbox.isChecked ? Qt.rgba(230/255, 240/255, 255/255, 1) : "white";    //TODO: magic color
+                        if (checkbox.isChecked) {
+                            itemSelected(itemData);
+                        } else {
+                            itemDeselected(itemData);
+                        }
+                    }
+                }
+
+                Rectangle {
+                    anchors.top: parent.top
+                    anchors.right:parent.right
+                    anchors.bottom: parent.bottom
+                    width: 1
+                    color: Qt.rgba(189/255, 189/255, 189/255, 1) //THEME
+                }
+            }
+
+            Item {
+                anchors.verticalCenter: parent.verticalCenter
+                width: checkBoxVisible ? noteButton.width - checkboxContainer.width - container.spacing - container.anchors.leftMargin
+                                       : noteButton.width  - container.anchors.leftMargin
+                height: container.height
+
+                Column {
+                    anchors.verticalCenter: parent.verticalCenter
+                    anchors.left: parent.left
+                    anchors.right: grip.left
+                    anchors.rightMargin: 10
+
+                    Text {
+                        id: textElement
+                        font.pixelSize: theme.fontPixelSizeNormal
+                        text: qsTr("Text Element");
+                        wrapMode: Text.Wrap
+                    }
+
+                    Text {
+                        id: textComment
+                        font.pixelSize: theme.fontPixelSizeSmall
+                        text: qsTr("Add some comments here");
+                        elide: Text.ElideRight
+                        color: theme.fontColorInactive
+                    }
+                }
+
+                Image {
+                    id: grip
+                    anchors.verticalCenter: parent.verticalCenter
+                    anchors.right: parent.right
+                    anchors.rightMargin: container.spacing
+
+                    source: "image://themedimage/images/tasks/icn_grabhandle"
+                }
+
+                GestureArea {
+                    anchors.top: parent.top
+                    anchors.bottom: parent.bottom
+                    anchors.left: parent.left
+                    anchors.right: grip.left
+
+                    Tap {
+                        onFinished: itemTapped(gesture, itemData)
+                    }
+
+                    TapAndHold {
+                        onFinished: itemTappedAndHeld(gesture, itemData)
+                    }
+
+                    Pan {
+                        onUpdated: itemPanUpdated(gesture, itemData)
+                        onFinished: itemPanFinished(gesture, itemData)
+                    }
+                }
+            }
+        }
+
+        Image {
+            anchors.left: parent.left
+            anchors.right: parent.right
+            source: "image://themedimage/images/tasks/ln_grey_l"
+        }
     }
 }

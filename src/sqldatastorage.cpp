@@ -81,6 +81,8 @@ bool AbstractSqlDataStorage::createStorage()
     QSqlQuery query(m_database);
     const QStringList scripts = databaseCreationScript().split(';');
     foreach (const QString &script, scripts) {
+        if (script.isEmpty())
+            continue;
         if (!query.exec(script)) {
             emit error(QString("%1: %2").arg(Q_FUNC_INFO).arg(query.lastError().text()));
             return false;
@@ -108,6 +110,8 @@ bool AbstractSqlDataStorage::removeStorage()
 
     const QStringList scripts = databaseDeletionScript().split(';');
     foreach (const QString &script, scripts) {
+        if (script.isEmpty())
+            continue;
         if (!query.exec(script)) {
             emit error(QString("%1: %2").arg(Q_FUNC_INFO).arg(query.lastError().text()));
             return false;

@@ -27,6 +27,7 @@ AppPage {
 
     onActionMenuIconClicked: {
         if (window.pageStack.currentPage == page) {
+            firstActionMenu.model = internal.menuModel();
             customMenu.setPosition(mouseX, mouseY);
             customMenu.show();
         }
@@ -95,6 +96,8 @@ AppPage {
         id: notebookDelegate
 
         NoteButton {
+            id: button
+
             width: listView.width
             title: note.title
             comment: note.html
@@ -112,19 +115,40 @@ AppPage {
                 contextMenu.show();
             }
 
-            //TODO: dnd
             onGripTappedAndHeld: {
-                console.debug('---------------drag init');
+                internal.dndStarted = true;
+                internal.dndStartPoint = mapToItem(listView, gesture.position.x, gesture.position.y);
+                internal.dndOlButtonY = button.y;
+                button.z = 10;
+                button.opacity = 0.5;
+                button.color = "lightgray";
+                listView.interactive = false;
             }
 
-            //TODO: dnd
             onGripPanUpdated: {
-                console.debug('---------------drag updated');
+                if (!internal.dndStarted)
+                    return;
+
+                var currentPoint = internal.dndStartPoint;
+                currentPoint.y += gesture.offset.y;
+                internal.dndCurrentPoint = currentPoint;
+
+                button.y = currentPoint.y;
             }
 
-            //TODO: dnd
             onGripPanFinished: {
-                console.debug('---------------drag finished');
+                button.y = internal.dndOlButtonY;
+                button.z = 0;
+                button.opacity = 1.0;
+                button.color = "white";
+
+                var index = listView.indexAt(internal.dndCurrentPoint.x, internal.dndCurrentPoint.y);
+                page.model.swapNotes(itemData.id, page.model.note(index).id);
+
+                internal.dndStarted = false;
+                internal.dndStartPoint = null;
+                internal.dndCurrentPoint = null;
+                listView.interactive = true;
             }
         }
     }
@@ -133,6 +157,8 @@ AppPage {
         id: notebookDelegate2
 
         NoteButton {
+            id: button2
+
             width: listView.width
             title: note.title
             comment: note.html
@@ -152,19 +178,40 @@ AppPage {
                 contextMenu.show();
             }
 
-            //TODO: dnd
             onGripTappedAndHeld: {
-                console.debug('---------------drag init');
+                internal.dndStarted = true;
+                internal.dndStartPoint = mapToItem(listView, gesture.position.x, gesture.position.y);
+                internal.dndOlButtonY = button2.y;
+                button2.z = 10;
+                button2.opacity = 0.5;
+                button2.color = "lightgray";
+                listView.interactive = false;
             }
 
-            //TODO: dnd
             onGripPanUpdated: {
-                console.debug('---------------drag updated');
+                if (!internal.dndStarted)
+                    return;
+
+                var currentPoint = internal.dndStartPoint;
+                currentPoint.y += gesture.offset.y;
+                internal.dndCurrentPoint = currentPoint;
+
+                button2.y = currentPoint.y;
             }
 
-            //TODO: dnd
             onGripPanFinished: {
-                console.debug('---------------drag finished');
+                button2.y = internal.dndOlButtonY;
+                button2.z = 0;
+                button2.opacity = 1.0;
+                button2.color = "white";
+
+                var index = listView.indexAt(internal.dndCurrentPoint.x, internal.dndCurrentPoint.y);
+                page.model.swapNotes(itemData.id, page.model.note(index).id);
+
+                internal.dndStarted = false;
+                internal.dndStartPoint = null;
+                internal.dndCurrentPoint = null;
+                listView.interactive = true;
             }
         }
     }
@@ -517,6 +564,11 @@ AppPage {
         property bool selectMultiply: false
         property variant selectedNotePoint: null
 
+        property bool dndStarted: false
+        property variant dndStartPoint: null
+        property variant dndCurrentPoint: null
+        property int dndOlButtonY: 0
+
         function addItem(item)
         {
             var list = selectedNotes;
@@ -540,202 +592,9 @@ AppPage {
         {
             var res = [];
             res.push(qsTr("New note"));
-            if(listView.model.count > 1)
+            if(page.model.count >= 1)
                 res.push(qsTr("Select multiple"));
             return res;
         }
     }
-
-//        Component {
-//            id: noteDelegate
-
-//            NoteButton {
-//                id: note
-//                //                x: 40;
-//                width: listView.width
-//                height: theme_listBackgroundPixelHeightTwo
-//                z: 0
-//                title: name
-//                comment: prepareText(dataHandler.loadNoteData(notebook, name));
-//                property string notePos: position
-//                checkBoxVisible: false;
-//                property int startY
-//                showGrip: !dataHandler.isSorted()
-
-//                function prepareText(text)
-//                {
-//                    var plainText = textEditHandler.toPlainText(text);
-//                    var array = plainText.split('\n');
-//                    var firstStr = array[0];
-//                    var result = textEditHandler.setFontSize(firstStr, 0, firstStr.length, 11);
-//                    return result;
-//                }
-
-//                MouseArea {
-//                    anchors.fill: parent
-
-//                    hoverEnabled: true
-
-//                    onClicked: {
-//                        selectedNote = name;
-//                        selectedTitle = title;
-//                        selectedIndex = index;
-//                        listView.drag = false;
-//                        noteClicked(name);
-//                    }
-
-//                    onPressAndHold:{
-//                        selectedNote = name;
-//                        selectedTitle = title;
-//                        selectedIndex = index;
-//                        var map = mapToItem(listView, mouseX, mouseY);
-//                        //                        itemX = note.x + mouseX;
-//                        //                        itemY = note.y + nameLabel.height + 50/*header*/ + mouseY;
-
-//                        itemX = map.x;
-//                        itemY = map.y + 50;
-
-//                        menu.setPosition(map.x, map.y + 50);
-//                        menu.show();
-//                    }
-//                }
-
-//                MouseArea {
-//                    anchors.right: parent.right
-//                    width: parent.height * 2 //big thumbs + little screen = sad panda; so we be a little lenient
-//                    height: parent.height
-//                    enabled: !dataHandler.isSorted()
-
-//                    drag.target: parent
-//                    drag.axis: Drag.YAxis
-//                    hoverEnabled: true
-
-//                    onPressed: {
-//                        parent.z = 100;
-//                        listView.isDragging = true;
-//                        parent.startY = parent.y;
-//                    }
-
-
-//                    onReleased: {
-//                        parent.z = 1;
-//                        listView.isDragging = false;
-//                        listView.draggingItem = parent.title;
-//                        var diff = parent.y - startY;
-//                        diff = parseInt( diff /  parent.height);
-//                        listView.newIndex = parseInt(parent.notePos) + diff;
-
-//                        //console.debug("Going to move: " + listView.count + " from " + parent.notePos + " to " +  listView.newIndex);
-//                        if ((parent.notePos != listView.newIndex) && (parseInt(listView.newIndex) > 0)) {
-//                            if (parseInt(listView.newIndex) > listView.count)
-//                                listView.newIndex = listView.count;
-
-//                            listView.changePosition();
-//                        } else {
-//                            //just stupid workaround
-//                            var prev = listView.model.noteName;
-//                            listView.model.noteName = "something else"; //this is a hack to force the model to update (no need for translation)
-//                            listView.model.noteName = prev;
-//                        }
-//                    }
-//                }
-//            }
-//        }
-
-//        Component {
-//            id: noteDelegate2
-
-//            NoteButton {
-//                id: note2
-//                //                x: 40;
-//                width: listView.width
-//                height: theme_listBackgroundPixelHeightTwo
-//                z: 0
-//                title: name
-//                comment: prepareText(dataHandler.loadNoteData(notebook, name));
-//                property string notePos: position
-//                checkBoxVisible: true;
-//                showGrip: !dataHandler.isSorted()
-
-//                function prepareText(text)
-//                {
-//                    var plainText = textEditHandler.toPlainText(text);
-//                    var array = plainText.split('\n');
-//                    var firstStr = array[0];
-//                    var result = textEditHandler.setFontSize(firstStr, 0, firstStr.length, 11);
-//                    return result;
-//                }
-
-////                onNoteSelected: {
-////                    var tmpList = selectedItems;
-////                    tmpList.push(noteName);
-////                    selectedItems = tmpList;
-////                }
-
-////                onNoteDeselected: {
-////                    var tmpList = selectedItems;
-////                    tmpList = dataHandler.removeFromString(tmpList, noteName);
-////                    selectedItems = tmpList;
-////                }
-
-
-//                MouseArea {
-//                    anchors.left:parent.left
-//                    anchors.leftMargin: parent.checkBoxWidth;
-//                    anchors.right:parent.right
-//                    anchors.top:parent.top
-//                    anchors.bottom:parent.bottom
-
-//                    hoverEnabled: true
-
-//                    onClicked: {
-//                        selectedNote = name;
-//                        selectedTitle = title;
-//                        selectedIndex = index;
-//                        listView.drag = false;
-//                        noteClicked(name);
-//                    }
-
-//                    onPressAndHold:{
-//                        selectedNote = name;
-//                        selectedTitle = title;
-//                        selectedIndex = index;
-//                        itemX = note.x + mouseX;
-//                        itemY = note.y + nameLabel.height + 50/*header*/ + mouseY;
-//                        menu.setPosition(itemX, itemY);
-//                        menu.show();
-//                    }
-//                }
-
-//                MouseArea {
-//                    anchors.right: parent.right
-//                    width: (parent.height * 2) //Because we want to be lenient with peopel who have big thumbs
-//                    height: parent.height
-//                    enabled: !dataHandler.isSorted()
-
-//                    drag.target: parent
-//                    drag.axis: Drag.YAxis
-//                    hoverEnabled: true
-
-//                    onPressed: {
-//                        parent.z = 100;
-//                        listView.isDragging = true;
-//                        parent.startY = parent.y;
-//                    }
-
-
-//                    onReleased: {
-//                        parent.z = 1;
-//                        listView.isDragging = false;
-//                        listView.draggingItem = parent.title;
-//                        var diff = parent.y - startY;
-//                        diff = parseInt( diff /  parent.height);
-//                        listView.newIndex = parent.notePos + diff;
-
-//                        //console.debug("Going to move: " + listView.draggingItem + " from " + parent.notePos + " to " +  listView.newIndex);
-//                        listView.changePosition();
-//                    }
-//                }
-//            }
-//        }
 }

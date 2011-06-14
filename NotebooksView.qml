@@ -25,6 +25,7 @@ AppPage {
 
     onActionMenuIconClicked: {
         if (window.pageStack.currentPage == page) {
+            firstActionMenu.model = internal.menuModel();
             customMenu.setPosition(mouseX, mouseY);
             customMenu.show();
         }

@@ -348,7 +348,7 @@ AppPage {
                 var newNotebook = model[index];
 
                 if (internal.selectedNotes.length > 1) {
-                    moveReportWindow.text = qsTr("%1 notes have successfully been moved to \"%2\"").arg(internal.selectedNotes.length).arg(newNotebook);
+                    moveReportWindow.text = qsTr("%n note(s) have successfully been moved to \"%2\"", "", internal.selectedNotes.length).arg(newNotebook);
                 } else {
                     //: %1 is moved note title
                     moveReportWindow.text = qsTr("\"%1\" has successfully been moved to \"%2\"").arg(internal.selectedNote.title).arg(newNotebook);
@@ -431,7 +431,7 @@ AppPage {
             anchors.rightMargin: anchors.leftMargin
 
             text: (internal.selectedNotes.length > 1)
-                  ? qsTr("Are you sure you want to delete these %1 notes?").arg(internal.selectedNotes.length)
+                  ? qsTr("Are you sure you want to delete these %n note(s)?", "", internal.selectedNotes.length)
                   //: %1 is note title
                   : qsTr("Are you sure you want to delete \"%1\"?").arg(componentText)
 
@@ -471,7 +471,7 @@ AppPage {
             anchors.rightMargin: anchors.leftMargin
             text: {
                 if (internal.selectedNotes.length > 1) {
-                    return qsTr("%1 notes have been deleted").arg(internal.selectedNotes.length);
+                    return qsTr("%n note(s) have been deleted", "", internal.selectedNotes.length);
                 } else if (internal.selectedNotes.length == 1) {
                     return qsTr("\"%1\" has been deleted").arg(internal.selectedNotes[0]);
                 } else {

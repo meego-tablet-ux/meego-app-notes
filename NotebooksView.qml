@@ -273,7 +273,7 @@ AppPage {
             anchors.rightMargin: anchors.leftMargin
 
             text: (internal.selectedNoteBooks.length > 1)
-                  ? qsTr("Are you sure you want to delete these %1 notebooks?").arg(internal.selectedNoteBooks.length)
+                  ? qsTr("Are you sure you want to delete these %n notebook(s)?", "", internal.selectedNoteBooks.length)
                   //: %1 is notebook title
                   : qsTr("Are you sure you want to delete \"%1\"?").arg(componentText)
 
@@ -313,7 +313,7 @@ AppPage {
             anchors.rightMargin: anchors.leftMargin
             text: {
                 if(internal.selectedNoteBooks.length > 1) {
-                    return qsTr("%1 notebooks have been deleted").arg(internal.selectedNoteBooks.length);
+                    return qsTr("%n notebook(s) have been deleted", "", internal.selectedNoteBooks.length);
                 } else if(internal.selectedNoteBooks.length == 1) {
                     //: %1 is notebook title
                     return qsTr("\"%1\" has been deleted").arg(internal.selectedNoteBooks[0]);
@@ -415,7 +415,7 @@ AppPage {
         function notesCountText(noteBook)
         {
             var notesCount = noteBook ? noteBook.notesCount : 0;
-            return notesCount == 1 ? qsTr("%1 note").arg(notesCount) : qsTr("%1 notes").arg(notesCount);
+            return qsTr("%n note(s)", "", notesCount);
         }
 
         function menuModel()

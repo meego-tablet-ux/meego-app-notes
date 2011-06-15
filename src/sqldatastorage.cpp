@@ -129,7 +129,7 @@ bool AbstractSqlDataStorage::checkConnection() const
 
 QString AbstractSqlDataStorage::databaseName() const
 {
-    const QString meegoAppNotesDir = QDir::homePath() + QDir::separator() + ".meego-app-notes";
+    const QString meegoAppNotesDir = QDir::homePath() + QDir::separator() + ".config/meego-app-notes";
     QDir dir(meegoAppNotesDir);
     if (!dir.exists() && !dir.mkdir(meegoAppNotesDir))
         return "notes.db";

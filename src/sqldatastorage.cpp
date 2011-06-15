@@ -126,6 +126,15 @@ bool AbstractSqlDataStorage::checkConnection() const
 {
     return m_database.isValid() && m_database.isOpen();
 }
+
+QString AbstractSqlDataStorage::databaseName() const
+{
+    const QString meegoAppNotesDir = QDir::homePath() + QDir::separator() + ".meego-app-notes";
+    QDir dir(meegoAppNotesDir);
+    if (!dir.exists() && !dir.mkdir(meegoAppNotesDir))
+        return "notes.db";
+    return QString("%1/notes.db").arg(meegoAppNotesDir);
+}
 //--------------------------------------------------------------------------------------------------------------------------
 bool SQLiteStorage::createNoteBook(const QString &title, qint32 position)
 {

@@ -143,7 +143,7 @@ protected:
     bool removeStorage();
 
     virtual QString driverName() const = 0;
-    virtual QString databaseName() const { return QString("notes.db"); };
+    virtual QString databaseName() const;// { return QString("notes.db"); };
     virtual QString connectionName() const { return QString("meego-app-notes"); };
 
     QString noteBooksTableName() const { return QString("noteBooks"); }

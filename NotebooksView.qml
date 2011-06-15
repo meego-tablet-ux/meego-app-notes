@@ -252,7 +252,7 @@ AppPage {
             var name = newName.text;
             newName.text = ""; //reset it for next time
             if (page.model.noteBookExists(name)) {  //TODO: do we need this checking now?
-                informationDialog.info = qsTr("A NoteBook '%1' already exists.").arg(name);
+                informationDialog.info = qsTr("A Notebook '%1' already exists.").arg(name);
                 informationDialog.show();
                 return;
             }
@@ -347,7 +347,7 @@ AppPage {
         acceptButtonText: qsTr("OK")
         cancelButtonText: qsTr("Cancel")
         showAcceptButton: renameTextEntry.text.length > 0
-        title: qsTr("Rename noteBook")
+        title: qsTr("Rename notebook")
 
         property string oldName
 
@@ -378,7 +378,7 @@ AppPage {
             var newName = renameTextEntry.text;
             if (page.model.noteBookExists(newName)) {   //TODO: do we need this checking now?
                 //: %1 is notebook title
-                informationDialog.info = qsTr("A noteBook '%1' already exists.").arg(newName);
+                informationDialog.info = qsTr("A notebook '%1' already exists.").arg(newName);
                 informationDialog.show();
                 return;
             }

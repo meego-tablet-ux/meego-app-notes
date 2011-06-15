@@ -237,6 +237,7 @@ AppPage {
                 anchors.right: parent.right
                 font.italic: true
                 font.pixelSize: 10
+                //: %1 is current title length, %2 is max title length
                 text: qsTr("%1/%2").arg(newName.text.length).arg(window.maxCharactersCount)
             }
         }
@@ -273,6 +274,7 @@ AppPage {
 
             text: (internal.selectedNoteBooks.length > 1)
                   ? qsTr("Are you sure you want to delete these %1 notebooks?").arg(internal.selectedNoteBooks.length)
+                  //: %1 is notebook title
                   : qsTr("Are you sure you want to delete \"%1\"?").arg(componentText)
 
             property string componentText: internal.selectedNoteBook ? internal.selectedNoteBook.title
@@ -313,6 +315,7 @@ AppPage {
                 if(internal.selectedNoteBooks.length > 1) {
                     return qsTr("%1 notebooks have been deleted").arg(internal.selectedNoteBooks.length);
                 } else if(internal.selectedNoteBooks.length == 1) {
+                    //: %1 is notebook title
                     return qsTr("\"%1\" has been deleted").arg(internal.selectedNoteBooks[0]);
                 } else {
                     return qsTr("\"%1\" has been deleted").arg(internal.selectedNoteBook);
@@ -374,6 +377,7 @@ AppPage {
         onAccepted: {
             var newName = renameTextEntry.text;
             if (page.model.noteBookExists(newName)) {   //TODO: do we need this checking now?
+                //: %1 is notebook title
                 informationDialog.info = qsTr("A noteBook '%1' already exists.").arg(newName);
                 informationDialog.show();
                 return;

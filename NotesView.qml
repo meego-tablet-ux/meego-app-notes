@@ -350,6 +350,7 @@ AppPage {
                 if (internal.selectedNotes.length > 1) {
                     moveReportWindow.text = qsTr("%1 notes have successfully been moved to \"%2\"").arg(internal.selectedNotes.length).arg(newNotebook);
                 } else {
+                    //: %1 is moved note title
                     moveReportWindow.text = qsTr("\"%1\" has successfully been moved to \"%2\"").arg(internal.selectedNote.title).arg(newNotebook);
                 }
 
@@ -392,6 +393,7 @@ AppPage {
                 anchors.right: parent.right
                 font.italic: true
                 font.pixelSize: 10
+                //: %1 is current title length, %2 is max title length
                 text: qsTr("%1/%2").arg(newName.text.length).arg(window.maxCharactersCount)
             }
         }
@@ -407,6 +409,7 @@ AppPage {
             newName.text = ""; //reset it for next time
 
             if (page.model.noteExists(name)) {  //TODO: do we need this checking now?
+                //: %1 is note title
                 informationDialog.info = qsTr("A Note '%1' already exists.").arg(name);
                 informationDialog.show();
                 return;
@@ -429,6 +432,7 @@ AppPage {
 
             text: (internal.selectedNotes.length > 1)
                   ? qsTr("Are you sure you want to delete these %1 notes?").arg(internal.selectedNotes.length)
+                  //: %1 is note title
                   : qsTr("Are you sure you want to delete \"%1\"?").arg(componentText)
 
             property string componentText: internal.selectedNote ? internal.selectedNote.title
@@ -530,6 +534,7 @@ AppPage {
         onAccepted: {
             var newName = renameTextEntry.text;
             if (page.model.noteExists(newName)) {   //TODO: do we need this checking now?
+                //: %1 is note name
                 informationDialog.info = qsTr("A note '%1' already exists.").arg(newName);
                 informationDialog.show();
                 return;

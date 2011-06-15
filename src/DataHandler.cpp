@@ -491,6 +491,8 @@ void CDataHandler::moveNote(const QString& _notebookID, const QString& _noteName
                                     else //note already exists
                                     {
                                         int counter =2;
+                                        //: this is used as a title when a note thus titled already exists,
+                                        //: %1 is original title, %2 is consecutive note number
                                         newNoteName = tr("%1 (%2)").arg(newNoteName).arg(QString::number(counter));
 
                                         while(getNameFromFile(db2, newNoteName, strLine) == newNoteName) {

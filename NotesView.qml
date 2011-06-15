@@ -394,7 +394,7 @@ AppPage {
                 font.italic: true
                 font.pixelSize: 10
                 //: %1 is current title length, %2 is max title length
-                text: qsTr("%1/%2").arg(newName.text.length).arg(window.maxCharactersCount)
+                text: qsTr("%1/%2", "CharLeft").arg(newName.text.length).arg(window.maxCharactersCount)
             }
         }
 
@@ -525,7 +525,7 @@ AppPage {
                 anchors.right: parent.right
                 font.italic: true
                 font.pixelSize: 10
-                text: qsTr("%1/%2").arg(renameTextEntry.text.length).arg(window.maxCharactersCount)
+                text: qsTr("%1/%2", "CharLeft").arg(renameTextEntry.text.length).arg(window.maxCharactersCount)
             }
         }
 

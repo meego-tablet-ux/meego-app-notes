@@ -11,53 +11,41 @@ import MeeGo.Components 0.1
 import MeeGo.App.Notes 0.1
 
 AppPage {
-    id: notebookListPage
+    id: page
 
-    property string selectedNotebook: qsTr("Everyday Notes (default)")
-    property string defaultNotebook: qsTr("Everyday Notes (default)")
-    property string selectedTitle
-    property bool showCheckBox: dataHandler.getCheckBox()
-    property variant selectedItems: [];
+    property alias model: listView.model
 
-    signal notebookClicked(string name, string title)
-    signal updateView();
+    signal noteBookClicked(variant noteBook)
+
+    Theme {
+        id: theme
+    }
 
     enableCustomActionMenu: true
 
     onActionMenuIconClicked: {
-        if (window.pageStack.currentPage == notebookListPage) {
+        if (window.pageStack.currentPage == page) {
+            firstActionMenu.model = internal.menuModel();
             customMenu.setPosition(mouseX, mouseY);
             customMenu.show();
         }
     }
 
-    Loader {
-        id: blankStateScreenLoader
+    BlankStateScreen {
+        id: blankStateScreen
+        anchors.fill: parent
+        parent: page
 
-        sourceComponent: ((saveRestore.value("FirstTimeUseNotebooks") == undefined) && listView.model.count == 1) ? blankStateScreenComponent : undefined
-    }
+        mainTitleText: qsTr("Use the default notebook, or make a new one")
+        buttonText: qsTr("Create a new notebook")
+        firstHelpTitle: qsTr("What's a notebook?")
+        secondHelpTitle: qsTr("How do I create notes?")
+        firstHelpText: qsTr("A notebook is a collection of notes. Use the default notebook we have created for you, or make a new one.")
+        secondHelpText: qsTr("Tap the 'Create the first note' button. You can also tap the icon in the top right corner of the screen, then select 'New note'.")
 
-    Component {
-        id: blankStateScreenComponent
+        onButtonClicked: addDialog.show()
 
-        BlankStateScreen {
-            id: blankStateScreen
-            width: mainContainer.width
-            height: mainContainer.height
-            parent: mainContainer
-            y: theme_listBackgroundPixelHeightTwo + 10
-
-            mainTitleText: qsTr("Use the default notebook, or make a new one")
-            buttonText: qsTr("Create a new notebook")
-            firstHelpTitle: qsTr("What's a notebook?")
-            secondHelpTitle: qsTr("How do I create notes?")
-            firstHelpText: qsTr("A notebook is a collection of notes. Use the default notebook we have created for you, or make a new one.")
-            secondHelpText: qsTr("Tap the 'Create the first note' button. You can also tap the icon in the top right corner of the screen, then select 'New note'.")
-
-            onButtonClicked: {
-                addDialog.show();
-            }
-        }
+        visible: (saveRestore.value("FirstTimeUseNotebooks") == undefined) && listView.model.count == 1
     }
 
     ContextMenu {
@@ -65,18 +53,12 @@ AppPage {
         content: Column {
             ActionMenu {
                 id: firstActionMenu
-                model: {
-                    if((listView.model.count < 3) || (showCheckBox) ) {
-                        return [qsTr("New Notebook")];
-                    } else {
-                        return [qsTr("New Notebook"), qsTr("Select Multiple")];
-                    }
-                }
+                model: internal.menuModel()
                 onTriggered: {
                     if(index == 0) {
                         addDialog.show();
                     } else if(index == 1) {
-                        showCheckBox = true;
+                        internal.selectMultiply = true;
                         multiSelectRow.show();
                     }
                     customMenu.hide();
@@ -87,20 +69,18 @@ AppPage {
                 anchors.left: parent.left
                 anchors.leftMargin: 5
                 text: qsTr("View by:")
-                font.pixelSize: theme_fontPixelSizeLarge
-                color: theme_fontColorNormal
+                font.pixelSize: theme.fontPixelSizeLarge
+                color: theme.fontColorNormal
             }
             ActionMenu {
                 id: secondActionMenu
-                model: [qsTr("All"), qsTr("A-Z")]
+                model: [qsTr("All"), qsTr("Alphabetical order")]
                 onTriggered: {
                     if(index == 0) {
-                        dataHandler.setSort(false);
-                        updateView();
+                        page.model.sorting = false;
                     } else if(index == 1) {
-                        dataHandler.setSort(true);
-                        notebooksModel.sort();
-                        updateView();
+                        page.model.sorting = true;
+                        page.model.sort(NoteBooksModel.ASC);    //TODO: make possibility to sort in both directions
                     }
                     customMenu.hide();
                 }//ontriggered
@@ -113,34 +93,20 @@ AppPage {
         id: notebookDelegate
 
         NoteButton {
-            id: notebook
-//            x: 40
             width: listView.width
-            height:theme_listBackgroundPixelHeightTwo
-            title: name
-            comment: {
-                if(notesCount == 1){
-                    qsTr("%1 Note").arg(notesCount);
-                } else {
-                    qsTr("%1 Notes").arg(notesCount);
-                }
-            }
-            isNote : false
-            checkBoxVisible: false;
+            title: noteBook.title
+            comment: internal.notesCountText(noteBook)
+            itemData: noteBook
+            checkBoxVisible: false
             showGrip: false
 
-            MouseArea {
-                anchors.fill: parent
+            onItemTapped: noteBookClicked(itemData)
 
-                onClicked: notebookClicked(name, title)
-
-                onPressAndHold:{
-                    selectedNotebook = name;
-                    selectedTitle = title;
-                    var map = mapToItem(listView, mouseX, mouseY);
-                    contextMenu.setPosition(map.x, map.y+50);
-                    contextMenu.show();
-                }
+            onItemTappedAndHeld: {
+                internal.selectedNoteBook = itemData;
+                var map = mapToItem(null, gesture.position.x, gesture.position.y);
+                contextMenu.setPosition(map.x, map.y);
+                contextMenu.show();
             }
         }
     }
@@ -149,113 +115,64 @@ AppPage {
         id: notebookDelegate2
 
         NoteButton {
-            id: notebook2
-//            x: 40
             width: listView.width
-            height: theme_listBackgroundPixelHeightTwo
-            title: name
-            comment: {
-                if(dataHandler.getChildNotes(name) == 1) {
-                    qsTr("%1 Note").arg(dataHandler.getChildNotes(name));
-                } else {
-                    qsTr("%1 Notes").arg(dataHandler.getChildNotes(name));
-                }
-            }
-            isNote : false
+            title: noteBook.title
+            comment: internal.notesCountText(noteBook)
+            itemData: noteBook
             checkBoxVisible: index != 0
             showGrip: false
 
-            onNoteSelected: {
-                var tmpList = selectedItems;
-                tmpList.push(noteName);
-                selectedItems = tmpList;
-            }
+            onItemSelected: internal.addItem(itemData)
+            onItemDeselected: internal.removeItem(itemData)
+            onItemTapped: noteBookClicked(itemData)
 
-            onNoteDeselected: {
-                var tmpList = selectedItems;
-                tmpList = dataHandler.removeFromString(tmpList, noteName);
-                selectedItems = tmpList;
-            }
-
-            MouseArea {
-                anchors.left:parent.left
-                anchors.leftMargin: parent.checkBoxWidth;
-                anchors.right:parent.right
-                anchors.top:parent.top
-                anchors.bottom:parent.bottom
-
-                onClicked: notebookClicked(name, title)
-
-                onPressAndHold:{
-                    selectedNotebook = name;
-                    selectedTitle = title;
-                    contextMenu.menuX = notebook2.x + mouseX;
-                    contextMenu.menuY = notebook2.y + 50/*header*/ + mouseY;
-                    contextMenu.visible = true;
-                }
+            onItemTappedAndHeld: {
+                internal.selectedNoteBook = itemData;
+                var map = mapToItem(null, gesture.position.x, gesture.position.y);
+                contextMenu.setPosition(map.x, map.y);
+                contextMenu.show();
             }
         }
     }
 
-    Item {
-        id: mainContainer
-        anchors.fill: notebookListPage
+    ListView {
+        id: listView
+        anchors.fill: parent
 
-        ListView {
-            id: listView
-            width: parent.width;
-            height: parent.height
-            model: notebooksModel
-            anchors.top: parent.top
-            anchors.left: parent.left
-            anchors.right: parent.right
+        delegate: internal.selectMultiply ? notebookDelegate2 : notebookDelegate
 
+        clip: true
+        spacing: 1
+        cacheBuffer: 600
+        interactive: contentHeight > listView.height
+    }
 
-            delegate: showCheckBox ? notebookDelegate2 : notebookDelegate;
-            //focus: true
-            clip: true
-            spacing: 1
-            cacheBuffer: 600
-            interactive: contentHeight > listView.height
+    BottomToolBar {
+        id: multiSelectRow
+        anchors.bottom: parent.bottom
+        anchors.left: parent.left
+        anchors.right: parent.right
 
-            footer:
-                Item {
-                width:listView.width
-                height: 50
-            }
-        }
-
-        BottomToolBar {
-            id: multiSelectRow
-            anchors.bottom: listView.bottom
-            width: listView.width
-
-            content: BottomToolBarRow {
-                centerContent: Row {
-                    spacing: 10
-                    Button {
-                        id: deleteButton
-                        text: qsTr("Delete")
-                        enabled: selectedItems.length > 0
-                        bgSourceUp: "image://themedimage/images/btn_red_up"
-                        bgSourceDn: "image://themedimage/images/btn_red_dn"
-                        onClicked: {
-                            deleteConfirmationDialog.show();
-                            showCheckBox = false;
-                            multiSelectRow.hide();
-                        }
-                    }
-                    Button {
-                        id: cancelButton
-                        text: qsTr("Cancel")
-                        onClicked: {
-                            multiSelectRow.hide();
-                            showCheckBox = false;
-                            selectedItems = [];
-                        }
+        content: BottomToolBarRow {
+            centerContent: Row {
+                spacing: 10
+                Button {
+                    id: deleteButton
+                    text: qsTr("Delete (%1)").arg(internal.selectedNoteBooks.length)
+                    enabled: internal.selectedNoteBooks.length > 0
+                    bgSourceUp: "image://themedimage/images/btn_red_up"
+                    bgSourceDn: "image://themedimage/images/btn_red_dn"
+                    onClicked: deleteConfirmationDialog.show()
+                }
+                Button {
+                    id: cancelButton
+                    text: qsTr("Cancel")
+                    onClicked: {
+                        multiSelectRow.hide();
+                        internal.selectMultiply = false;
+                        internal.selectedNoteBooks = [];
                     }
                 }
-
             }
         }
     }
@@ -264,9 +181,8 @@ AppPage {
     ContextMenu {
         id: contextMenu
 
-        property string openChoice: qsTr("Open");
-        property string emailChoice: qsTr("Email");
-        property string deleteChoice: qsTr("Delete");
+        property string openChoice: qsTr("Open")
+        property string deleteChoice: qsTr("Delete")
         property string renameChoice: qsTr("Rename")
 
         property variant choices: [ openChoice,  deleteChoice, renameChoice ]
@@ -275,7 +191,7 @@ AppPage {
 
         content: ActionMenu {
             model:  {
-                if(selectedNotebook == defaultNotebook) {
+                if(internal.selectedNoteBook.id == page.model.defaultNoteBookId) {
                     return contextMenu.defaultListChoices;
                 } else {
                     return contextMenu.choices;
@@ -284,30 +200,14 @@ AppPage {
 
             onTriggered: {
                 if (model[index] == contextMenu.openChoice) {
-                    notebookClicked(selectedNotebook, selectedTitle)
-                }
-                else if (model[index] == contextMenu.deleteChoice) {
-                    if (selectedItems.length > 1) {
-                        if (selectedItems[0] != defaultNotebook){
-                            deleteConfirmationDialog.show();
-                        }
-                    }
-                    else if (selectedItems.length == 1)
-                    {
-                        if (selectedItems[0] != defaultNotebook)
-                        {
-                            deleteConfirmationDialog.show();
-                        }
-                    }
-                    else
-                    {
+                    noteBookClicked(internal.selectedNoteBook);
+                } else if (model[index] == contextMenu.deleteChoice) {
+                    if (internal.selectedNoteBook)
                         deleteConfirmationDialog.show();
-                    }
                 } else if (model[index] == contextMenu.renameChoice) {
-                    renameWindow.oldName = notebookListPage.selectedTitle;
+                    renameWindow.oldName = internal.selectedNoteBook.title;
                     renameWindow.show();
                 }
-
                 contextMenu.hide();
             }
         }
@@ -315,25 +215,30 @@ AppPage {
 
     ModalDialog {
         id: addDialog
-        title: qsTr("Create a new Notebook");
-        acceptButtonText: qsTr("Create");
-        cancelButtonText: qsTr("Cancel");
+        title: qsTr("Create a new notebook")
+        acceptButtonText: qsTr("Create")
+        cancelButtonText: qsTr("Cancel")
+        showAcceptButton: newName.text.length > 0
         content: Column {
-            anchors.fill: parent
+            anchors.verticalCenter: parent.verticalCenter
+            anchors.left: parent.left
+            anchors.right: parent.right
+            anchors.leftMargin: 20
+            anchors.rightMargin: anchors.leftMargin
             TextEntry {
                 id: newName
-                defaultText: qsTr("Notebook name");
-                onTextChanged: {
-                    newName.text = newName.text.slice(0, window.maxCharactersCount);
-                }
-                width: parent.width
-                height: parent.height - charsIndicator.height
+                defaultText: qsTr("Notebook name")
+                onTextChanged: newName.text = newName.text.slice(0, window.maxCharactersCount)
+                anchors.left: parent.left
+                anchors.right: parent.right
             }
             Text {
                 id: charsIndicator
+                anchors.right: parent.right
                 font.italic: true
                 font.pixelSize: 10
-                text: qsTr("%1/%2").arg(newName.text.length).arg(window.maxCharactersCount)
+                //: %1 is current title length, %2 is max title length
+                text: qsTr("%1/%2", "CharLeft").arg(newName.text.length).arg(window.maxCharactersCount)
             }
         }
 
@@ -344,133 +249,182 @@ AppPage {
                 saveRestore.sync();
             }
 
-//            if (dataHandler.isFirstTimeUse()) {
-//                dataHandler.unsetFirstTimeUse();
-//                //blankStateScreen.helpContentVisible = false; //I don't know why this was needed, but putting in here casues a scoping error
-//            }
-
-            updateView();
-
-            if (dataHandler.noteBookExists(newName.text)) {
-                informationDialog.info = qsTr("A NoteBook '%1' already exists.").arg(newName.text);
-                informationDialog.visible = true;
+            var name = newName.text;
+            newName.text = ""; //reset it for next time
+            if (page.model.noteBookExists(name)) {  //TODO: do we need this checking now?
+                informationDialog.info = qsTr("A Notebook '%1' already exists.").arg(name);
+                informationDialog.show();
                 return;
             }
 
-            dataHandler.createNoteBook(newName.text);
-            newName.text =""; //reset it for next time
-        }
-        onRejected: {
-            updateView();
+            page.model.createNoteBook(name);
         }
     }
 
     ModalDialog {
         id: deleteConfirmationDialog
-        acceptButtonText: qsTr("Delete");
-        title: (selectedItems.length > 1) ?
-                         qsTr("Are you sure you want to delete these %1 notebooks?").arg(selectedItems.length)
-                       :  qsTr("Are you sure you want to delete \"%1\"?").arg(componentText);
-        property string componentText: (selectedItems.length > 0) ? selectedItems[0] : selectedNotebook;
+        acceptButtonText: qsTr("Delete")
+        title: (internal.selectedNoteBooks.length > 1) ? qsTr("Delete notebooks?") : qsTr("Delete notebook?")
+        content: Text {
+            anchors.verticalCenter: parent.verticalCenter
+            anchors.left: parent.left
+            anchors.right: parent.right
+            anchors.leftMargin: 20
+            anchors.rightMargin: anchors.leftMargin
+
+            text: (internal.selectedNoteBooks.length > 1)
+                  ? qsTr("Are you sure you want to delete these %n notebook(s)?", "", internal.selectedNoteBooks.length)
+                  //: %1 is notebook title
+                  : qsTr("Are you sure you want to delete \"%1\"?").arg(componentText)
+
+            property string componentText: internal.selectedNoteBook ? internal.selectedNoteBook.title
+                                                                     : (internal.selectedNoteBooks.length == 1 ? internal.selectedNoteBooks[0].title : "")
+        }
+
         acceptButtonImage: "image://themedimage/images/btn_red_up"
         acceptButtonImagePressed:"image://themedimage/images/btn_red_dn"
 
-        onAccepted: {
-            if (selectedItems.length > 0)
-            {
-                dataHandler.deleteNoteBooks(selectedItems);
-            }
-            else
-            {
-                dataHandler.deleteNoteBook(selectedNotebook);
+        onAccepted: {   //TODO: check it
+            if (internal.selectedNoteBooks.length > 0) {
+                for (var i = 0; i < internal.selectedNoteBooks.length; ++i)
+                    page.model.removeNoteBook(internal.selectedNoteBooks[i].id);
+            } else {
+                page.model.removeNoteBook(internal.selectedNoteBook.id);
             }
             deleteReportWindow.show();
+            internal.selectMultiply = false;
+            multiSelectRow.hide();
         }
 
-        onRejected: {
-            selectedItems = [];
-        }
+        onRejected: internal.selectedNoteBooks = []
     }
 
     ModalDialog {
         id: deleteReportWindow
         showCancelButton: false
         showAcceptButton: true
-        acceptButtonText: qsTr("OK");
-        title: (selectedItems.length > 1) ? qsTr("Notebooks deleted") : qsTr("Notebook deleted")
+        acceptButtonText: qsTr("OK")
+        title: (internal.selectedNoteBooks.length > 1) ? qsTr("Notebooks deleted") : qsTr("Notebook deleted")
         content: Text {
-            anchors.fill: parent
-            text:  {
-                if(selectedItems.length > 1) {
-                    return qsTr("%1 notebooks have been deleted").arg(selectedItems.length);
-                } else if(selectedItems.length == 1) {
-                    return qsTr("\"%1\" has been deleted").arg(selectedItems[0]);
-                } else  {
-                    return qsTr("\"%1\" has been deleted").arg(selectedNotebook);
+            anchors.verticalCenter: parent.verticalCenter
+            anchors.left: parent.left
+            anchors.right: parent.right
+            anchors.leftMargin: 20
+            anchors.rightMargin: anchors.leftMargin
+            text: {
+                if(internal.selectedNoteBooks.length > 1) {
+                    return qsTr("%n notebook(s) have been deleted", "", internal.selectedNoteBooks.length);
+                } else if(internal.selectedNoteBooks.length == 1) {
+                    //: %1 is notebook title
+                    return qsTr("\"%1\" has been deleted").arg(internal.selectedNoteBooks[0]);
+                } else {
+                    return qsTr("\"%1\" has been deleted").arg(internal.selectedNoteBook);
                 }
             }
         }
-        onAccepted: {
-            selectedItems = [];
-            updateView();
-        }
+        onAccepted: internal.selectedNoteBooks = []
     }
 
     ModalDialog {
         id: informationDialog
+        title: qsTr("Information")
         property alias info: textInfo.text
         showCancelButton: false
         showAcceptButton: true
-        acceptButtonText: qsTr("OK");
+        acceptButtonText: qsTr("OK")
         content: Text {
             id: textInfo
-            anchors.fill: parent
+            anchors.verticalCenter: parent.verticalCenter
+            anchors.left: parent.left
+            anchors.right: parent.right
+            anchors.leftMargin: 20
+            anchors.rightMargin: anchors.leftMargin
         }
     }
 
     ModalDialog {
         id: renameWindow
-        acceptButtonText: qsTr("OK");
-        cancelButtonText: qsTr("Cancel");
-        title: qsTr("Rename NoteBook")
+        acceptButtonText: qsTr("OK")
+        cancelButtonText: qsTr("Cancel")
+        showAcceptButton: renameTextEntry.text.length > 0
+        title: qsTr("Rename notebook")
+
         property string oldName
 
         content: Column {
-            anchors.fill: parent
+            anchors.verticalCenter: parent.verticalCenter
+            anchors.left: parent.left
+            anchors.right: parent.right
+            anchors.leftMargin: 20
+            anchors.rightMargin: anchors.leftMargin
             TextEntry {
                 id: renameTextEntry
-                onTextChanged: {
-                    renameTextEntry.text = renameTextEntry.text.slice(0, window.maxCharactersCount);
-                }
-                width: parent.width
-                height: parent.height - renameCharsIndicator.height
+                onTextChanged: renameTextEntry.text = renameTextEntry.text.slice(0, window.maxCharactersCount)
+                anchors.left: parent.left
+                anchors.right: parent.right
             }
             Text {
                 id: renameCharsIndicator
+                anchors.right: parent.right
                 font.italic: true
                 font.pixelSize: 10
-                text: qsTr("%1/%2").arg(renameTextEntry.text.length).arg(window.maxCharactersCount)
+                text: qsTr("%1/%2", "CharLeft").arg(renameTextEntry.text.length).arg(window.maxCharactersCount)
             }
         }
 
-        onOldNameChanged: {
-            renameTextEntry.text = oldName;
-        }
+        onOldNameChanged: renameTextEntry.text = oldName
 
         onAccepted: {
             var newName = renameTextEntry.text;
-            if (dataHandler.noteBookExists(newName)) {
-                visible = false;
-                updateView();
-                informationDialog.info = qsTr("A NoteBook '%1' already exists.").arg(newName);
+            if (page.model.noteBookExists(newName)) {   //TODO: do we need this checking now?
+                //: %1 is notebook title
+                informationDialog.info = qsTr("A notebook '%1' already exists.").arg(newName);
                 informationDialog.show();
                 return;
             }
+            page.model.renameNoteBook(internal.selectedNoteBook.id, newName);
+        }
+    }
 
-            console.log("Renaming...");
-            dataHandler.renameNoteBook(oldName, newName);
-            updateView();
+    QtObject {
+        id: internal
+
+        property variant selectedNoteBook: page.model.noteBook(0)   //NOTE: default note books is always on 0 position
+        property variant selectedNoteBooks: []
+        property bool selectMultiply: false
+
+        function addItem(item)
+        {
+            var list = selectedNoteBooks;
+            list.push(item);
+            selectedNoteBooks = list;
+        }
+
+        function removeItem(item)
+        {
+            var list = selectedNoteBooks;
+            for (var i = 0; i < list.length; ++i) {
+                if (list[i].id == item.id) {
+                    list.splice(i, 1);
+                    break;
+                }
+            }
+            selectedNoteBooks = list;
+        }
+
+        function notesCountText(noteBook)
+        {
+            var notesCount = noteBook ? noteBook.notesCount : 0;
+            return qsTr("%n note(s)", "", notesCount);
+        }
+
+        function menuModel()
+        {
+            var res = [];
+            res.push(qsTr("New notebook"));
+            if(listView.model.count > 1)
+                res.push(qsTr("Select multiple"));
+            return res;
         }
     }
 }
-

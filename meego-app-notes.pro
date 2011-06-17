@@ -5,6 +5,9 @@ SUBDIRS+= src
 qmlfiles.files += *.qml
 qmlfiles.path += $$INSTALL_ROOT/usr/share/$$TARGET
 
+desktopfiles.files += *.desktop
+desktopfiles.path += $$INSTALL_ROOT/usr/share/applications
+
 QML_FILES = *.qml
 
 LIB_SOURCES += src/*.cpp
@@ -29,4 +32,4 @@ dist.commands += rm -fR $${PROJECT_NAME}-$${VERSION} &&
 dist.commands += echo; echo Created $${PROJECT_NAME}-$${VERSION}.tar.bz2
 QMAKE_EXTRA_TARGETS += dist
 
-INSTALLS += qmlfiles
+INSTALLS += qmlfiles desktopfiles

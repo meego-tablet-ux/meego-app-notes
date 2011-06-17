@@ -11,132 +11,91 @@ import MeeGo.Components 0.1
 import MeeGo.App.Notes 0.1
 
 AppPage {
-    id: topRect;
-    property string notebookID: qsTr("Everyday Notes (default)")
-    property string noteName: qsTr("Note name...")
-    property bool listNumbers: false;
-    property bool listBullets: false;
-    property int listNumbersCount: 0
-    property string strNumberCount: ""
-    property alias caption: nameLabel.text
+    id: page
 
-    signal modifyNote(string notebook, string note, string text)
-    signal deleteNote(string notebook, string note)
-    signal closeWindow();
+    property variant note: null
+    property variant model: null
 
+    signal windowClosed()
 
-    Component.onDestruction: {
-        noteModel.refresh();
-    }
+    actionMenuModel: [qsTr("Save"), qsTr("Delete")]
 
-    actionMenuModel: [qsTr("Save"), qsTr("Delete"),/* qsTr("Share")*/ ]
-
-    actionMenuPayload: [0, 1, 2]
-
+    actionMenuPayload: [0, 1]
 
     onActionMenuTriggered: {
         if(selectedItem == 0) {
             manualSaveTimer.running = true;
-            dataHandler.modifyNote(notebookID, nameLabel.text, editor.text);
+            page.model.setNoteText(page.note.id, editor.text);
         } else if(selectedItem == 1) {
             deleteConfirmationDialog.show();
-        } else {
-            //shareDialog.opacity = 1;
         }
     }
 
-    TextEditHandler {
-        id: textEditHandler
+    NoteButton {
+        id: noteBookNameLabel
+
+        anchors.top: parent.top
+        anchors.left: parent.left
+        anchors.right: parent.right
+
+        color: "lightgray"
+
+        title: page.note ? page.note.title : ""
+        comment: ""
+        itemData: page.note
+        checkBoxVisible: false
+        showGrip: false
     }
 
-    Item {
-        id: content
-        anchors.fill: topRect
+    TextField {
+        id: editor
 
-        Rectangle {
-            id: textRect;
-            height: 50;
-            color: "#CACACA"
+        anchors.top: noteBookNameLabel.bottom
+        anchors.left: parent.left
+        anchors.right: parent.right
+        anchors.bottom: parent.bottom
+        anchors.margins: 20
 
-            anchors { left: parent.left;
-                right: parent.right;
-                top: parent.top;
-            }
+        smooth:true;
+        text: page.note ? page.note.html : ""
+        defaultText: qsTr("Start typing a new note.")
+    }
 
-            Text {
-                id: nameLabel
+    Timer {
+        id: saveTimer
+        interval: 1000
+        running: true
+        repeat: true
+        onTriggered: {
+            if(!manualSaveTimer.running && !deleteConfirmationDialog.visible)
+                page.model.setNoteText(page.note.id, editor.text);
+        }
+    }
 
-                text: qsTr("Test Notebook Name");
-                font.pointSize: 16;
-                smooth: true
+    Timer {
+        id: manualSaveTimer
+        interval: 5000
+    }
 
-                anchors { left: parent.left;
-                    right: parent.right;
-                    top: parent.top;
-                    topMargin: 10
-                    leftMargin: 30
-                }
-            }
+    ModalDialog {
+        id: deleteConfirmationDialog
+        acceptButtonText: qsTr("Yes")
+        cancelButtonText: qsTr("No")
+        title: qsTr("Delete?")
+
+        content: Text {
+            text: qsTr("Do you want to delete this note?")
+            horizontalAlignment: Text.AlignHCenter
+            width: parent.width
         }
 
-        TextField {
-            id: editor
-            property int topMargins: 20
-            anchors.top: textRect.bottom;
-            anchors.topMargin: topMargins
-            anchors.left: parent.left
-            anchors.leftMargin: 30
-            anchors.right: parent.right
-            anchors.rightMargin: 30
-            width: parent.width;
-            height: parent.height -  textRect.height - topMargins;
-//            contentWidth: editor.paintedWidth
-//            contentHeight: editor.paintedHeight
-            smooth:true;
-            text: dataHandler.loadNoteData(notebookID, noteName);
-            defaultText: qsTr("Start typing a new note.")
+        onAccepted: {
+            page.model.removeNote(page.note.id);
+            hide();
+            page.windowClosed();
         }
 
-        Timer {
-            id: saveTimer
-            interval: 1000
-            running: true
-            repeat: true
-            onTriggered: {
-                if((!manualSaveTimer.running) && (deleteConfirmationDialog.opacity == 0)) {
-                    dataHandler.modifyNote(notebookID, nameLabel.text, editor.text);
-                }
-            }
-        }
-
-        Timer {
-            id: manualSaveTimer
-            interval: 5000
-        }
-
-        ModalDialog {
-            id: deleteConfirmationDialog
-            opacity: 0
-            acceptButtonText: qsTr("Yes");
-            cancelButtonText: qsTr("No");
-            title: qsTr("Delete?");
-
-            content: Text {
-                text: qsTr("Do you want to Delete this note?");
-                horizontalAlignment: Text.AlignHCenter
-                width: parent.width
-            }
-
-            onAccepted: {
-                dataHandler.deleteNote(notebookID, noteName);
-                hide();
-                topRect.closeWindow();
-            }
-
-            onRejected: {
-                hide();
-            }
-        }
+        onRejected: hide()
     }
 }
 

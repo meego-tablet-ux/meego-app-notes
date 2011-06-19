@@ -7,7 +7,8 @@
  */
 
 import Qt 4.7
-import MeeGo.Components 0.1
+import MeeGo.Ux.Components.Common 0.1
+import MeeGo.Ux.Kernel 0.1
 import MeeGo.App.Notes 0.1
 
 AppPage {
@@ -21,12 +22,138 @@ AppPage {
         id: theme
     }
 
+    SaveRestoreState {
+        id: saveRestoreNotebooks
+
+        onSaveRequired: {
+            //for contextMenu
+            setValue("contextMenu.baseX", contextMenu.baseX);
+            setValue("contextMenu.baseY", contextMenu.baseY);
+            setValue("contextMenu.visible", contextMenu.visible);
+            setValue("internal.selectedNoteBookId", internal.selectedNoteBook.id);
+
+            //for custom menu
+            setValue("customMenu.visible", customMenu.visible);
+
+            //for add dialog
+            setValue("addDialog.visible", addDialog.visible);
+            setValue("newName.text", newName.text);
+
+            //for rename dialog
+            setValue("renameWindow.visible", renameWindow.visible);
+            setValue("renameTextEntry.text", renameTextEntry.text);
+
+            //for information dialog
+            setValue("informationDialog.visible", informationDialog.visible);
+            setValue("informationDialog.info", informationDialog.info);
+
+            //for deleteReportWindow
+            setValue("deleteReportWindow.visible", deleteReportWindow.visible);
+
+            //for delete dialog
+            setValue("deleteConfirmationDialog.visible", deleteConfirmationDialog.visible);
+
+            //for listView
+            setValue("listView.contentY", listView.contentY);
+
+            //selected notebooks
+            var notebookIds = new Array();
+            for(var i=0; i<internal.selectedNoteBooks.length; ++i) {
+                notebookIds[i] = internal.selectedNoteBooks[i].id;
+            }
+            setValue("internal.selectedNoteBooks", notebookIds.join(","));
+
+            //internal.selectMultiply
+            setValue("internal.selectMultiply", internal.selectMultiply);
+
+            //multiSelectRow
+            setValue("multiSelectRow.visible", multiSelectRow.visible);
+
+            //custom menu position
+            setValue("internal.customMenuX", internal.customMenuX);
+            setValue("internal.customMenuY", internal.customMenuY);
+
+            //context menu position
+            setValue("internal.contextMenuX", internal.contextMenuX);
+            setValue("internal.contextMenuY", internal.contextMenuY);
+
+            sync();
+        }
+    }
+
+    Component.onCompleted: {
+        console.log("restoreRequired: " + saveRestoreNotebooks.restoreRequired);
+        if (saveRestoreNotebooks.restoreRequired) {
+            listView.contentY = saveRestoreNotebooks.value("listView.contentY");
+
+            internal.selectedNoteBook = noteBooksModel.noteBookById(saveRestoreNotebooks.value("internal.selectedNoteBookId"));
+
+            if (saveRestoreNotebooks.value("contextMenu.visible")) {
+                var mouseX = saveRestoreNotebooks.value("internal.contextMenuX");
+                var mouseY = saveRestoreNotebooks.value("internal.contextMenuY");
+                contextMenu.setPosition(mouseX, mouseY);
+                contextMenu.show();
+            }
+
+            if (saveRestoreNotebooks.value("customMenu.visible")) {
+                var mouseX = saveRestoreNotebooks.value("internal.customMenuX");
+                var mouseY = saveRestoreNotebooks.value("internal.customMenuY");
+                customMenu.setPosition(mouseX, mouseY);
+                customMenu.show();
+            }
+
+            //add dialog
+            if (saveRestoreNotebooks.value("addDialog.visible")) {
+                newName.text = saveRestoreNotebooks.value("newName.text");
+                addDialog.show();
+            }
+
+            //rename dialog
+            if (saveRestoreNotebooks.value("renameWindow.visible")) {
+                renameTextEntry.text = saveRestoreNotebooks.value("renameTextEntry.text");
+                renameWindow.show();
+            }
+
+            //information dialog
+            if (saveRestoreNotebooks.value("informationDialog.visible")) {
+                informationDialog.info = saveRestoreNotebooks.value("informationDialog.info");
+                informationDialog.show();
+            }
+
+            //deleteReportWindow
+            if (saveRestoreNotebooks.value("deleteReportWindow.visible")) {
+                deleteReportWindow.show();
+            }
+
+            //delete dialog
+            if (saveRestoreNotebooks.value("deleteConfirmationDialog.visible")) {
+                deleteConfirmationDialog.show();
+            }
+
+            //selected notebooks
+            var notebookIds = new Array();
+            notebookIds = saveRestoreNotebooks.value("internal.selectedNoteBooks").split(",");
+            for(var i=0; i<notebookIds.length; ++i) {
+                internal.selectedNoteBooks[i] = noteBooksModel.noteBookById(notebookIds[i]);
+            }
+
+            //internal.selectMultiply
+            internal.selectMultiply = saveRestoreNotebooks.value("internal.selectMultiply");
+
+            //multiSelectRow
+            if (saveRestoreNotebooks.value("multiSelectRow.visible"))
+                multiSelectRow.show();
+        }
+    }
+
     enableCustomActionMenu: true
 
     onActionMenuIconClicked: {
         if (window.pageStack.currentPage == page) {
             firstActionMenu.model = internal.menuModel();
             customMenu.setPosition(mouseX, mouseY);
+            internal.customMenuX = mouseX;
+            internal.customMenuY = mouseY;
             customMenu.show();
         }
     }
@@ -106,6 +233,8 @@ AppPage {
                 internal.selectedNoteBook = itemData;
                 var map = mapToItem(null, gesture.position.x, gesture.position.y);
                 contextMenu.setPosition(map.x, map.y);
+                internal.contextMenuX = map.x;
+                internal.contextMenuY = map.y;
                 contextMenu.show();
             }
         }
@@ -274,7 +403,7 @@ AppPage {
 
             text: (internal.selectedNoteBooks.length > 1)
                   ? qsTr("Are you sure you want to delete these %n notebook(s)?", "", internal.selectedNoteBooks.length)
-                  //: %1 is notebook title
+                    //: %1 is notebook title
                   : qsTr("Are you sure you want to delete \"%1\"?").arg(componentText)
 
             property string componentText: internal.selectedNoteBook ? internal.selectedNoteBook.title
@@ -392,6 +521,10 @@ AppPage {
         property variant selectedNoteBook: page.model.noteBook(0)   //NOTE: default note books is always on 0 position
         property variant selectedNoteBooks: []
         property bool selectMultiply: false
+        property int customMenuX: 0
+        property int customMenuY: 0
+        property int contextMenuX: 0
+        property int contextMenuY: 0
 
         function addItem(item)
         {

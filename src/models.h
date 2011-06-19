@@ -178,6 +178,7 @@ public slots:
     void renameNoteBook(quint64 noteBookId, const QString &newTitle);
     bool noteBookExists(const QString &title);  //TODO: do we need this function now?
     NoteBook *noteBook(int row) const;
+    NoteBook *noteBookById(quint64 noteBookId) const;
 
 signals:
     void storageChanged();

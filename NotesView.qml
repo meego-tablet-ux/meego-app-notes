@@ -7,7 +7,8 @@
  */
 
 import Qt 4.7
-import MeeGo.Components 0.1
+import MeeGo.Ux.Components.Common 0.1
+import MeeGo.Ux.Kernel 0.1
 import MeeGo.App.Notes 0.1
 import MeeGo.Sharing 0.1
 import MeeGo.Sharing.UI 0.1
@@ -21,6 +22,144 @@ AppPage {
 
     Theme {
         id: theme
+    }
+
+    SaveRestoreState {
+        id: saveRestoreNotes
+
+        onSaveRequired: {
+            //for contextMenu
+            setValue("contextMenuNotes.baseX", contextMenu.baseX);
+            setValue("contextMenuNotes.baseY", contextMenu.baseY);
+            setValue("contextMenuNotes.visible", contextMenu.visible);
+            setValue("internal.selectedNoteId", internal.selectedNote.id);
+
+            //for custom menu
+            setValue("customMenuNotes.visible", customMenu.visible);
+
+            //for add dialog
+            setValue("addDialogNotes.visible", addDialog.visible);
+            setValue("newNameNotes.text", newName.text);
+
+            //for rename dialog
+            setValue("renameWindowNotes.visible", renameWindow.visible);
+            setValue("renameTextEntryNotes.text", renameTextEntry.text);
+
+            //for information dialog
+            setValue("informationDialogNotes.visible", informationDialog.visible);
+            setValue("informationDialogNotes.info", informationDialog.info);
+
+            //for deleteReportWindow
+            setValue("deleteReportWindowNotes.visible", deleteReportWindow.visible);
+
+            //for delete dialog
+            setValue("deleteConfirmationDialogNotes.visible", deleteConfirmationDialog.visible);
+
+            //for listView
+            setValue("listViewNotes.contentY", listView.contentY);
+
+            //selected notes
+            var noteIds = new Array();
+            for(var i=0; i<internal.selectedNotes.length; ++i) {
+                noteIds[i] = internal.selectedNotes[i].id;
+            }
+            setValue("internal.selectedNotes", noteIds.join(","));
+
+            //internal.selectMultiply
+            setValue("internal.selectMultiplyNotes", internal.selectMultiply);
+
+            //multiSelectRow
+            setValue("multiSelectRowNotes.visible", multiSelectRow.visible);
+
+            //custom menu position
+            setValue("internal.customMenuNotesX", internal.customMenuX);
+            setValue("internal.customMenuNotesY", internal.customMenuY);
+
+            //context menu position
+            setValue("internal.contextMenuNotesX", internal.contextMenuX);
+            setValue("internal.contextMenuNotesY", internal.contextMenuY);
+
+            //move menu
+            setValue("notebookSelector.visible", notebookSelector.visible);
+            setValue("internal.moveMenuX", internal.moveMenuX);
+            setValue("internal.moveMenuY", internal.moveMenuY);
+
+            sync();
+        }
+    }
+
+    Component.onCompleted: {
+        console.log("restoreRequired: " + saveRestoreNotes.restoreRequired);
+        if (saveRestoreNotes.restoreRequired) {
+            listView.contentY = saveRestoreNotes.value("listViewNotes.contentY");
+
+            internal.selectedNote = notesModel.noteById(saveRestoreNotes.value("internal.selectedNoteId"));
+
+            if (saveRestoreNotes.value("contextMenuNotes.visible")) {
+                var mouseX = saveRestoreNotes.value("internal.contextMenuNotesX");
+                var mouseY = saveRestoreNotes.value("internal.contextMenuNotesY");
+                contextMenu.setPosition(mouseX, mouseY);
+                contextMenu.show();
+            }
+
+            if (saveRestoreNotes.value("customMenuNotes.visible")) {
+                var mouseX = saveRestoreNotes.value("internal.customMenuNotesX");
+                var mouseY = saveRestoreNotes.value("internal.customMenuNotesY");
+                customMenu.setPosition(mouseX, mouseY);
+                customMenu.show();
+            }
+
+            //add dialog
+            if (saveRestoreNotes.value("addDialogNotes.visible")) {
+                newName.text = saveRestoreNotes.value("newNameNotes.text");
+                addDialog.show();
+            }
+
+            //rename dialog
+            if (saveRestoreNotes.value("renameWindowNotes.visible")) {
+                renameTextEntry.text = saveRestoreNotes.value("renameTextEntryNotes.text");
+                renameWindow.show();
+            }
+
+            //information dialog
+            if (saveRestoreNotes.value("informationDialogNotes.visible")) {
+                informationDialog.info = saveRestoreNotes.value("informationDialogNotes.info");
+                informationDialog.show();
+            }
+
+            //deleteReportWindow
+            if (saveRestoreNotes.value("deleteReportWindowNotes.visible")) {
+                deleteReportWindow.show();
+            }
+
+            //delete dialog
+            if (saveRestoreNotes.value("deleteConfirmationDialogNotes.visible")) {
+                deleteConfirmationDialog.show();
+            }
+
+            //selected notes
+            var noteIds = new Array();
+            noteIds = saveRestoreNotes.value("internal.selectedNotes").split(",");
+            for(var i=0; i<noteIds.length; ++i) {
+                internal.selectedNotes[i] = notesModel.noteById(noteIds[i]);
+            }
+
+            //internal.selectMultiply
+            internal.selectMultiply = saveRestoreNotes.value("internal.selectMultiplyNotes");
+
+            //multiSelectRow
+            if (saveRestoreNotes.value("multiSelectRowNotes.visible"))
+                multiSelectRow.show();
+
+            //move menu
+            if (saveRestoreNotes.value("notebookSelector.visible")) {
+                notebookSelectorMenu.filterNoteBooksList();
+                var mouseX = saveRestoreNotes.value("internal.moveMenuX", internal.moveMenuX);
+                var mouseY = saveRestoreNotes.value("internal.moveMenuY", internal.moveMenuY);
+                notebookSelector.setPosition(mouseX, mouseY);
+                notebookSelector.show();
+            }
+        }
     }
 
     enableCustomActionMenu: true
@@ -287,10 +426,10 @@ AppPage {
         property string deleteChoice: qsTr("Delete")
         property string renameChoice: qsTr("Rename")
 
-        ShareObj {
-            id: shareObj
-            shareType: MeeGoUXSharingClientQmlObj.ShareTypeText
-        }
+//        ShareObj {
+//            id: shareObj
+//            shareType: MeeGoUXSharingClientQmlObj.ShareTypeText
+//        }
 
         property variant choices: [ openChoice, emailChoice, moveChoice, deleteChoice, renameChoice ]
 
@@ -301,13 +440,15 @@ AppPage {
                     noteClicked(internal.selectedNote);
                 } else if (model[index] == contextMenu.emailChoice) {
                     var uri = page.model.dumpNote(internal.selectedNote.id);
-                    shareObj.clearItems();
-                    shareObj.addItem(uri);
-                    shareObj.setParam(uri, "subject", noteListPage.selectedTitle);
-                    shareObj.showContext(qsTr("Email"), noteListPage.width / 2, noteListPage.height / 2);
+//                    shareObj.clearItems();
+//                    shareObj.addItem(uri);
+//                    shareObj.setParam(uri, "subject", noteListPage.selectedTitle);
+//                    shareObj.showContext(qsTr("Email"), noteListPage.width / 2, noteListPage.height / 2);
                 } else if (model[index] == contextMenu.moveChoice) {
                     notebookSelectorMenu.filterNoteBooksList();
                     notebookSelector.setPosition(internal.selectedNotePoint.x, internal.selectedNotePoint.y);
+                    internal.moveMenuX = internal.selectedNotePoint.x;
+                    internal.moveMenuY = internal.selectedNotePoint.y;
                     notebookSelector.show();
                 } else if (model[index] == contextMenu.deleteChoice) {
                     if (internal.selectedNote)
@@ -568,6 +709,13 @@ AppPage {
         property variant selectedNotes: []
         property bool selectMultiply: false
         property variant selectedNotePoint: null
+
+        property int customMenuX: 0
+        property int customMenuY: 0
+        property int contextMenuX: 0
+        property int contextMenuY: 0
+        property int moveMenuX: 0
+        property int moveMenuY: 0
 
         property bool dndStarted: false
         property variant dndStartPoint: null

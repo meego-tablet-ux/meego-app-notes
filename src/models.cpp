@@ -382,6 +382,13 @@ NoteBook *NoteBooksModel::noteBook(int row) const
     return qobject_cast<NoteBook *>(item(row));
 }
 
+NoteBook *NoteBooksModel::noteBookById(quint64 noteBookId) const
+{
+    if (!storage())
+        return 0;
+    return noteBook(storage()->noteBookPosition(noteBookId));
+}
+
 quint64 NoteBooksModel::defaultNoteBookId() const
 {
     return storage() ? storage()->defaultNoteBookId() : 0;

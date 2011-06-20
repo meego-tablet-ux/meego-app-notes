@@ -7,7 +7,8 @@
  */
 
 import Qt 4.7
-import MeeGo.Components 0.1
+import MeeGo.Ux.Components.Common 0.1
+import MeeGo.Ux.Kernel 0.1
 import MeeGo.App.Notes 0.1
 
 Window {
@@ -16,7 +17,54 @@ Window {
 
     property int maxCharactersCount: 50
 
-    Component.onCompleted: switchBook(notebookList)
+    SaveRestoreState {
+        id: saveRestoreMain
+
+        onSaveRequired: {
+            //currentPage
+            setValue("currentPageName", pageStack.currentPage.pageName);
+
+            //internal
+            setValue("internalMain.selectedNoteBook", internal.selectedNoteBook != null ? internal.selectedNoteBook.id : "");
+            setValue("internalMain.selectedNote", internal.selectedNote != null ? internal.selectedNote.id : "");
+
+            sync();
+        }
+    }
+
+    function restorePageStack()
+    {
+        switch (saveRestoreMain.value("currentPageName")){
+        case "NotebooksPage":
+            switchBook(notebookList);
+            break;
+        case "NotesPage":
+            switchBook(notebookList);
+            fastPageSwitch = true;
+            addPage(noteList);
+            fastPageSwitch = false;
+            break;
+        case "NoteDetailPage":
+            switchBook(notebookList);
+            fastPageSwitch = true;
+            addPage(noteList);
+            addPage(noteDetailPage);
+            fastPageSwitch = false;
+            break;
+        }
+    }
+
+    Component.onCompleted: {
+        if (saveRestoreMain.restoreRequired) {
+            internal.selectedNoteBook = noteBooksModel.noteBookById(saveRestoreMain.value("internalMain.selectedNoteBook"));
+            internal.selectedNote = notesModel.noteById(saveRestoreMain.value("internalMain.selectedNote"));
+
+            //restore page stack
+            restorePageStack();
+        } else {
+            switchBook(notebookList);
+        }
+    }
 
     SQLiteStorage {
         id: sqliteStorage
@@ -47,6 +95,7 @@ Window {
             anchors.fill: parent
             pageTitle: qsTr("Notes")
             model: noteBooksModel
+            property string pageName: "NotebooksPage"
 
             onNoteBookClicked: {
                 window.addPage(noteList);
@@ -63,6 +112,7 @@ Window {
             anchors.fill: parent
             pageTitle: qsTr("Notes")
             model: notesModel
+            property string pageName: "NotesPage"
 
             onNoteClicked: {
                 window.addPage(noteDetailPage);
@@ -80,6 +130,7 @@ Window {
             anchors.fill: parent
             note: internal.selectedNote
             model: notesModel
+            property string pageName: "NoteDetailPage"
 
             onWindowClosed:
             {

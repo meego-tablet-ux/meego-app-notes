@@ -8,6 +8,9 @@ DESTDIR = $$TARGET
 OBJECTS_DIR = .obj
 MOC_DIR = .moc
 
+LIBS+=/usr/lib/libmeegolocale.so
+INCLUDEPATH+=/usr/include
+
 SOURCES += \
 #    DataHandler.cpp \
 #    NotebooksModel.cpp \

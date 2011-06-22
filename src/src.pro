@@ -2,14 +2,12 @@ include(../common.pri)
 TEMPLATE = lib
 TARGET = Notes
 QT += core gui declarative sql
-CONFIG += qt plugin debug
+CONFIG += qt plugin debug link_pkgconfig
+PKGCONFIG+= icu-i18n icu-uc
 TARGET = $$qtLibraryTarget($$TARGET)
 DESTDIR = $$TARGET
 OBJECTS_DIR = .obj
 MOC_DIR = .moc
-
-LIBS+=/usr/lib/libmeegolocale.so
-INCLUDEPATH+=/usr/include
 
 SOURCES += \
 #    DataHandler.cpp \

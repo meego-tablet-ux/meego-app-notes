@@ -10,9 +10,12 @@
 #include <QTemporaryFile>
 
 #include "models.h"
+#include "meegolocale.h"
 
 static const QString noteBookRole = "noteBook";
 static const QString noteRole = "note";
+
+using namespace meego;
 
 ItemData::ItemData(QObject *parent) :
     QObject(parent),
@@ -109,7 +112,9 @@ bool NoteBook::operator < (const NoteBook &other) const
     if (other.id() == m_storage->defaultNoteBookId())
         return false;
 
-    return title() < other.title();
+    //use Locale api
+    meego::Locale locale;
+    return locale.lessThan(title(), other.title());
 }
 
 bool NoteBook::operator > (const NoteBook &other) const
@@ -181,7 +186,10 @@ bool Note::operator < (const Note &other) const
 {
     if (!m_storage)
         return false;
-    return title() < other.title();
+
+    //use Locale api
+    meego::Locale locale;
+    return locale.lessThan(title(), other.title());
 }
 
 bool Note::operator > (const Note &other) const

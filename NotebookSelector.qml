@@ -8,6 +8,7 @@
 
 import Qt 4.7
 import MeeGo.App.Notes 0.1
+import MeeGo.Components 0.1
 
 Item {
     id: container

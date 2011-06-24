@@ -12,6 +12,7 @@ import MeeGo.Ux.Kernel 0.1
 import MeeGo.App.Notes 0.1
 import MeeGo.Sharing 0.1
 import MeeGo.Sharing.UI 0.1
+import MeeGo.Components 0.1
 
 AppPage {
     id: page

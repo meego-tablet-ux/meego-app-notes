@@ -10,6 +10,7 @@ import Qt 4.7
 import MeeGo.Ux.Components.Common 0.1
 import MeeGo.Ux.Kernel 0.1
 import MeeGo.Ux.Gestures 0.1
+import MeeGo.Components 0.1
 
 Rectangle {
     id: noteButton

@@ -15,9 +15,6 @@ LIB_HEADERS += src/*.h
 
 OTHER_FILES += $${QML_FILES}
 
-RESOURCES += \
-    meego-app-notes.qrc
-
 TRANSLATIONS += $${QML_FILES} $${LIB_SOURCES} $${LIB_HEADERS}
 PROJECT_NAME = meego-app-notes
 

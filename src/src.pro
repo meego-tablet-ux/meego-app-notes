@@ -3,11 +3,13 @@ TEMPLATE = lib
 TARGET = Notes
 QT += core gui declarative sql
 CONFIG += qt plugin debug link_pkgconfig
-PKGCONFIG+= icu-i18n icu-uc
+PKGCONFIG+= icu-i18n icu-uc meegolocale
 TARGET = $$qtLibraryTarget($$TARGET)
 DESTDIR = $$TARGET
 OBJECTS_DIR = .obj
 MOC_DIR = .moc
+
+INCLUDEPATH += /usr/include/mlite
 
 SOURCES += \
 #    DataHandler.cpp \

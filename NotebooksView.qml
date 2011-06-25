@@ -10,6 +10,7 @@ import Qt 4.7
 import MeeGo.Ux.Components.Common 0.1
 import MeeGo.Ux.Kernel 0.1
 import MeeGo.App.Notes 0.1
+import MeeGo.Components 0.1
 
 AppPage {
     id: page
@@ -88,14 +89,14 @@ AppPage {
 
             internal.selectedNoteBook = noteBooksModel.noteBookById(saveRestoreNotebooks.value("internal.selectedNoteBookId"));
 
-            if (saveRestoreNotebooks.value("contextMenu.visible")) {
+            if (saveRestoreNotebooks.value("contextMenu.visible") == "true") {
                 var mouseX = saveRestoreNotebooks.value("internal.contextMenuX");
                 var mouseY = saveRestoreNotebooks.value("internal.contextMenuY");
                 contextMenu.setPosition(mouseX, mouseY);
                 contextMenu.show();
             }
 
-            if (saveRestoreNotebooks.value("customMenu.visible")) {
+            if (saveRestoreNotebooks.value("customMenu.visible") == "true") {
                 var mouseX = saveRestoreNotebooks.value("internal.customMenuX");
                 var mouseY = saveRestoreNotebooks.value("internal.customMenuY");
                 customMenu.setPosition(mouseX, mouseY);
@@ -103,30 +104,31 @@ AppPage {
             }
 
             //add dialog
-            if (saveRestoreNotebooks.value("addDialog.visible")) {
+            if (saveRestoreNotebooks.value("addDialog.visible") == "true") {
+		console.log("addDialog.show!");
                 newName.text = saveRestoreNotebooks.value("newName.text");
                 addDialog.show();
             }
 
             //rename dialog
-            if (saveRestoreNotebooks.value("renameWindow.visible")) {
+            if (saveRestoreNotebooks.value("renameWindow.visible") == "true") {
                 renameTextEntry.text = saveRestoreNotebooks.value("renameTextEntry.text");
                 renameWindow.show();
             }
 
-            //information dialog
-            if (saveRestoreNotebooks.value("informationDialog.visible")) {
+            //information diaxlog
+            if (saveRestoreNotebooks.value("informationDialog.visible") == "true") {
                 informationDialog.info = saveRestoreNotebooks.value("informationDialog.info");
                 informationDialog.show();
             }
 
             //deleteReportWindow
-            if (saveRestoreNotebooks.value("deleteReportWindow.visible")) {
+            if (saveRestoreNotebooks.value("deleteReportWindow.visible") == "true") {
                 deleteReportWindow.show();
             }
 
             //delete dialog
-            if (saveRestoreNotebooks.value("deleteConfirmationDialog.visible")) {
+            if (saveRestoreNotebooks.value("deleteConfirmationDialog.visible") == "true") {
                 deleteConfirmationDialog.show();
             }
 
@@ -138,10 +140,11 @@ AppPage {
             }
 
             //internal.selectMultiply
-            internal.selectMultiply = saveRestoreNotebooks.value("internal.selectMultiply");
+            if (saveRestoreNotebooks.value("internal.selectMultiply" == "true"))
+		internal.selectMultiply = true;
 
             //multiSelectRow
-            if (saveRestoreNotebooks.value("multiSelectRow.visible"))
+            if (saveRestoreNotebooks.value("multiSelectRow.visible") == true)
                 multiSelectRow.show();
         }
     }
@@ -172,7 +175,8 @@ AppPage {
 
         onButtonClicked: addDialog.show()
 
-        visible: (saveRestore.value("FirstTimeUseNotebooks") == undefined) && listView.model.count == 1
+        visible: (saveRestoreNotebooks.value("FirstTimeUseNotebooks") == undefined) && 
+listView.model.count == 1
     }
 
     ContextMenu {

@@ -10,6 +10,7 @@ import Qt 4.7
 import MeeGo.Ux.Components.Common 0.1
 import MeeGo.Ux.Kernel 0.1
 import MeeGo.App.Notes 0.1
+import MeeGo.Components 0.1
 
 Window {
     id: window
@@ -81,10 +82,6 @@ Window {
         id: notesModel
         storage: sqliteStorage
         noteBook: internal.selectedNoteBook
-    }
-
-    SaveRestoreState {
-        id: saveRestore
     }
 
     Component {

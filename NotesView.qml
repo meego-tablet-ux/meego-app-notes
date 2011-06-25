@@ -12,6 +12,7 @@ import MeeGo.Ux.Kernel 0.1
 import MeeGo.App.Notes 0.1
 import MeeGo.Sharing 0.1
 import MeeGo.Sharing.UI 0.1
+import MeeGo.Components 0.1
 
 AppPage {
     id: page
@@ -32,7 +33,8 @@ AppPage {
             setValue("contextMenuNotes.baseX", contextMenu.baseX);
             setValue("contextMenuNotes.baseY", contextMenu.baseY);
             setValue("contextMenuNotes.visible", contextMenu.visible);
-            setValue("internal.selectedNoteId", internal.selectedNote.id);
+            setValue("internal.selectedNoteId", internal.selectedNote != null ? 
+internal.selectedNote.id : "");
 
             //for custom menu
             setValue("customMenuNotes.visible", customMenu.visible);
@@ -91,18 +93,19 @@ AppPage {
     Component.onCompleted: {
         console.log("restoreRequired: " + saveRestoreNotes.restoreRequired);
         if (saveRestoreNotes.restoreRequired) {
-            listView.contentY = saveRestoreNotes.value("listViewNotes.contentY");
+            var contentY = saveRestoreNotes.value("listViewNotes.contentY");
+            listView.contentY = contentY;
 
             internal.selectedNote = notesModel.noteById(saveRestoreNotes.value("internal.selectedNoteId"));
 
-            if (saveRestoreNotes.value("contextMenuNotes.visible")) {
+            if (saveRestoreNotes.value("contextMenuNotes.visible") == "true") {
                 var mouseX = saveRestoreNotes.value("internal.contextMenuNotesX");
                 var mouseY = saveRestoreNotes.value("internal.contextMenuNotesY");
                 contextMenu.setPosition(mouseX, mouseY);
                 contextMenu.show();
             }
 
-            if (saveRestoreNotes.value("customMenuNotes.visible")) {
+            if (saveRestoreNotes.value("customMenuNotes.visible") == "true") {
                 var mouseX = saveRestoreNotes.value("internal.customMenuNotesX");
                 var mouseY = saveRestoreNotes.value("internal.customMenuNotesY");
                 customMenu.setPosition(mouseX, mouseY);
@@ -110,30 +113,30 @@ AppPage {
             }
 
             //add dialog
-            if (saveRestoreNotes.value("addDialogNotes.visible")) {
+            if (saveRestoreNotes.value("addDialogNotes.visible") == "true") {
                 newName.text = saveRestoreNotes.value("newNameNotes.text");
                 addDialog.show();
             }
 
             //rename dialog
-            if (saveRestoreNotes.value("renameWindowNotes.visible")) {
+            if (saveRestoreNotes.value("renameWindowNotes.visible") == "true") {
                 renameTextEntry.text = saveRestoreNotes.value("renameTextEntryNotes.text");
                 renameWindow.show();
             }
 
             //information dialog
-            if (saveRestoreNotes.value("informationDialogNotes.visible")) {
+            if (saveRestoreNotes.value("informationDialogNotes.visible") == "true") {
                 informationDialog.info = saveRestoreNotes.value("informationDialogNotes.info");
                 informationDialog.show();
             }
 
             //deleteReportWindow
-            if (saveRestoreNotes.value("deleteReportWindowNotes.visible")) {
+            if (saveRestoreNotes.value("deleteReportWindowNotes.visible") == "true") {
                 deleteReportWindow.show();
             }
 
             //delete dialog
-            if (saveRestoreNotes.value("deleteConfirmationDialogNotes.visible")) {
+            if (saveRestoreNotes.value("deleteConfirmationDialogNotes.visible") == "true") {
                 deleteConfirmationDialog.show();
             }
 
@@ -145,14 +148,15 @@ AppPage {
             }
 
             //internal.selectMultiply
-            internal.selectMultiply = saveRestoreNotes.value("internal.selectMultiplyNotes");
+            if (saveRestoreNotes.value("internal.selectMultiplyNotes") == "true")
+		internal.selectMultiply = true;
 
             //multiSelectRow
-            if (saveRestoreNotes.value("multiSelectRowNotes.visible"))
+            if (saveRestoreNotes.value("multiSelectRowNotes.visible") == "true")
                 multiSelectRow.show();
 
             //move menu
-            if (saveRestoreNotes.value("notebookSelector.visible")) {
+            if (saveRestoreNotes.value("notebookSelector.visible") == "true") {
                 notebookSelectorMenu.filterNoteBooksList();
                 var mouseX = saveRestoreNotes.value("internal.moveMenuX", internal.moveMenuX);
                 var mouseY = saveRestoreNotes.value("internal.moveMenuY", internal.moveMenuY);
@@ -185,7 +189,8 @@ AppPage {
         secondHelpTitle: qsTr("Share your notes by email")
         firstHelpText: qsTr("Tap the 'Create the first note' button. You can also tap the icon in the top right corner of the screen, then select 'New note'.")
         secondHelpText: qsTr("To send a note by email, tap and hold the note you want to send, then select 'Email'.")
-        helpContentVisible: (saveRestore.value("FirstTimeUseNotes") == undefined) && (listView.count == 0)
+        helpContentVisible: (saveRestoreNotes.value("FirstTimeUseNotes") == undefined) && 
+(listView.count == 0)
 
         onButtonClicked: addDialog.show()
     }

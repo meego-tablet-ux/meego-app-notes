@@ -151,8 +151,8 @@ Item {
                 height: 40
                 smooth:true
                 clip: true
-                bgSourceUp: "image://themedimage/images/notes/btn_spelling_up"
-                bgSourceDn: "image://themedimage/images/notes/btn_spelling_dn"
+                //bgSourceUp: "image://themedimage/images/notes/btn_spelling_up"
+                //bgSourceDn: "image://themedimage/images/notes/btn_spelling_dn"
 
                 MouseArea {
                     anchors.fill: parent
@@ -176,8 +176,8 @@ Item {
                 height: 40
                 smooth:true
                 clip: true
-                bgSourceUp: "image://themedimage/images/notes/btn_spelling_up"
-                bgSourceDn: "image://themedimage/images/notes/btn_spelling_dn"
+                //bgSourceUp: "image://themedimage/images/notes/btn_spelling_up"
+                //bgSourceDn: "image://themedimage/images/notes/btn_spelling_dn"
 
                 MouseArea {
                     anchors.fill: parent

@@ -377,9 +377,9 @@ listView.model.count == 1
 
         onAccepted: {
             //first time use feature
-            if (saveRestore.value("FirstTimeUseNotebooks") == undefined) {
-                saveRestore.setValue("FirstTimeUseNotebooks", false);
-                saveRestore.sync();
+            if (saveRestoreNotebooks.value("FirstTimeUseNotebooks") == undefined) {
+                saveRestoreNotebooks.setValue("FirstTimeUseNotebooks", false);
+                saveRestoreNotebooks.sync();
             }
 
             var name = newName.text;

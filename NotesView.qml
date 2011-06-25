@@ -445,10 +445,10 @@ internal.selectedNote.id : "");
                     noteClicked(internal.selectedNote);
                 } else if (model[index] == contextMenu.emailChoice) {
                     var uri = page.model.dumpNote(internal.selectedNote.id);
-//                    shareObj.clearItems();
-//                    shareObj.addItem(uri);
-//                    shareObj.setParam(uri, "subject", noteListPage.selectedTitle);
-//                    shareObj.showContext(qsTr("Email"), noteListPage.width / 2, noteListPage.height / 2);
+                    shareObj.clearItems();
+                    shareObj.addItem(uri);
+                    shareObj.setParam(uri, "subject", noteListPage.selectedTitle);
+                    shareObj.showContext(qsTr("Email"), noteListPage.width / 2, noteListPage.height / 2);
                 } else if (model[index] == contextMenu.moveChoice) {
                     notebookSelectorMenu.filterNoteBooksList();
                     notebookSelector.setPosition(internal.selectedNotePoint.x, internal.selectedNotePoint.y);
@@ -546,9 +546,9 @@ internal.selectedNote.id : "");
 
         onAccepted: {
             //first time use feature
-            if (saveRestore.value("FirstTimeUseNotes") == undefined) {
-                saveRestore.setValue("FirstTimeUseNotes", false);
-                saveRestore.sync();
+            if (saveRestoreNotes.value("FirstTimeUseNotes") == undefined) {
+                saveRestoreNotes.setValue("FirstTimeUseNotes", false);
+                saveRestoreNotes.sync();
             }
 
             var name = newName.text;

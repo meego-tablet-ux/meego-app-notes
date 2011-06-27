@@ -68,15 +68,6 @@ Rectangle {
                 CheckBox {
                     id:checkbox
                     anchors.centerIn:parent
-
-                    onClicked: {
-                        noteButton.color = checkbox.isChecked ? Qt.rgba(230/255, 240/255, 255/255, 1) : "white";    //TODO: magic color
-                        if (checkbox.isChecked) {
-                            itemSelected(itemData);
-                        } else {
-                            itemDeselected(itemData);
-                        }
-                    }
                 }
 
                 Rectangle {
@@ -85,6 +76,21 @@ Rectangle {
                     anchors.bottom: parent.bottom
                     width: 1
                     color: Qt.rgba(189/255, 189/255, 189/255, 1) //THEME
+                }
+
+		GestureArea {
+                    anchors.fill: parent
+
+                    Tap {
+                        onFinished: {
+                            checkbox.isChecked = !checkbox.isChecked;
+                            noteButton.color = checkbox.isChecked ? Qt.rgba(230/255, 240/255, 255/255, 1) : "white";    //TODO: magic color
+                            if (checkbox.isChecked)
+                                itemSelected(itemData);
+                            else
+                                itemDeselected(itemData);
+                        }
+                    }
                 }
             }
 

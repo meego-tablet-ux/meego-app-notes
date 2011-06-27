@@ -16,6 +16,7 @@ static const QString noteBookRole = "noteBook";
 static const QString noteRole = "note";
 
 using namespace meego;
+static const Locale g_locale;
 
 ItemData::ItemData(QObject *parent) :
     QObject(parent),
@@ -112,9 +113,7 @@ bool NoteBook::operator < (const NoteBook &other) const
     if (other.id() == m_storage->defaultNoteBookId())
         return false;
 
-    //use Locale api
-    meego::Locale locale;
-    return locale.lessThan(title(), other.title());
+    return g_locale.lessThan(title(), other.title());
 }
 
 bool NoteBook::operator > (const NoteBook &other) const
@@ -187,9 +186,7 @@ bool Note::operator < (const Note &other) const
     if (!m_storage)
         return false;
 
-    //use Locale api
-    meego::Locale locale;
-    return locale.lessThan(title(), other.title());
+    return g_locale.lessThan(title(), other.title());
 }
 
 bool Note::operator > (const Note &other) const

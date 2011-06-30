@@ -293,8 +293,8 @@ listView.model.count == 1
                     id: deleteButton
                     text: qsTr("Delete (%1)").arg(internal.selectedNoteBooks.length)
                     enabled: internal.selectedNoteBooks.length > 0
-                    bgSourceUp: "image://themedimage/images/btn_red_up"
-                    bgSourceDn: "image://themedimage/images/btn_red_dn"
+                    bgSourceUp: "image://themedimage/widgets/common/button/button-negative"
+                    bgSourceDn: "image://themedimage/widgets/common/button/button-negative-pressed"
                     onClicked: deleteConfirmationDialog.show()
                 }
                 Button {
@@ -414,8 +414,8 @@ listView.model.count == 1
                                                                      : (internal.selectedNoteBooks.length == 1 ? internal.selectedNoteBooks[0].title : "")
         }
 
-        acceptButtonImage: "image://themedimage/images/btn_red_up"
-        acceptButtonImagePressed:"image://themedimage/images/btn_red_dn"
+        acceptButtonImage: "image://themedimage/widgets/common/button/button-negative"
+        acceptButtonImagePressed:"image://themedimage/widgets/common/button/button-negative-pressed"
 
         onAccepted: {   //TODO: check it
             if (internal.selectedNoteBooks.length > 0) {

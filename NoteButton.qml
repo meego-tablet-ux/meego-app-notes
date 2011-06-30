@@ -48,7 +48,7 @@ Rectangle {
         Image {
             anchors.left: parent.left
             anchors.right: parent.right
-            source: "image://themedimage/images/tasks/ln_grey_l"
+            source: "image://themedimage/widgets/common/dividers/divider-horizontal-single"
         }
 
         Row {
@@ -128,7 +128,7 @@ Rectangle {
                     anchors.right: parent.right
                     anchors.rightMargin: container.spacing
 
-                    source: "image://themedimage/images/tasks/icn_grabhandle"
+                    source: "image://themedimage/widgets/common/drag-handle/drag-handle"
 
                     GestureArea {
                         anchors.fill: parent
@@ -164,7 +164,7 @@ Rectangle {
         Image {
             anchors.left: parent.left
             anchors.right: parent.right
-            source: "image://themedimage/images/tasks/ln_grey_l"
+            source: "image://themedimage/widgets/common/dividers/divider-horizontal-single"
         }
     }
 }

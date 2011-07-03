@@ -163,19 +163,19 @@ bool SQLiteStorage::removeNoteBook(quint64 id)
         return false;
     }
 
-    const QString noteBookDeletionScript = QString("DELETE FROM %1 WHERE id = %2")
-            .arg(noteBooksTableName())
-            .arg(id);
     QSqlQuery noteBookDeletionQuery(m_database);
-    const QString notesDeletionScript = QString("DELETE FROM %1 WHERE noteBookId = %2")
-            .arg(notesTableName())
-            .arg(id);
+    noteBookDeletionQuery.prepare(QString("DELETE FROM %1 WHERE id = ?").arg(noteBooksTableName()));
+    noteBookDeletionQuery.addBindValue(id);
+
     QSqlQuery notesDeletionQuery(m_database);
-    if (!notesDeletionQuery.exec(notesDeletionScript)) {
+    notesDeletionQuery.prepare(QString("DELETE FROM %1 WHERE noteBookId = ?").arg(notesTableName()));
+    notesDeletionQuery.addBindValue(id);
+
+    if (!notesDeletionQuery.exec()) {
         emit error(QString("%1: %2").arg(Q_FUNC_INFO).arg(notesDeletionQuery.lastError().text()));
         return false;
     }
-    if (!noteBookDeletionQuery.exec(noteBookDeletionScript)) {
+    if (!noteBookDeletionQuery.exec()) {
         emit error(QString("%1: %2").arg(Q_FUNC_INFO).arg(noteBookDeletionQuery.lastError().text()));
         return false;
     }
@@ -190,13 +190,12 @@ bool SQLiteStorage::updateNoteBook(quint64 id, const QString &title, qint32 posi
         return false;
     }
 
-    const QString script = QString("UPDATE %1 SET title = '%2', position = %3 WHERE id = %4")
-            .arg(noteBooksTableName())
-            .arg(title)
-            .arg(position)
-            .arg(id);
     QSqlQuery query(m_database);
-    if (!query.exec(script)) {
+    query.prepare(QString("UPDATE %1 SET title = ?, position = ? WHERE id = ?").arg(noteBooksTableName()));
+    query.addBindValue(title);
+    query.addBindValue(position);
+    query.addBindValue(id);
+    if (!query.exec()) {
         emit error(QString("%1: %2").arg(Q_FUNC_INFO).arg(query.lastError().text()));
         return false;
     }
@@ -211,15 +210,15 @@ bool SQLiteStorage::updateNoteBookTitle(quint64 id, const QString &title)
         return false;
     }
 
-    const QString script = QString("UPDATE %1 SET title = '%2' WHERE id = %3")
-            .arg(noteBooksTableName())
-            .arg(title)
-            .arg(id);
     QSqlQuery query(m_database);
-    if (!query.exec(script)) {
+    query.prepare(QString("UPDATE %1 SET title = ? WHERE id = ?").arg(noteBooksTableName()));
+    query.addBindValue(title);
+    query.addBindValue(id);
+    if (!query.exec()) {
         emit error(QString("%1: %2").arg(Q_FUNC_INFO).arg(query.lastError().text()));
         return false;
     }
+    qDebug() << Q_FUNC_INFO << query.executedQuery();
     emit noteBookUpdated();
     return true;
 }
@@ -231,12 +230,11 @@ bool SQLiteStorage::updateNoteBookPosition(quint64 id, qint32 position)
         return false;
     }
 
-    const QString script = QString("UPDATE %1 SET position = %2 WHERE id = %3")
-            .arg(noteBooksTableName())
-            .arg(position)
-            .arg(id);
     QSqlQuery query(m_database);
-    if (!query.exec(script)) {
+    query.prepare(QString("UPDATE %1 SET position = ? WHERE id = ?").arg(noteBooksTableName()));
+    query.addBindValue(position);
+    query.addBindValue(id);
+    if (!query.exec()) {
         emit error(QString("%1: %2").arg(Q_FUNC_INFO).arg(query.lastError().text()));
         return false;
     }
@@ -299,9 +297,10 @@ AbstractDataStorage::NoteBook SQLiteStorage::noteBook(quint64 id)
         return res;
     }
 
-    const QString script = QString("SELECT * FROM %1 WHERE id = %2").arg(noteBooksTableName()).arg(id);
     QSqlQuery query(m_database);
-    if (!query.exec(script) || !query.next()) {
+    query.prepare(QString("SELECT * FROM %1 WHERE id = ?").arg(noteBooksTableName()));
+    query.addBindValue(id);
+    if (!query.exec() || !query.next()) {
         emit error(QString("%1: %2").arg(Q_FUNC_INFO).arg(query.lastError().text()));
         return res;
     }
@@ -322,9 +321,10 @@ AbstractDataStorage::NoteBook SQLiteStorage::noteBookByPosition(qint32 position)
         return res;
     }
 
-    const QString script = QString("SELECT * FROM %1 WHERE position = %2").arg(noteBooksTableName()).arg(position);
     QSqlQuery query(m_database);
-    if (!query.exec(script) || !query.next()) {
+    query.prepare(QString("SELECT * FROM %1 WHERE position = ?").arg(noteBooksTableName()));
+    query.addBindValue(position);
+    if (!query.exec() || !query.next()) {
         emit error(QString("%1: %2").arg(Q_FUNC_INFO).arg(query.lastError().text()));
         return res;
     }
@@ -343,9 +343,10 @@ bool SQLiteStorage::noteBookExists(const QString &title)
         return false;
     }
 
-    const QString script = QString("SELECT COUNT(1) AS count FROM %1 WHERE title = '%2'").arg(noteBooksTableName()).arg(title);
     QSqlQuery query(m_database);
-    if (!query.exec(script) || !query.next()) {
+    query.prepare(QString("SELECT COUNT(1) AS count FROM %1 WHERE title = ?").arg(noteBooksTableName()));
+    query.addBindValue(title);
+    if (!query.exec() || !query.next()) {
         emit error(QString("%1: %2").arg(Q_FUNC_INFO).arg(query.lastError().text()));
         return false;
     }
@@ -359,9 +360,10 @@ qint32 SQLiteStorage::noteBookPosition(quint64 id)
         return -1;
     }
 
-    const QString script = QString("SELECT position FROM %1 WHERE id = '%2'").arg(noteBooksTableName()).arg(id);
     QSqlQuery query(m_database);
-    if (!query.exec(script) || !query.next()) {
+    query.prepare(QString("SELECT position FROM %1 WHERE id = ?").arg(noteBooksTableName()));
+    query.addBindValue(id);
+    if (!query.exec() || !query.next()) {
         emit error(QString("%1: %2").arg(Q_FUNC_INFO).arg(query.lastError().text()));
         return -1;
     }
@@ -376,9 +378,8 @@ bool SQLiteStorage::createNote(quint64 noteBookId, const QString &title, qint32 
         return false;
     }
 
-    const QString script = QString("INSERT INTO %1 (noteBookId, title, position) VALUES (?, ?, ?)").arg(notesTableName());
     QSqlQuery query(m_database);
-    query.prepare(script);
+    query.prepare(QString("INSERT INTO %1 (noteBookId, title, position) VALUES (?, ?, ?)").arg(notesTableName()));
     query.addBindValue(noteBookId);
     query.addBindValue(title);
     query.addBindValue(position);
@@ -398,12 +399,11 @@ bool SQLiteStorage::removeNote(quint64 noteBookId, quint64 id)
     }
 
     //TODO: noteBookId is unneccessary parameter since a note's id is always unique.
-    const QString script = QString("DELETE FROM %1 WHERE id = %2 AND noteBookId = %3")
-            .arg(notesTableName())
-            .arg(id)
-            .arg(noteBookId);
     QSqlQuery query(m_database);
-    if (!query.exec(script)) {
+    query.prepare(QString("DELETE FROM %1 WHERE id = ? AND noteBookId = ?").arg(notesTableName()));
+    query.addBindValue(id);
+    query.addBindValue(noteBookId);
+    if (!query.exec()) {
         emit error(QString("%1: %2").arg(Q_FUNC_INFO).arg(query.lastError().text()));
         return false;
     }
@@ -419,15 +419,14 @@ bool SQLiteStorage::updateNote(quint64 noteBookId, quint64 id, const QString &ti
     }
 
     //TODO: noteBookId is unneccessary parameter since a note's id is always unique.
-    const QString script = QString("UPDATE %1 SET title = '%2', html = '%3', position = %4 WHERE id = %5 AND noteBookId = %6")
-            .arg(notesTableName())
-            .arg(title)
-            .arg(html)
-            .arg(position)
-            .arg(id)
-            .arg(noteBookId);
     QSqlQuery query(m_database);
-    if (!query.exec(script)) {
+    query.prepare(QString("UPDATE %1 SET title = ?, html = ?, position = ? WHERE id = ? AND noteBookId = ?").arg(notesTableName()));
+    query.addBindValue(title);
+    query.addBindValue(html);
+    query.addBindValue(position);
+    query.addBindValue(id);
+    query.addBindValue(noteBookId);
+    if (!query.exec()) {
         emit error(QString("%1: %2").arg(Q_FUNC_INFO).arg(query.lastError().text()));
         return false;
     }
@@ -443,13 +442,12 @@ bool SQLiteStorage::updateNoteTitle(quint64 noteBookId, quint64 id, const QStrin
     }
 
     //TODO: noteBookId is unneccessary parameter since a note's id is always unique.
-    const QString script = QString("UPDATE %1 SET title = '%2' WHERE id = %3 AND noteBookId = %4")
-            .arg(notesTableName())
-            .arg(title)
-            .arg(id)
-            .arg(noteBookId);
     QSqlQuery query(m_database);
-    if (!query.exec(script)) {
+    query.prepare(QString("UPDATE %1 SET title = ? WHERE id = ? AND noteBookId = ?").arg(notesTableName()));
+    query.addBindValue(title);
+    query.addBindValue(id);
+    query.addBindValue(noteBookId);
+    if (!query.exec()) {
         emit error(QString("%1: %2").arg(Q_FUNC_INFO).arg(query.lastError().text()));
         return false;
     }
@@ -465,13 +463,12 @@ bool SQLiteStorage::updateNotePosition(quint64 noteBookId, quint64 id, qint32 po
     }
 
     //TODO: noteBookId is unneccessary parameter since a note's id is always unique.
-    const QString script = QString("UPDATE %1 SET position = %2 WHERE id = %3 AND noteBookId = %4")
-            .arg(notesTableName())
-            .arg(position)
-            .arg(id)
-            .arg(noteBookId);
     QSqlQuery query(m_database);
-    if (!query.exec(script)) {
+    query.prepare(QString("UPDATE %1 SET position = ? WHERE id = ? AND noteBookId = ?").arg(notesTableName()));
+    query.addBindValue(position);
+    query.addBindValue(id);
+    query.addBindValue(noteBookId);
+    if (!query.exec()) {
         emit error(QString("%1: %2").arg(Q_FUNC_INFO).arg(query.lastError().text()));
         return false;
     }
@@ -487,13 +484,12 @@ bool SQLiteStorage::updateNoteHtml(quint64 noteBookId, quint64 id, const QString
     }
 
     //TODO: noteBookId is unneccessary parameter since a note's id is always unique.
-    const QString script = QString("UPDATE %1 SET html = '%2' WHERE id = %3 AND noteBookId = %4")
-            .arg(notesTableName())
-            .arg(html)
-            .arg(id)
-            .arg(noteBookId);
     QSqlQuery query(m_database);
-    if (!query.exec(script)) {
+    query.prepare(QString("UPDATE %1 SET html = ? WHERE id = ? AND noteBookId = ?").arg(notesTableName()));
+    query.addBindValue(html);
+    query.addBindValue(id);
+    query.addBindValue(noteBookId);
+    if (!query.exec()) {
         emit error(QString("%1: %2").arg(Q_FUNC_INFO).arg(query.lastError().text()));
         return false;
     }
@@ -510,11 +506,10 @@ QList<AbstractDataStorage::Note> SQLiteStorage::notes(quint64 noteBookId)
         return res;
     }
 
-    const QString script = QString("SELECT * FROM %1 WHERE noteBookId = %2")
-            .arg(notesTableName())
-            .arg(noteBookId);
     QSqlQuery query(m_database);
-    if (!query.exec(script)) {
+    query.prepare(QString("SELECT * FROM %1 WHERE noteBookId = ?").arg(notesTableName()));
+    query.addBindValue(noteBookId);
+    if (!query.exec()) {
         emit error(QString("%1: %2").arg(Q_FUNC_INFO).arg(query.lastError().text()));
         return res;
     }
@@ -539,11 +534,10 @@ quint64 SQLiteStorage::notesCount(quint64 noteBookId)
         return 0;
     }
 
-    const QString script = QString("SELECT COUNT(1) AS rowsCount FROM %1 WHERE noteBookId = %2")
-            .arg(notesTableName())
-            .arg(noteBookId);
     QSqlQuery query(m_database);
-    if (!query.exec(script) || !query.next()) {
+    query.prepare(QString("SELECT COUNT(1) AS rowsCount FROM %1 WHERE noteBookId = ?").arg(notesTableName()));
+    query.addBindValue(noteBookId);
+    if (!query.exec() || !query.next()) {
         emit error(QString("%1: %2").arg(Q_FUNC_INFO).arg(query.lastError().text()));
         return 0;
     }
@@ -559,12 +553,11 @@ AbstractDataStorage::Note SQLiteStorage::note(quint64 noteBookId, quint64 id)
         return res;
     }
 
-    const QString script = QString("SELECT * FROM %1 WHERE noteBookId = %2 AND id = %3")
-            .arg(notesTableName())
-            .arg(noteBookId)
-            .arg(id);
     QSqlQuery query(m_database);
-    if (!query.exec(script) || !query.next()) {
+    query.prepare(QString("SELECT * FROM %1 WHERE noteBookId = ? AND id = ?").arg(notesTableName()));
+    query.addBindValue(noteBookId);
+    query.addBindValue(id);
+    if (!query.exec() || !query.next()) {
         emit error(QString("%1: %2").arg(Q_FUNC_INFO).arg(query.lastError().text()));
         return res;
     }
@@ -587,12 +580,11 @@ AbstractDataStorage::Note SQLiteStorage::noteByPosition(quint64 noteBookId, qint
         return res;
     }
 
-    const QString script = QString("SELECT * FROM %1 WHERE noteBookId = %2 AND position = %3")
-            .arg(notesTableName())
-            .arg(noteBookId)
-            .arg(position);
     QSqlQuery query(m_database);
-    if (!query.exec(script) || !query.next()) {
+    query.prepare(QString("SELECT * FROM %1 WHERE noteBookId = ? AND position = ?").arg(notesTableName()));
+    query.addBindValue(noteBookId);
+    query.addBindValue(position);
+    if (!query.exec() || !query.next()) {
         emit error(QString("%1: %2").arg(Q_FUNC_INFO).arg(query.lastError().text()));
         return res;
     }
@@ -613,12 +605,11 @@ bool SQLiteStorage::noteExists(quint64 noteBookId, const QString &title)
         return false;
     }
 
-    const QString script = QString("SELECT COUNT(1) AS count FROM %1 WHERE noteBookId = %2 AND title = '%3'")
-            .arg(notesTableName())
-            .arg(noteBookId)
-            .arg(title);
     QSqlQuery query(m_database);
-    if (!query.exec(script) || !query.next()) {
+    query.prepare(QString("SELECT COUNT(1) AS count FROM %1 WHERE noteBookId = ? AND title = ?").arg(notesTableName()));
+    query.addBindValue(noteBookId);
+    query.addBindValue(title);
+    if (!query.exec() || !query.next()) {
         emit error(QString("%1: %2").arg(Q_FUNC_INFO).arg(query.lastError().text()));
         return false;
     }
@@ -632,12 +623,11 @@ qint32 SQLiteStorage::notePosition(quint64 noteBookId, quint64 id)
         return -1;
     }
 
-    const QString script = QString("SELECT position FROM %1 WHERE noteBookId = %2 AND id = %3")
-            .arg(notesTableName())
-            .arg(noteBookId)
-            .arg(id);
     QSqlQuery query(m_database);
-    if (!query.exec(script) || !query.next()) {
+    query.prepare(QString("SELECT position FROM %1 WHERE noteBookId = ? AND id = ?").arg(notesTableName()));
+    query.addBindValue(noteBookId);
+    query.addBindValue(id);
+    if (!query.exec() || !query.next()) {
         emit error(QString("%1: %2").arg(Q_FUNC_INFO).arg(query.lastError().text()));
         return -1;
     }
@@ -652,10 +642,9 @@ bool SQLiteStorage::moveNote(quint64 oldNoteBookId, quint64 newNoteBookId, quint
     }
 
     QSqlQuery lastPositionQuery(m_database);
-    const QString lastPositionScript = QString("SELECT MAX(position) AS position FROM %1 WHERE noteBookId = %2")
-            .arg(notesTableName())
-            .arg(newNoteBookId);
-    if (!lastPositionQuery.exec(lastPositionScript) || !lastPositionQuery.next()) {
+    lastPositionQuery.prepare(QString("SELECT MAX(position) AS position FROM %1 WHERE noteBookId = ?").arg(notesTableName()));
+    lastPositionQuery.addBindValue(newNoteBookId);
+    if (!lastPositionQuery.exec() || !lastPositionQuery.next()) {
         emit error(QString("%1: %2").arg(Q_FUNC_INFO).arg(lastPositionQuery.lastError().text()));
         return false;
     }
@@ -665,14 +654,13 @@ bool SQLiteStorage::moveNote(quint64 oldNoteBookId, quint64 newNoteBookId, quint
     if (ok)
         position += 1;
     //TODO: noteBookId is unneccessary parameter since a note's id is always unique.
-    const QString script = QString("UPDATE %1 SET noteBookId = %2, position = %3 WHERE id = %4 AND noteBookId = %5")
-            .arg(notesTableName())
-            .arg(newNoteBookId)
-            .arg(position)
-            .arg(id)
-            .arg(oldNoteBookId);
     QSqlQuery query(m_database);
-    if (!query.exec(script)) {
+    query.prepare(QString("UPDATE %1 SET noteBookId = ?, position = ? WHERE id = ? AND noteBookId = ?").arg(notesTableName()));
+    query.addBindValue(newNoteBookId);
+    query.addBindValue(position);
+    query.addBindValue(id);
+    query.addBindValue(oldNoteBookId);
+    if (!query.exec()) {
         emit error(QString("%1: %2").arg(Q_FUNC_INFO).arg(query.lastError().text()));
         return false;
     }

@@ -249,6 +249,8 @@ listView.model.count == 1
     Component {
         id: notebookDelegate2
 
+        //TopItem { id: top }
+
         NoteButton {
             id: noteButton
             width: listView.width
@@ -264,7 +266,7 @@ listView.model.count == 1
 
             onItemTappedAndHeld: {
                 internal.selectedNoteBook = itemData;
-                var shift = noteButton.height
+                var shift = noteButton.height // for correct position when check box visible
                 var map = mapToItem(topItem.topItem, gesture.position.x + shift, gesture.position.y);
                 contextMenu.setPosition(map.x, map.y);
                 contextMenu.show();

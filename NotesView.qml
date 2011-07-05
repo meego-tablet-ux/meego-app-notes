@@ -319,7 +319,7 @@ internal.selectedNote.id : "");
 
             onItemTappedAndHeld: {
                 internal.selectedNote = itemData;
-                var shift = button2.height
+                var shift = button2.height // it need for right position when check box visible
                 var map = mapToItem(topItem.topItem, gesture.position.x + shift, gesture.position.y);
                 internal.selectedNotePoint = map;
                 contextMenu.setPosition(map.x, map.y);

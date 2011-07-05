@@ -19,6 +19,8 @@ AppPage {
 
     signal noteBookClicked(variant noteBook)
 
+    TopItem {id: topItem}
+
     Theme {
         id: theme
     }
@@ -235,7 +237,7 @@ listView.model.count == 1
 
             onItemTappedAndHeld: {
                 internal.selectedNoteBook = itemData;
-                var map = mapToItem(null, gesture.position.x, gesture.position.y);
+                var map = mapToItem(topItem.topItem, gesture.position.x, gesture.position.y);
                 contextMenu.setPosition(map.x, map.y);
                 internal.contextMenuX = map.x;
                 internal.contextMenuY = map.y;
@@ -248,6 +250,7 @@ listView.model.count == 1
         id: notebookDelegate2
 
         NoteButton {
+            id: noteButton
             width: listView.width
             title: noteBook.title
             comment: internal.notesCountText(noteBook)
@@ -261,7 +264,8 @@ listView.model.count == 1
 
             onItemTappedAndHeld: {
                 internal.selectedNoteBook = itemData;
-                var map = mapToItem(null, gesture.position.x, gesture.position.y);
+                var shift = noteButton.height
+                var map = mapToItem(topItem.topItem, gesture.position.x + shift, gesture.position.y);
                 contextMenu.setPosition(map.x, map.y);
                 contextMenu.show();
             }

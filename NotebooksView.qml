@@ -220,6 +220,8 @@ listView.model.count == 1
         }
     }
 
+    TopItem{ id: topMost }
+
     Component {
         id: notebookDelegate
 
@@ -235,7 +237,8 @@ listView.model.count == 1
 
             onItemTappedAndHeld: {
                 internal.selectedNoteBook = itemData;
-                var map = mapToItem(null, gesture.position.x, gesture.position.y);
+                topMost.calcTopParent();
+                var map = mapToItem(topMost.topItem, gesture.position.x, gesture.position.y);
                 contextMenu.setPosition(map.x, map.y);
                 internal.contextMenuX = map.x;
                 internal.contextMenuY = map.y;
@@ -246,6 +249,8 @@ listView.model.count == 1
 
     Component {
         id: notebookDelegate2
+
+        //TopItem { id: top }
 
         NoteButton {
             width: listView.width
@@ -261,7 +266,8 @@ listView.model.count == 1
 
             onItemTappedAndHeld: {
                 internal.selectedNoteBook = itemData;
-                var map = mapToItem(null, gesture.position.x, gesture.position.y);
+                topMost.calcTopParent();
+                var map = mapToItem(topMost.topItem, gesture.position.x, gesture.position.y);
                 contextMenu.setPosition(map.x, map.y);
                 contextMenu.show();
             }

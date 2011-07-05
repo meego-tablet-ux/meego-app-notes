@@ -235,6 +235,7 @@ internal.selectedNote.id : "");
 
         }
     }
+    TopItem{ id: topMost }
 
     Component {
         id: notebookDelegate
@@ -253,7 +254,8 @@ internal.selectedNote.id : "");
 
             onItemTappedAndHeld: {
                 internal.selectedNote = itemData;
-                var map = mapToItem(null, gesture.position.x, gesture.position.y);
+                topMost.calcTopParent();
+                var map = mapToItem(topMost.topItem, gesture.position.x, gesture.position.y);
                 internal.selectedNotePoint = map;
                 contextMenu.setPosition(map.x, map.y);
                 contextMenu.show();
@@ -316,7 +318,8 @@ internal.selectedNote.id : "");
 
             onItemTappedAndHeld: {
                 internal.selectedNote = itemData;
-                var map = mapToItem(null, gesture.position.x, gesture.position.y);
+                topMost.calcTopParent();
+                var map = mapToItem(topMost.topItem, gesture.position.x, gesture.position.y);
                 internal.selectedNotePoint = map;
                 contextMenu.setPosition(map.x, map.y);
                 contextMenu.show();

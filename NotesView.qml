@@ -21,6 +21,8 @@ AppPage {
 
     signal noteClicked(variant note)
 
+    TopItem {id: topItem}
+
     Theme {
         id: theme
     }
@@ -101,6 +103,7 @@ internal.selectedNote.id : "");
             if (saveRestoreNotes.value("contextMenuNotes.visible") == "true") {
                 var mouseX = saveRestoreNotes.value("internal.contextMenuNotesX");
                 var mouseY = saveRestoreNotes.value("internal.contextMenuNotesY");
+                console.debug("context menu 0")
                 contextMenu.setPosition(mouseX, mouseY);
                 contextMenu.show();
             }
@@ -253,7 +256,7 @@ internal.selectedNote.id : "");
 
             onItemTappedAndHeld: {
                 internal.selectedNote = itemData;
-                var map = mapToItem(null, gesture.position.x, gesture.position.y);
+                var map = mapToItem(topItem.topItem, gesture.position.x, gesture.position.y);
                 internal.selectedNotePoint = map;
                 contextMenu.setPosition(map.x, map.y);
                 contextMenu.show();
@@ -316,7 +319,8 @@ internal.selectedNote.id : "");
 
             onItemTappedAndHeld: {
                 internal.selectedNote = itemData;
-                var map = mapToItem(null, gesture.position.x, gesture.position.y);
+                var shift = button2.height // it need for right position when check box visible
+                var map = mapToItem(topItem.topItem, gesture.position.x + shift, gesture.position.y);
                 internal.selectedNotePoint = map;
                 contextMenu.setPosition(map.x, map.y);
                 contextMenu.show();

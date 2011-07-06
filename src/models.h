@@ -37,6 +37,8 @@ public:
 
     virtual void setStorage(AbstractDataStorage *storage) { m_storage = storage; }
 
+    virtual bool operator < (const ItemData &other) const = 0;
+
 signals:
     void titleChanged();
     void positionChanged();
@@ -59,8 +61,7 @@ public:
     explicit NoteBook(QObject *parent = 0);
     NoteBook(const AbstractDataStorage::NoteBook &noteBook, QObject *parent = 0);
 
-    bool operator < (const NoteBook &other) const;
-    bool operator > (const NoteBook &other) const;
+    bool operator < (const ItemData &other) const;
 
     int notesCount() const;
 
@@ -93,8 +94,7 @@ public:
     void setHtml(const QString &html);
     QString html() const { return m_note.html; }
 
-    bool operator < (const Note &other) const;
-    bool operator > (const Note &other) const;
+    bool operator < (const ItemData &other) const;
 
 signals:
     void noteBookChanged();
@@ -113,19 +113,43 @@ QML_DECLARE_TYPE(Note)
 class ItemsDataModel : public QAbstractListModel
 {
     Q_OBJECT
+public:
+    explicit ItemsDataModel(QObject *parent = 0);
+
+    void setStorage(AbstractDataStorage *storage);
+    AbstractDataStorage *storage() const { return m_storage; }
+
+    ItemData *item(int row) const;
+
+signals:
+    void storageChanged();
+    void countChanged();
+
+private slots:
+    void emitDataChanged();
+
+private:
+    QPointer<AbstractDataStorage> m_storage;
+};
+//----------------------------------------------------------------------------------------------
+class ItemsDataSortFilterProxyModel: public QSortFilterProxyModel
+{
+    Q_OBJECT
 
     Q_ENUMS(SortOrder)
     Q_PROPERTY(AbstractDataStorage *storage READ storage WRITE setStorage NOTIFY storageChanged)
     Q_PROPERTY(int count READ rowCount NOTIFY countChanged)
     Q_PROPERTY(SortOrder sortOrder READ sortOrder NOTIFY modelSorted)
     Q_PROPERTY(bool sorting READ isSortingEnabled WRITE setSortingEnabled NOTIFY sortingEnabled)
+    Q_PROPERTY(QString filter READ filterText WRITE setFilterText NOTIFY filterChanged)
 public:
+
     enum SortOrder { ASC = Qt::AscendingOrder, DESC = Qt::DescendingOrder };
 
-    explicit ItemsDataModel(QObject *parent = 0);
+    explicit ItemsDataSortFilterProxyModel(QObject *parent = 0);
 
-    void setStorage(AbstractDataStorage *storage);
-    AbstractDataStorage *storage() const { return m_storage; }
+    void setStorage(AbstractDataStorage *storage) { m_sourceModel->setStorage(storage); }
+    AbstractDataStorage *storage() const { return m_sourceModel->storage(); }
 
     SortOrder sortOrder() const { return m_sortOrder; }
 
@@ -134,33 +158,42 @@ public:
 
     virtual void sort(int column, Qt::SortOrder order);
 
+    void setFilterText(const QString &filter);
+    QString filterText() const { return m_filter; }
+
 public slots:
     void sort(SortOrder order) { m_sortOrder = order; sort(0, Qt::SortOrder(order)); }
 
-private slots:
-    void noteMovedSlot();
-
 protected:
+    void setItemsDataModel(ItemsDataModel *model);
     ItemData *item(int row) const;
-    virtual void sortHelper(QList<ItemData *> &container, Qt::SortOrder order) = 0;
+
+    bool lessThan(const QModelIndex &left, const QModelIndex &right) const;
+    bool filterAcceptsRow(int sourceRow, const QModelIndex &sourceParent) const;
+
+private:
+    void setSourceModel(QAbstractItemModel *sourceModel) { Q_UNUSED(sourceModel); }
+
+private slots:
+    void sortHelper();
 
 signals:
     void storageChanged();
     void countChanged();
     void modelSorted();
     void sortingEnabled();
+    void filterChanged();
 
 private:
-    QPointer<AbstractDataStorage> m_storage;
+    QPointer<ItemsDataModel> m_sourceModel;
     SortOrder m_sortOrder;
     bool m_sortingEnabled;
+    QString m_filter;
 };
 //----------------------------------------------------------------------------------------------
 class NoteBooksModel : public ItemsDataModel
 {
     Q_OBJECT
-
-    Q_PROPERTY(quint64 defaultNoteBookId READ defaultNoteBookId NOTIFY storageChanged)
 public:
     enum Roles { NoteBookRole = Qt::UserRole + 1 };
 
@@ -179,19 +212,37 @@ public slots:
     bool noteBookExists(const QString &title);  //TODO: do we need this function now?
     NoteBook *noteBook(int row) const;
     NoteBook *noteBookById(quint64 noteBookId) const;
+};
+//----------------------------------------------------------------------------------------------
+class NoteBooksSortFilterProxyModel : public ItemsDataSortFilterProxyModel
+{
+    Q_OBJECT
+
+    Q_PROPERTY(quint64 defaultNoteBookId READ defaultNoteBookId NOTIFY storageChanged)
+public:
+    explicit NoteBooksSortFilterProxyModel(QObject *parent = 0);
+
+    quint64 defaultNoteBookId() const;
+
+public slots:
+    NoteBook *createNoteBook(const QString &title);
+    void removeNoteBook(quint64 noteBookId);
+    void renameNoteBook(quint64 noteBookId, const QString &newTitle);
+    bool noteBookExists(const QString &title);  //TODO: do we need this function now?
+    NoteBook *noteBook(int row) const;
+    NoteBook *noteBookById(quint64 noteBookId) const;
 
 signals:
     void storageChanged();
 
 private:
-    void sortHelper(QList<ItemData *> &container, Qt::SortOrder order);
+    QPointer<NoteBooksModel> m_noteBooksModel;
 };
 //----------------------------------------------------------------------------------------------
 class NotesModel : public ItemsDataModel
 {
     Q_OBJECT
 
-    Q_PROPERTY(NoteBook *noteBook READ noteBook WRITE setNoteBook NOTIFY noteBookChanged)
 public:
     enum Roles { NoteRole = Qt::UserRole + 1 };
 
@@ -220,11 +271,38 @@ signals:
     void noteBookChanged();
 
 private:
-    void sortHelper(QList<ItemData *> &container, Qt::SortOrder order);
-
-private:
     QPointer<NoteBook> m_noteBook;
     QTemporaryFile *m_dumpFile;
+};
+//----------------------------------------------------------------------------------------------
+class NotesSortFilterProxyModel : public ItemsDataSortFilterProxyModel
+{
+    Q_OBJECT
+
+    Q_PROPERTY(NoteBook *noteBook READ noteBook WRITE setNoteBook NOTIFY noteBookChanged)
+public:
+    explicit NotesSortFilterProxyModel(QObject *parent = 0);
+
+    void setNoteBook(NoteBook *noteBook) { m_notesModel->setNoteBook(noteBook); }
+    NoteBook *noteBook() const { return m_notesModel->noteBook(); }
+
+public slots:
+    Note *createNote(const QString &title);
+    void removeNote(quint64 noteId);
+    void renameNote(quint64 noteId, const QString &newTitle);
+    void setNoteText(quint64 noteId, const QString &text);
+    bool noteExists(const QString &title);  //TODO: do we need this function now?
+    void moveNote(quint64 noteId, quint64 newNoteBookId);
+    Note *note(int row) const;
+    Note *noteById(quint64 noteId) const;
+    QString dumpNote(quint64 noteId);
+    void swapNotes(quint64 firstNoteId, quint64 secondNoteId);
+
+signals:
+    void noteBookChanged();
+
+private:
+    QPointer<NotesModel> m_notesModel;
 };
 
 #endif // MODELS_H

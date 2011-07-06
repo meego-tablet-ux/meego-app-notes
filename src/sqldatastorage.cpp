@@ -218,7 +218,6 @@ bool SQLiteStorage::updateNoteBookTitle(quint64 id, const QString &title)
         emit error(QString("%1: %2").arg(Q_FUNC_INFO).arg(query.lastError().text()));
         return false;
     }
-    qDebug() << Q_FUNC_INFO << query.executedQuery();
     emit noteBookUpdated();
     return true;
 }
@@ -238,7 +237,7 @@ bool SQLiteStorage::updateNoteBookPosition(quint64 id, qint32 position)
         emit error(QString("%1: %2").arg(Q_FUNC_INFO).arg(query.lastError().text()));
         return false;
     }
-    emit noteBookUpdated();
+
     return true;
 }
 
@@ -269,7 +268,6 @@ QList<AbstractDataStorage::NoteBook> SQLiteStorage::noteBooks()
     return res;
 }
 
-
 quint64 SQLiteStorage::noteBooksCount()
 {
     if (!checkConnection()) {
@@ -286,7 +284,6 @@ quint64 SQLiteStorage::noteBooksCount()
     }
     return query.record().value("rowsCount").toUInt();
 }
-
 
 AbstractDataStorage::NoteBook SQLiteStorage::noteBook(quint64 id)
 {
@@ -472,7 +469,7 @@ bool SQLiteStorage::updateNotePosition(quint64 noteBookId, quint64 id, qint32 po
         emit error(QString("%1: %2").arg(Q_FUNC_INFO).arg(query.lastError().text()));
         return false;
     }
-    emit noteUpdated();
+
     return true;
 }
 
@@ -664,7 +661,6 @@ bool SQLiteStorage::moveNote(quint64 oldNoteBookId, quint64 newNoteBookId, quint
         emit error(QString("%1: %2").arg(Q_FUNC_INFO).arg(query.lastError().text()));
         return false;
     }
-    emit noteUpdated();
     emit noteMoved();
     return true;
 }

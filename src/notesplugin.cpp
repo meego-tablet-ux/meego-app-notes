@@ -17,10 +17,11 @@ void NotesPlugin::registerTypes(const char *uri)
 {
     qmlRegisterUncreatableType<AbstractDataStorage>(uri, 0, 1, "AbstractDataStorage", "Base class");
     qmlRegisterType<SQLiteStorage>(uri, 0, 1, "SQLiteStorage");
+    qmlRegisterUncreatableType<ItemsDataSortFilterProxyModel>(uri, 0, 1, "ItemsDataSortFilterProxyModel", "Base class");
     qmlRegisterType<NoteBook>(uri, 0, 1, "NoteBook");
-    qmlRegisterType<NoteBooksModel>(uri, 0, 1, "NoteBooksModel");
+    qmlRegisterType<NoteBooksSortFilterProxyModel>(uri, 0, 1, "NoteBooksModel");
     qmlRegisterType<Note>(uri, 0, 1, "Note");
-    qmlRegisterType<NotesModel>(uri, 0, 1, "NotesModel");
+    qmlRegisterType<NotesSortFilterProxyModel>(uri, 0, 1, "NotesModel");
 }
 
 Q_EXPORT_PLUGIN(NotesPlugin);

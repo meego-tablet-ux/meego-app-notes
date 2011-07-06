@@ -94,15 +94,17 @@ void NoteBook::setStorage(AbstractDataStorage *storage)
     if (m_storage) {
         disconnect(m_storage, SIGNAL(noteCreated()));
         disconnect(m_storage, SIGNAL(noteRemoved()));
+        disconnect(m_storage, SIGNAL(noteMoved()));
     }
     ItemData::setStorage(storage);
     if (m_storage) {
         connect(m_storage, SIGNAL(noteCreated()), SIGNAL(notesCountChanged()));
         connect(m_storage, SIGNAL(noteRemoved()), SIGNAL(notesCountChanged()));
+        connect(m_storage, SIGNAL(noteMoved()), SIGNAL(notesCountChanged()));
     }
 }
 
-bool NoteBook::operator < (const NoteBook &other) const
+bool NoteBook::operator < (const ItemData &other) const
 {
     if (!m_storage)
         return false;
@@ -115,19 +117,6 @@ bool NoteBook::operator < (const NoteBook &other) const
     //use Locale api
     meego::Locale locale;
     return locale.lessThan(title(), other.title());
-}
-
-bool NoteBook::operator > (const NoteBook &other) const
-{
-    if (!m_storage)
-        return false;
-
-    if (id() == m_storage->defaultNoteBookId())
-        return true;
-    if (other.id() == m_storage->defaultNoteBookId())
-        return false;
-
-    return title() > other.title();
 }
 //----------------------------------------------------------------------------------------------
 Note::Note(QObject *parent) :
@@ -182,7 +171,7 @@ void Note::setHtml(const QString &html)
     emit htmlChanged();
 }
 
-bool Note::operator < (const Note &other) const
+bool Note::operator < (const ItemData &other) const
 {
     if (!m_storage)
         return false;
@@ -191,19 +180,10 @@ bool Note::operator < (const Note &other) const
     meego::Locale locale;
     return locale.lessThan(title(), other.title());
 }
-
-bool Note::operator > (const Note &other) const
-{
-    if (!m_storage)
-        return false;
-    return title() > other.title();
-}
 //----------------------------------------------------------------------------------------------
 ItemsDataModel::ItemsDataModel(QObject *parent) :
     QAbstractListModel(parent),
-    m_storage(0),
-    m_sortOrder(ASC),
-    m_sortingEnabled(false)
+    m_storage(0)
 {
 
 }
@@ -213,45 +193,25 @@ void ItemsDataModel::setStorage(AbstractDataStorage *storage)
     if (!storage)
         return;
 
-    if (m_storage)
+    if (m_storage) {
+        disconnect(m_storage, SIGNAL(noteBookCreated()));
+        disconnect(m_storage, SIGNAL(noteBookRemoved()));
+        disconnect(m_storage, SIGNAL(noteCreated()));
+        disconnect(m_storage, SIGNAL(noteRemoved()));
         disconnect(m_storage, SIGNAL(noteMoved()));
+    }
 
     m_storage = storage;
 
-    if (m_storage)
-        connect(m_storage, SIGNAL(noteMoved()), SLOT(noteMovedSlot()));
+    connect(m_storage, SIGNAL(noteBookCreated()), SIGNAL(countChanged()));
+    connect(m_storage, SIGNAL(noteBookRemoved()), SIGNAL(countChanged()));
+    connect(m_storage, SIGNAL(noteCreated()), SIGNAL(countChanged()));
+    connect(m_storage, SIGNAL(noteRemoved()), SIGNAL(countChanged()));
+    connect(m_storage, SIGNAL(noteMoved()), SIGNAL(countChanged()));
 
     reset();
     emit storageChanged();
     emit countChanged();
-}
-
-void ItemsDataModel::sort(int column, Qt::SortOrder order)
-{
-    Q_UNUSED(column);
-
-    emit layoutAboutToBeChanged();
-
-    QList<ItemData *> list;
-    for (int i = 0; i < rowCount(); ++i)
-        list << item(i);
-
-    sortHelper(list, order);
-
-    QVector<int> forwarding(list.count());
-    for (int i = 0; i < list.count(); ++i) {
-        forwarding[list[i]->position()] = i;
-        list[i]->setPosition(i);
-    }
-
-    QModelIndexList oldIndexes = persistentIndexList();
-    QModelIndexList newIndexes;
-    for (int i = 0; i < oldIndexes.count(); ++i)
-        newIndexes << index(forwarding[oldIndexes[i].row()]);
-    changePersistentIndexList(oldIndexes, newIndexes);
-
-    emit layoutChanged();
-    emit modelSorted();
 }
 
 ItemData *ItemsDataModel::item(int row) const
@@ -263,11 +223,93 @@ ItemData *ItemsDataModel::item(int row) const
     return static_cast<ItemData *>(index.internalPointer());
 }
 
-void ItemsDataModel::noteMovedSlot()
+void ItemsDataModel::emitDataChanged()
 {
     emit dataChanged(index(0), index(rowCount() - 1));
-    emit countChanged();
+}
+//----------------------------------------------------------------------------------------------
+ItemsDataSortFilterProxyModel::ItemsDataSortFilterProxyModel(QObject *parent) :
+    QSortFilterProxyModel(parent),
+    m_sourceModel(0),
+    m_sortOrder(ASC),
+    m_sortingEnabled(false)
+{
 
+}
+
+void ItemsDataSortFilterProxyModel::setItemsDataModel(ItemsDataModel *model)
+{
+    if (!model)
+        return;
+
+    if (m_sourceModel) {
+        disconnect(m_sourceModel, SIGNAL(storageChanged()));
+        disconnect(m_sourceModel, SIGNAL(countChanged()));
+        disconnect(m_sourceModel, SIGNAL(dataChanged(QModelIndex, QModelIndex)));
+    }
+
+    m_sourceModel = model;
+
+    if (m_sourceModel) {
+        connect(m_sourceModel, SIGNAL(storageChanged()), SIGNAL(storageChanged()));
+        connect(m_sourceModel, SIGNAL(countChanged()), SIGNAL(countChanged()));
+        connect(m_sourceModel, SIGNAL(dataChanged(QModelIndex, QModelIndex)), SLOT(sortHelper()));
+    }
+
+    QSortFilterProxyModel::setSourceModel(m_sourceModel);
+}
+
+void ItemsDataSortFilterProxyModel::sort(int column, Qt::SortOrder order)
+{
+    QSortFilterProxyModel::sort(column, order);
+
+    for (int row = 0; row < rowCount(); ++row)
+        item(row)->setPosition(row);
+
+    emit modelSorted();
+}
+
+ItemData *ItemsDataSortFilterProxyModel::item(int row) const
+{
+    return m_sourceModel->item(mapToSource(index(row, 0)).row());
+}
+
+void ItemsDataSortFilterProxyModel::setFilterText(const QString &filter)
+{
+    if (m_filter == filter)
+        return;
+
+    m_filter = filter;
+    invalidateFilter();
+    emit filterChanged();
+}
+
+bool ItemsDataSortFilterProxyModel::lessThan(const QModelIndex &left, const QModelIndex &right) const
+{
+    ItemData *l = m_sourceModel->item(left.row());
+    ItemData *r = m_sourceModel->item(right.row());
+
+    if (!l)
+        return true;
+    if (!r)
+        return false;
+
+    return *l < *r;
+}
+
+bool ItemsDataSortFilterProxyModel::filterAcceptsRow(int sourceRow, const QModelIndex &sourceParent) const
+{
+    Q_UNUSED(sourceParent);
+    if (m_filter.isEmpty())
+        return true;
+    ItemData *item = m_sourceModel->item(sourceRow);
+    if (!item)
+        return false;
+    return item->title().contains(m_filter);
+}
+
+void ItemsDataSortFilterProxyModel::sortHelper()
+{
     if (isSortingEnabled())
         sort(sortOrder());
 }
@@ -324,16 +366,10 @@ NoteBook *NoteBooksModel::createNoteBook(const QString &title)
     if (!storage()->createNoteBook(title, rowCount()))
         return 0;
 
-    beginInsertRows(QModelIndex(), rowCount(), rowCount());
+    beginInsertRows(QModelIndex(), rowCount() - 1, rowCount() - 1);
     endInsertRows();
-    emit countChanged();
 
-    NoteBook *noteBook = this->noteBook(rowCount() - 1);
-
-    if (isSortingEnabled())
-        sort(sortOrder());
-
-    return noteBook;
+    return noteBook(rowCount() - 1);
 }
 
 void NoteBooksModel::removeNoteBook(quint64 noteBookId)
@@ -354,11 +390,6 @@ void NoteBooksModel::removeNoteBook(quint64 noteBookId)
             noteBook->setPosition(r - 1);
     }
     endRemoveRows();
-
-    emit countChanged();
-
-    if (isSortingEnabled())
-        sort(sortOrder());
 }
 
 void NoteBooksModel::renameNoteBook(quint64 noteBookId, const QString &newTitle)
@@ -375,9 +406,6 @@ void NoteBooksModel::renameNoteBook(quint64 noteBookId, const QString &newTitle)
     noteBook->setTitle(newTitle);
 
     emit dataChanged(index(row), index(row));
-
-    if (isSortingEnabled())
-        sort(sortOrder());
 }
 
 bool NoteBooksModel::noteBookExists(const QString &title)
@@ -401,24 +429,56 @@ quint64 NoteBooksModel::defaultNoteBookId() const
 {
     return storage() ? storage()->defaultNoteBookId() : 0;
 }
-
-static bool noteBookLessThen(ItemData *a, ItemData *b)
+//----------------------------------------------------------------------------------------------
+NoteBooksSortFilterProxyModel::NoteBooksSortFilterProxyModel(QObject *parent) :
+    ItemsDataSortFilterProxyModel(parent),
+    m_noteBooksModel(new NoteBooksModel(this))
 {
-    return *qobject_cast<NoteBook *>(a) < *qobject_cast<NoteBook *>(b);
+    setItemsDataModel(m_noteBooksModel);
 }
 
-static bool noteBookGreaterThen(ItemData *a, ItemData *b)
+quint64 NoteBooksSortFilterProxyModel::defaultNoteBookId() const
 {
-    return *qobject_cast<NoteBook *>(a) > *qobject_cast<NoteBook *>(b);
+    return m_noteBooksModel->defaultNoteBookId();
 }
 
-void NoteBooksModel::sortHelper(QList<ItemData *> &container, Qt::SortOrder order)
+NoteBook *NoteBooksSortFilterProxyModel::createNoteBook(const QString &title)
 {
-    if (order == Qt::AscendingOrder) {
-        qSort(container.begin(), container.end(), noteBookLessThen);
-    } else {
-        qSort(container.begin(), container.end(), noteBookGreaterThen);
-    }
+    NoteBook *noteBook = m_noteBooksModel->createNoteBook(title);
+
+    if (isSortingEnabled())
+        sort(sortOrder());
+
+    return noteBook;
+}
+
+void NoteBooksSortFilterProxyModel::removeNoteBook(quint64 noteBookId)
+{
+    m_noteBooksModel->removeNoteBook(noteBookId);
+    if (isSortingEnabled())
+        sort(sortOrder());
+}
+
+void NoteBooksSortFilterProxyModel::renameNoteBook(quint64 noteBookId, const QString &newTitle)
+{
+    m_noteBooksModel->renameNoteBook(noteBookId, newTitle);
+    if (isSortingEnabled())
+        sort(sortOrder());
+}
+
+bool NoteBooksSortFilterProxyModel::noteBookExists(const QString &title)
+{
+    return m_noteBooksModel->noteBookExists(title);
+}
+
+NoteBook *NoteBooksSortFilterProxyModel::noteBook(int row) const
+{
+    return m_noteBooksModel->noteBook(mapToSource(index(row, 0)).row());
+}
+
+NoteBook *NoteBooksSortFilterProxyModel::noteBookById(quint64 noteBookId) const
+{
+    return m_noteBooksModel->noteBookById(noteBookId);
 }
 //----------------------------------------------------------------------------------------------
 NotesModel::NotesModel(QObject *parent) :
@@ -485,16 +545,10 @@ Note *NotesModel::createNote(const QString &title)
     if (!storage()->createNote(m_noteBook->id(), title, rowCount()))
         return 0;
 
-    beginInsertRows(QModelIndex(), rowCount(), rowCount());
+    beginInsertRows(QModelIndex(), rowCount() - 1, rowCount() - 1);
     endInsertRows();
-    emit countChanged();
 
-    Note *note = this->note(rowCount() - 1);
-
-    if (isSortingEnabled())
-        sort(sortOrder());
-
-    return note;
+    return note(rowCount() - 1);
 }
 
 void NotesModel::removeNote(quint64 noteId)
@@ -516,11 +570,6 @@ void NotesModel::removeNote(quint64 noteId)
             note->setPosition(r - 1);
     }
     endRemoveRows();
-
-    emit countChanged();
-
-    if (isSortingEnabled())
-        sort(sortOrder());
 }
 
 void NotesModel::renameNote(quint64 noteId, const QString &newTitle)
@@ -534,9 +583,6 @@ void NotesModel::renameNote(quint64 noteId, const QString &newTitle)
     note->setTitle(newTitle);
 
     emit dataChanged(index(row), index(row));
-
-    if (isSortingEnabled())
-        sort(sortOrder());
 }
 
 void NotesModel::setNoteText(quint64 noteId, const QString &text)
@@ -578,11 +624,6 @@ void NotesModel::moveNote(quint64 noteId, quint64 newNoteBookId)
             note->setPosition(r - 1);
     }
     endRemoveRows();
-
-    emit countChanged();
-
-    if (isSortingEnabled())
-        sort(sortOrder());
 }
 
 Note *NotesModel::note(int row) const
@@ -595,25 +636,6 @@ Note *NotesModel::noteById(quint64 noteId) const
     if (!storage() || !m_noteBook)
         return 0;
     return note(storage()->notePosition(m_noteBook->id(), noteId));
-}
-
-static bool noteLessThen(ItemData *a, ItemData *b)
-{
-    return *qobject_cast<Note *>(a) < *qobject_cast<Note *>(b);
-}
-
-static bool noteGreaterThen(ItemData *a, ItemData *b)
-{
-    return *qobject_cast<Note *>(a) > *qobject_cast<Note *>(b);
-}
-
-void NotesModel::sortHelper(QList<ItemData *> &container, Qt::SortOrder order)
-{
-    if (order == Qt::AscendingOrder) {
-        qSort(container.begin(), container.end(), noteLessThen);
-    } else {
-        qSort(container.begin(), container.end(), noteGreaterThen);
-    }
 }
 
 QString NotesModel::dumpNote(quint64 noteId)
@@ -655,4 +677,72 @@ void NotesModel::swapNotes(quint64 firstNoteId, quint64 secondNoteId)
     changePersistentIndex(oldPosition, newPosition);
 
     emit layoutChanged();
+}
+//----------------------------------------------------------------------------------------------
+NotesSortFilterProxyModel::NotesSortFilterProxyModel(QObject *parent) :
+    ItemsDataSortFilterProxyModel(parent),
+    m_notesModel(new NotesModel(this))
+{
+    setItemsDataModel(m_notesModel);
+
+    connect(m_notesModel, SIGNAL(noteBookChanged()), SIGNAL(noteBookChanged()));
+}
+
+Note *NotesSortFilterProxyModel::createNote(const QString &title)
+{
+    Note *note = m_notesModel->createNote(title);
+    if (isSortingEnabled())
+        sort(sortOrder());
+    return note;
+}
+
+void NotesSortFilterProxyModel::removeNote(quint64 noteId)
+{
+    m_notesModel->removeNote(noteId);
+    if (isSortingEnabled())
+        sort(sortOrder());
+}
+
+void NotesSortFilterProxyModel::renameNote(quint64 noteId, const QString &newTitle)
+{
+    m_notesModel->renameNote(noteId, newTitle);
+    if (isSortingEnabled())
+        sort(sortOrder());
+}
+
+void NotesSortFilterProxyModel::setNoteText(quint64 noteId, const QString &text)
+{
+    m_notesModel->setNoteText(noteId, text);
+}
+
+bool NotesSortFilterProxyModel::noteExists(const QString &title)
+{
+    return m_notesModel->noteExists(title);
+}
+
+void NotesSortFilterProxyModel::moveNote(quint64 noteId, quint64 newNoteBookId)
+{
+    m_notesModel->moveNote(noteId, newNoteBookId);
+    if (isSortingEnabled())
+        sort(sortOrder());
+}
+
+Note *NotesSortFilterProxyModel::note(int row) const
+{
+    return m_notesModel->note(mapToSource(index(row, 0)).row());
+}
+
+Note *NotesSortFilterProxyModel::noteById(quint64 noteId) const
+{
+    return m_notesModel->noteById(noteId);
+}
+
+QString NotesSortFilterProxyModel::dumpNote(quint64 noteId)
+{
+    return m_notesModel->dumpNote(noteId);
+}
+
+void NotesSortFilterProxyModel::swapNotes(quint64 firstNoteId, quint64 secondNoteId)
+{
+    m_notesModel->swapNotes(firstNoteId, secondNoteId);
 }

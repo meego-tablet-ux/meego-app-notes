@@ -85,6 +85,17 @@ Window {
         noteBook: internal.selectedNoteBook
     }
 
+    onSearch: {
+        switch (pageStack.currentPage.pageName) {
+        case "NotebooksPage":
+            noteBooksModel.filter = needle;
+            break;
+        case "NotesPage":
+            notesModel.filter = needle;
+            break;
+        }
+    }
+
     Component {
         id: notebookList
 
@@ -130,8 +141,7 @@ Window {
             model: notesModel
             property string pageName: "NoteDetailPage"
 
-            onWindowClosed:
-            {
+            onWindowClosed: {
                 window.switchBook(notebookList);
                 window.addPage(noteList);
 //                filterModel = filterModelList;

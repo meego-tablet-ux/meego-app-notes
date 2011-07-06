@@ -263,8 +263,12 @@ void ItemsDataSortFilterProxyModel::sort(int column, Qt::SortOrder order)
 {
     QSortFilterProxyModel::sort(column, order);
 
+    QList<ItemData *> items;
     for (int row = 0; row < rowCount(); ++row)
-        item(row)->setPosition(row);
+        items << item(row);
+
+    for (int row = 0; row < rowCount(); ++row)
+        items.at(row)->setPosition(row);
 
     emit modelSorted();
 }

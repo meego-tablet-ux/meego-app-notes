@@ -698,6 +698,7 @@ internal.selectedNote.id : "");
 
         acceptButtonText: qsTr("OK")
         title: qsTr("Note moved")
+        showCancelButton: false
 
         property alias text: label.text
 

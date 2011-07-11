@@ -177,8 +177,7 @@ AppPage {
 
         onButtonClicked: addDialog.show()
 
-        visible: (saveRestoreNotebooks.value("FirstTimeUseNotebooks") == undefined) && 
-listView.model.count == 1
+        visible: (saveRestoreNotebooks.value("FirstTimeUseNotebooks") == undefined) && listView.model.count == 1
     }
 
     ContextMenu {
@@ -248,8 +247,6 @@ listView.model.count == 1
 
     Component {
         id: notebookDelegate2
-
-        //TopItem { id: top }
 
         NoteButton {
             id: noteButton

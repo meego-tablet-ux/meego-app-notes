@@ -78,7 +78,7 @@ Rectangle {
                     color: Qt.rgba(189/255, 189/255, 189/255, 1) //THEME
                 }
 
-		GestureArea {
+                GestureArea { //for selecting/deselecting a note/notebook when selecting multiple
                     anchors.fill: parent
 
                     Tap {
@@ -151,7 +151,14 @@ Rectangle {
                     anchors.right: grip.left
 
                     Tap {
-                        onFinished: itemTapped(gesture, itemData)
+                        onStarted: {
+                            noteButton.color =  Qt.rgba(230/255, 240/255, 255/255, 1)
+                        }
+
+                        onFinished: {
+                            itemTapped(gesture, itemData)
+                            noteButton.color = "white";
+                        }
                     }
 
                     TapAndHold {

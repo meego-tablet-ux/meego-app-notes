@@ -435,10 +435,10 @@ internal.selectedNote.id : "");
         property string deleteChoice: qsTr("Delete")
         property string renameChoice: qsTr("Rename")
 
-//        ShareObj {
-//            id: shareObj
-//            shareType: MeeGoUXSharingClientQmlObj.ShareTypeText
-//        }
+        ShareObj {
+            id: shareObj
+            shareType: MeeGoUXSharingClientQmlObj.ShareTypeText
+        }
 
         property variant choices: [ openChoice, emailChoice, moveChoice, deleteChoice, renameChoice ]
 
@@ -451,8 +451,8 @@ internal.selectedNote.id : "");
                     var uri = page.model.dumpNote(internal.selectedNote.id);
                     shareObj.clearItems();
                     shareObj.addItem(uri);
-                    shareObj.setParam(uri, "subject", noteListPage.selectedTitle);
-                    shareObj.showContext(qsTr("Email"), noteListPage.width / 2, noteListPage.height / 2);
+                    shareObj.setParam(uri, "subject", internal.selectedNote.title);
+                    shareObj.showContext(qsTr("Email"), page.width / 2, page.height / 2);
                 } else if (model[index] == contextMenu.moveChoice) {
                     notebookSelectorMenu.filterNoteBooksList();
                     notebookSelector.setPosition(internal.selectedNotePoint.x, internal.selectedNotePoint.y);
@@ -698,6 +698,7 @@ internal.selectedNote.id : "");
 
         acceptButtonText: qsTr("OK")
         title: qsTr("Note moved")
+        showCancelButton: false
 
         property alias text: label.text
 

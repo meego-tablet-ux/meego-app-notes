@@ -25,7 +25,7 @@ Name[de]=Notizen
 Name[da]=Bemærkninger
 Name[cs]=Poznámky
 Icon=meego-app-notes
-Exec=meego-qml-launcher --opengl --fullscreen --app meego-app-notes
+Exec=invoker --type=l meego-qml-launcher --opengl --fullscreen --app meego-app-notes
 X-MEEGO-CORE-UX=true
 X-MEEGO-CGROUP-PATH=managed
 X-MEEGO-CGROUP-CONTROLLERS=freezer

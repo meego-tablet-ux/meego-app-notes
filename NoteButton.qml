@@ -149,6 +149,7 @@ Rectangle {
                     anchors.bottom: parent.bottom
                     anchors.left: parent.left
                     anchors.right: grip.left
+		    acceptUnhandledEvents: true
 
                     Tap {
                         onFinished: itemTapped(gesture, itemData)

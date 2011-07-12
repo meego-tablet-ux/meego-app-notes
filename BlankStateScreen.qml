@@ -26,6 +26,7 @@ Item {
         width: parent.width
         height: topLine.height + row.height + bottomLine.height + 60
         spacing: 15
+        y: theme.listBackgroundPixelHeightTwo
         Rectangle {
             id: topLine
             color: "black"

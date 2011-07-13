@@ -156,6 +156,10 @@ Rectangle {
                             noteButton.color =  Qt.rgba(230/255, 240/255, 255/255, 1)
                         }
 
+                        onCanceled: {
+                            noteButton.color = "white";
+                        }
+
                         onFinished: {
                             itemTapped(gesture, itemData)
                             noteButton.color = "white";

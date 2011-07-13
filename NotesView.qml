@@ -192,8 +192,8 @@ internal.selectedNote.id : "");
         secondHelpTitle: qsTr("Share your notes by email")
         firstHelpText: qsTr("Tap the 'Create the first note' button. You can also tap the icon in the top right corner of the screen, then select 'New note'.")
         secondHelpText: qsTr("To send a note by email, tap and hold the note you want to send, then select 'Email'.")
-        helpContentVisible: (saveRestoreNotes.value("FirstTimeUseNotes") == undefined) && 
-(listView.count == 0)
+        helpContentVisible: (saveRestoreNotes.value("FirstTimeUseNotes") == undefined) && (listView.count == 0)
+        visible: listView.count == 0
 
         onButtonClicked: addDialog.show()
     }

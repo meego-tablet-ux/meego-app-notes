@@ -679,7 +679,7 @@ internal.selectedNote.id : "");
             }
         }
 
-        onOldNameChanged: renameTextEntry.text = oldName
+        onVisibleChanged: if (visible) renameTextEntry.text = oldName
 
         onAccepted: {
             var newName = renameTextEntry.text;

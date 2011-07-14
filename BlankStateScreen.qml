@@ -78,6 +78,7 @@ Item {
                 height: blankStateScreen.height / 3
 
                 border.color: "gray"
+                visible: false
 
                 Image {
                     id: firstImage
@@ -105,6 +106,7 @@ Item {
                 height: blankStateScreen.height / 3
 
                 border.color: "gray"
+                visible: false
 
                 Image {
                     id: secondImage

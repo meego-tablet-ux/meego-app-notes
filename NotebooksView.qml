@@ -517,6 +517,7 @@ listView.model.count == 1
 
         onAccepted: {
             var newName = renameTextEntry.text;
+	    if (newName == oldName) return;
             if (page.model.noteBookExists(newName)) {   //TODO: do we need this checking now?
                 //: %1 is notebook title
                 informationDialog.info = qsTr("A notebook '%1' already exists.").arg(newName);

@@ -1,4 +1,4 @@
-/*
+de/*
  * Copyright 2011 Intel Corporation.
  *
  * This program is licensed under the terms and conditions of the
@@ -415,6 +415,8 @@ listView.model.count == 1
                   ? qsTr("Are you sure you want to delete these %n notebook(s)?", "", internal.selectedNoteBooks.length)
                     //: %1 is notebook title
                   : qsTr("Are you sure you want to delete \"%1\"?").arg(componentText)
+
+	    wrapMode: Text.Wrap
 
             property string componentText: internal.selectedNoteBook ? internal.selectedNoteBook.title
                                                                      : (internal.selectedNoteBooks.length == 1 ? internal.selectedNoteBooks[0].title : "")

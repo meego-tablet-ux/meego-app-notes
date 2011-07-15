@@ -1,4 +1,4 @@
-de/*
+/*
  * Copyright 2011 Intel Corporation.
  *
  * This program is licensed under the terms and conditions of the

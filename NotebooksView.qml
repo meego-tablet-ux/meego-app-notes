@@ -1,4 +1,4 @@
-/*
+de/*
  * Copyright 2011 Intel Corporation.
  *
  * This program is licensed under the terms and conditions of the
@@ -413,6 +413,8 @@ AppPage {
                     //: %1 is notebook title
                   : qsTr("Are you sure you want to delete \"%1\"?").arg(componentText)
 
+	    wrapMode: Text.Wrap
+
             property string componentText: internal.selectedNoteBook ? internal.selectedNoteBook.title
                                                                      : (internal.selectedNoteBooks.length == 1 ? internal.selectedNoteBooks[0].title : "")
         }
@@ -512,6 +514,7 @@ AppPage {
 
         onAccepted: {
             var newName = renameTextEntry.text;
+	    if (newName == oldName) return;
             if (page.model.noteBookExists(newName)) {   //TODO: do we need this checking now?
                 //: %1 is notebook title
                 informationDialog.info = qsTr("A notebook '%1' already exists.").arg(newName);

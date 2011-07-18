@@ -107,6 +107,8 @@ Window {
             property string pageName: "NotebooksPage"
 
             onNoteBookClicked: {
+                if (window.pageStack.busy)
+                    return;
                 window.addPage(noteList);
                 internal.selectedNoteBook = noteBook;
             }
@@ -124,6 +126,8 @@ Window {
             property string pageName: "NotesPage"
 
             onNoteClicked: {
+                if (window.pageStack.busy)
+                    return;
                 window.addPage(noteDetailPage);
                 internal.selectedNote = note;
                 //filterModel = [];

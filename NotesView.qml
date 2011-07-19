@@ -585,6 +585,7 @@ internal.selectedNote.id : "");
                   //: %1 is note title
                   : qsTr("Are you sure you want to delete \"%1\"?").arg(componentText)
 
+            wrapMode: Text.Wrap
             property string componentText: internal.selectedNote ? internal.selectedNote.title
                                                                  : (internal.selectedNotes.length == 1 ? internal.selectedNotes[0].title : "")
         }
@@ -628,6 +629,7 @@ internal.selectedNote.id : "");
                     return qsTr("\"%1\" has been deleted").arg(internal.selectedNote);
                 }
             }
+            wrapMode: Text.Wrap
         }
         onAccepted: internal.selectedNotes = []
     }

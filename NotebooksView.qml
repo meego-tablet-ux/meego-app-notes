@@ -414,7 +414,6 @@ AppPage {
                   : qsTr("Are you sure you want to delete \"%1\"?").arg(componentText)
 
 	    wrapMode: Text.Wrap
-
             property string componentText: internal.selectedNoteBook ? internal.selectedNoteBook.title
                                                                      : (internal.selectedNoteBooks.length == 1 ? internal.selectedNoteBooks[0].title : "")
         }
@@ -459,6 +458,7 @@ AppPage {
                     return qsTr("\"%1\" has been deleted").arg(internal.selectedNoteBook);
                 }
             }
+            wrapMode: Text.Wrap
         }
         onAccepted: internal.selectedNoteBooks = []
     }

@@ -57,7 +57,7 @@ Rectangle {
             anchors.right: parent.right
             spacing: 20
             anchors.leftMargin: checkBoxVisible ? 0 : spacing
-            height: noteButton.height
+            height: noteButton.height 
 
             Item {
                 id:checkboxContainer
@@ -115,8 +115,10 @@ Rectangle {
 
                     Text {
                         id: textComment
+                        height: (container.height - textElement.height > 0) ? (container.height - textElement.height) : 0
                         font.pixelSize: theme.fontPixelSizeSmall
                         text: qsTr("Add some comments here")
+                        clip: true
                         elide: Text.ElideRight
                         color: theme.fontColorInactive
                     }

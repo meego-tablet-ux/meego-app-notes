@@ -711,6 +711,7 @@ internal.selectedNote.id : "");
             anchors.right: parent.right
             anchors.leftMargin: 20
             anchors.rightMargin: anchors.leftMargin
+	    wrapMode: Text.Wrap
         }
     }
 

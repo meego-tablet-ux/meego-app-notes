@@ -135,8 +135,8 @@ Rectangle {
                     GestureArea {
                         anchors.fill: parent
 
-                        TapAndHold {
-                            onFinished: gripTappedAndHeld(gesture, itemData)
+                        Tap {
+                            onStarted: gripTappedAndHeld(gesture, itemData)
                         }
 
                         Pan {

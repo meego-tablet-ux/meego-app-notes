@@ -22,7 +22,7 @@ Name[en_US]=Notes
 Name[en_GB]=Notes
 Name[el]=Σημειώσεις
 Name[de]=Notizen
-Name[da]=Bemærkninger
+Name[da]=Noter
 Name[cs]=Poznámky
 Icon=meego-app-notes
 Exec=invoker --type=l meego-qml-launcher --opengl --fullscreen --app meego-app-notes

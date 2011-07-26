@@ -277,7 +277,7 @@ internal.selectedNote.id : "");
                     return;
 
                 var currentPoint = internal.dndStartPoint;
-                currentPoint.y += gesture.offset.y;
+                currentPoint.y += listView.contentY + gesture.offset.y;
                 internal.dndCurrentPoint = currentPoint;
 
                 button.y = currentPoint.y;

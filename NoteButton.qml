@@ -131,6 +131,8 @@ Rectangle {
                     anchors.rightMargin: container.spacing
 
                     source: "image://themedimage/widgets/common/drag-handle/drag-handle"
+                    width: parent.height / 2
+                    height: parent.height /2
 
                     GestureArea {
                         anchors.fill: parent

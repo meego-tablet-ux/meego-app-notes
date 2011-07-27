@@ -20,6 +20,7 @@ Rectangle {
     property alias title: textElement.text
     property alias comment: textComment.text
     property alias checkBoxVisible: checkboxContainer.visible
+    property alias selected: checkbox.isChecked
     property alias showGrip: grip.visible
 
     signal itemSelected(variant itemData)
@@ -31,6 +32,8 @@ Rectangle {
     signal gripPanFinished(variant gesture, variant itemData)
 
     height: theme.listBackgroundPixelHeightTwo
+
+    color: checkbox.isChecked ? Qt.rgba(230/255, 240/255, 255/255, 1) : "white";    //TODO: magic color
 
     Theme {
         id: theme
@@ -84,7 +87,6 @@ Rectangle {
                     Tap {
                         onFinished: {
                             checkbox.isChecked = !checkbox.isChecked;
-                            noteButton.color = checkbox.isChecked ? Qt.rgba(230/255, 240/255, 255/255, 1) : "white";    //TODO: magic color
                             if (checkbox.isChecked)
                                 itemSelected(itemData);
                             else
@@ -131,12 +133,14 @@ Rectangle {
                     anchors.rightMargin: container.spacing
 
                     source: "image://themedimage/widgets/common/drag-handle/drag-handle"
+                    width: parent.height / 2
+                    height: parent.height /2
 
                     GestureArea {
                         anchors.fill: parent
 
-                        TapAndHold {
-                            onFinished: gripTappedAndHeld(gesture, itemData)
+                        Tap {
+                            onStarted: gripTappedAndHeld(gesture, itemData)
                         }
 
                         Pan {

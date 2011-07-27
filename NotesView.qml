@@ -35,8 +35,7 @@ AppPage {
             setValue("contextMenuNotes.baseX", contextMenu.baseX);
             setValue("contextMenuNotes.baseY", contextMenu.baseY);
             setValue("contextMenuNotes.visible", contextMenu.visible);
-            setValue("internal.selectedNoteId", internal.selectedNote != null ? 
-internal.selectedNote.id : "");
+            setValue("internal.selectedNoteId", internal.selectedNote != null ? internal.selectedNote.id : "");
 
             //for custom menu
             setValue("customMenuNotes.visible", customMenu.visible);
@@ -101,10 +100,9 @@ internal.selectedNote.id : "");
             internal.selectedNote = notesModel.noteById(saveRestoreNotes.value("internal.selectedNoteId"));
 
             if (saveRestoreNotes.value("contextMenuNotes.visible") == "true") {
-                var mouseX = saveRestoreNotes.value("internal.contextMenuNotesX");
-                var mouseY = saveRestoreNotes.value("internal.contextMenuNotesY");
-                console.debug("context menu 0")
-                contextMenu.setPosition(mouseX, mouseY);
+                internal.contextMenuX = saveRestoreNotes.value("internal.contextMenuNotesX");
+                internal.contextMenuY = saveRestoreNotes.value("internal.contextMenuNotesY");
+                contextMenu.setPosition(internal.contextMenuX, internal.contextMenuY);
                 contextMenu.show();
             }
 
@@ -124,6 +122,7 @@ internal.selectedNote.id : "");
             //rename dialog
             if (saveRestoreNotes.value("renameWindowNotes.visible") == "true") {
                 renameTextEntry.text = saveRestoreNotes.value("renameTextEntryNotes.text");
+                renameWindow.oldName = renameTextEntry.text;
                 renameWindow.show();
             }
 
@@ -144,10 +143,13 @@ internal.selectedNote.id : "");
             }
 
             //selected notes
-            var noteIds = new Array();
-            noteIds = saveRestoreNotes.value("internal.selectedNotes").split(",");
-            for(var i=0; i<noteIds.length; ++i) {
-                internal.selectedNotes[i] = notesModel.noteById(noteIds[i]);
+            var selectedNotesValue = saveRestoreNotes.value("internal.selectedNotes");
+            if (selectedNotesValue != "") {
+                var noteIds = new Array();
+                noteIds = saveRestoreNotes.value("internal.selectedNotes").split(",");
+                for(var i=0; i<noteIds.length; ++i) {
+                    internal.addItem(notesModel.noteById(noteIds[i]));
+                }
             }
 
             //internal.selectMultiply
@@ -175,6 +177,8 @@ internal.selectedNote.id : "");
         if (window.pageStack.currentPage == page) {
             firstActionMenu.model = internal.menuModel();
             customMenu.setPosition(mouseX, mouseY);
+            internal.customMenuX = mouseX;
+            internal.customMenuY = mouseY;
             customMenu.show();
         }
     }
@@ -257,7 +261,8 @@ internal.selectedNote.id : "");
             onItemTappedAndHeld: {
                 internal.selectedNote = itemData;
                 var map = mapToItem(topItem.topItem, gesture.position.x, gesture.position.y);
-                internal.selectedNotePoint = map;
+                internal.contextMenuX = map.x;
+                internal.contextMenuY = map.y;
                 contextMenu.setPosition(map.x, map.y);
                 contextMenu.show();
             }
@@ -312,6 +317,7 @@ internal.selectedNote.id : "");
             itemData: note
             checkBoxVisible: true
             showGrip: !page.model.sorting
+            selected: internal.indexOfItem(itemData) >= 0
 
             onItemSelected: internal.addItem(itemData)
             onItemDeselected: internal.removeItem(itemData)
@@ -321,7 +327,8 @@ internal.selectedNote.id : "");
                 internal.selectedNote = itemData;
                 var shift = button2.height // it need for right position when check box visible
                 var map = mapToItem(topItem.topItem, gesture.position.x + shift, gesture.position.y);
-                internal.selectedNotePoint = map;
+                internal.contextMenuX = map.x;
+                internal.contextMenuY = map.y;
                 contextMenu.setPosition(map.x, map.y);
                 contextMenu.show();
             }
@@ -455,9 +462,9 @@ internal.selectedNote.id : "");
                     shareObj.showContext(qsTr("Email"), page.width / 2, page.height / 2);
                 } else if (model[index] == contextMenu.moveChoice) {
                     notebookSelectorMenu.filterNoteBooksList();
-                    notebookSelector.setPosition(internal.selectedNotePoint.x, internal.selectedNotePoint.y);
-                    internal.moveMenuX = internal.selectedNotePoint.x;
-                    internal.moveMenuY = internal.selectedNotePoint.y;
+                    notebookSelector.setPosition(internal.contextMenuX, internal.contextMenuY);
+                    internal.moveMenuX = internal.contextMenuX;
+                    internal.moveMenuY = internal.contextMenuY;
                     notebookSelector.show();
                 } else if (model[index] == contextMenu.deleteChoice) {
                     if (internal.selectedNote)
@@ -721,7 +728,6 @@ internal.selectedNote.id : "");
         property variant selectedNote: null
         property variant selectedNotes: []
         property bool selectMultiply: false
-        property variant selectedNotePoint: null
 
         property int customMenuX: 0
         property int customMenuY: 0
@@ -735,6 +741,15 @@ internal.selectedNote.id : "");
         property variant dndCurrentPoint: null
         property int dndOlButtonY: 0
 
+        function indexOfItem(item)
+        {
+            for (var i = 0; i < selectedNotes.length; ++i) {
+                if (selectedNotes[i].id == item.id)
+                    return i;
+            }
+            return -1;
+        }
+
         function addItem(item)
         {
             var list = selectedNotes;
@@ -744,14 +759,12 @@ internal.selectedNote.id : "");
 
         function removeItem(item)
         {
-            var list = selectedNotes;
-            for (var i = 0; i < list.length; ++i) {
-                if (list[i].id == item.id) {
-                    list.splice(i, 1);
-                    break;
-                }
+            var index = indexOfItem(item);
+            if (index.valueOf() >= 0) {
+                var list = selectedNotes;
+                list.splice(index, 1);
+                selectedNotes = list;
             }
-            selectedNotes = list;
         }
 
         function menuModel()

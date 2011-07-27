@@ -143,11 +143,12 @@ bool SQLiteStorage::createNoteBook(const QString &title, qint32 position)
         return false;
     }
 
-    const QString script = QString("INSERT INTO %1 (title, position) VALUES (?, ?)").arg(noteBooksTableName());
+    const QString script = QString("INSERT INTO %1 (title, position, created) VALUES (?, ?, ?)").arg(noteBooksTableName());
     QSqlQuery query(m_database);
     query.prepare(script);
     query.addBindValue(title);
     query.addBindValue(position);
+    query.addBindValue(QDateTime::currentDateTime().toString(Qt::ISODate));
     if (!query.exec()) {
         emit error(QString("%1: %2").arg(Q_FUNC_INFO).arg(query.lastError().text()));
         return false;
@@ -262,6 +263,7 @@ QList<AbstractDataStorage::NoteBook> SQLiteStorage::noteBooks()
         noteBook.id = query.record().value("id").toUInt();
         noteBook.title = query.record().value("title").toString();
         noteBook.position = query.record().value("position").toInt();
+        noteBook.created = query.record().value("created").toDateTime();
         res << noteBook;
     }
 
@@ -305,6 +307,7 @@ AbstractDataStorage::NoteBook SQLiteStorage::noteBook(quint64 id)
     res.id = query.record().value("id").toUInt();
     res.title = query.record().value("title").toString();
     res.position = query.record().value("position").toInt();
+    res.created = query.record().value("created").toDateTime();
 
     return res;
 }
@@ -329,6 +332,7 @@ AbstractDataStorage::NoteBook SQLiteStorage::noteBookByPosition(qint32 position)
     res.id = query.record().value("id").toUInt();
     res.title = query.record().value("title").toString();
     res.position = query.record().value("position").toInt();
+    res.created = query.record().value("created").toDateTime();
 
     return res;
 }
@@ -376,10 +380,11 @@ bool SQLiteStorage::createNote(quint64 noteBookId, const QString &title, qint32 
     }
 
     QSqlQuery query(m_database);
-    query.prepare(QString("INSERT INTO %1 (noteBookId, title, position) VALUES (?, ?, ?)").arg(notesTableName()));
+    query.prepare(QString("INSERT INTO %1 (noteBookId, title, position, created) VALUES (?, ?, ?, ?)").arg(notesTableName()));
     query.addBindValue(noteBookId);
     query.addBindValue(title);
     query.addBindValue(position);
+    query.addBindValue(QDateTime::currentDateTime().toString(Qt::ISODate));
     if (!query.exec()) {
         emit error(QString("%1: %2").arg(Q_FUNC_INFO).arg(query.lastError().text()));
         return false;
@@ -518,6 +523,7 @@ QList<AbstractDataStorage::Note> SQLiteStorage::notes(quint64 noteBookId)
         note.title = query.record().value("title").toString();
         note.html = query.record().value("html").toString();
         note.position = query.record().value("position").toInt();
+        note.created = query.record().value("created").toDateTime();
         res << note;
     }
 
@@ -564,6 +570,7 @@ AbstractDataStorage::Note SQLiteStorage::note(quint64 noteBookId, quint64 id)
     res.title = query.record().value("title").toString();
     res.html = query.record().value("html").toString();
     res.position = query.record().value("position").toInt();
+    res.created = query.record().value("created").toDateTime();
 
     return res;
 }
@@ -591,6 +598,7 @@ AbstractDataStorage::Note SQLiteStorage::noteByPosition(quint64 noteBookId, qint
     res.title = query.record().value("title").toString();
     res.html = query.record().value("html").toString();
     res.position = query.record().value("position").toInt();
+    res.created = query.record().value("created").toDateTime();
 
     return res;
 }
@@ -669,12 +677,14 @@ QString SQLiteStorage::databaseCreationScript() const
 {
     const QString script = QString("CREATE TABLE IF NOT EXISTS %1 (id INTEGER PRIMARY KEY AUTOINCREMENT,"
                                     "title VARCHAR(255),"
-                                    "position INTEGER);"
+                                    "position INTEGER,"
+                                    "created TEXT);"
                                     "CREATE TABLE IF NOT EXISTS %2 (id INTEGER PRIMARY KEY AUTOINCREMENT,"
                                     "noteBookId INTEGER,"
                                     "title VARCHAR(255),"
                                     "html TEXT,"
-                                    "position INTEGER);").arg(noteBooksTableName()).arg(notesTableName());
+                                    "position INTEGER,"
+                                    "created TEXT);").arg(noteBooksTableName()).arg(notesTableName());
     return script;
 }
 

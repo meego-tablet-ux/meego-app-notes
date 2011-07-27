@@ -23,6 +23,7 @@ class ItemData : public QObject
     Q_PROPERTY(quint64 id READ id CONSTANT)
     Q_PROPERTY(QString title READ title NOTIFY titleChanged)
     Q_PROPERTY(qint32 position READ position NOTIFY positionChanged)
+    Q_PROPERTY(QDateTime created READ created CONSTANT)
 public:
     explicit ItemData(QObject *parent = 0);
     ItemData(const AbstractDataStorage::ItemData &itemData, QObject *parent = 0);
@@ -38,6 +39,8 @@ public:
     virtual void setStorage(AbstractDataStorage *storage) { m_storage = storage; }
 
     virtual bool operator < (const ItemData &other) const = 0;
+
+    QDateTime created() const { return m_itemData.created; }
 
 signals:
     void titleChanged();
@@ -153,7 +156,13 @@ public:
 
     SortOrder sortOrder() const { return m_sortOrder; }
 
-    void setSortingEnabled(bool enabled) { m_sortingEnabled = enabled; emit sortingEnabled(); }
+    void setSortingEnabled(bool enabled)
+    {
+        m_sortingEnabled = enabled;
+        if (!enabled)
+            sort(ASC);
+        emit sortingEnabled();
+    }
     bool isSortingEnabled() const { return m_sortingEnabled; }
 
     virtual void sort(int column, Qt::SortOrder order);

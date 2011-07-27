@@ -14,6 +14,7 @@
 #include <QList>
 #include <QSqlDatabase>
 #include <QtDeclarative>
+#include <QDateTime>
 
 /*
 *
@@ -41,6 +42,7 @@ public:
         quint64 id;
         QString title;
         qint32 position;
+        QDateTime created;
     };
 
     class NoteBook : public ItemData

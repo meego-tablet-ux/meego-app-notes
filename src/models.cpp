@@ -295,7 +295,7 @@ bool ItemsDataSortFilterProxyModel::lessThan(const QModelIndex &left, const QMod
     if (!r)
         return false;
 
-    return *l < *r;
+    return isSortingEnabled() ? *l < *r : l->created() < r->created();
 }
 
 bool ItemsDataSortFilterProxyModel::filterAcceptsRow(int sourceRow, const QModelIndex &sourceParent) const
